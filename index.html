@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ДарМаркет — P2P Обмен вещами</title>
-    <!-- Telegram WebApp API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Leaflet -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
@@ -23,945 +22,140 @@
             --text-sub: #8E8E93;
             --glass: rgba(255, 255, 255, 0.05);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            background-color: #030305;
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            max-height: 880px;
-            background-color: var(--bg-dark);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-        }
-
-        @media (min-width: 421px) {
-            .app-container {
-                border-radius: 32px;
-                height: 92vh;
-                border: 1px solid var(--card-border);
-            }
-        }
-
-        body.telegram-mini-app .app-container {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 0;
-            box-shadow: none;
-            border: none;
-        }
-
-        .app-header {
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(9, 10, 15, 0.85);
-            backdrop-filter: blur(16px);
-            z-index: 100;
-            border-bottom: 1px solid var(--card-border);
-            flex-shrink: 0;
-        }
-
-        .logo {
-            font-size: 20px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            background: var(--primary-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            cursor: pointer;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .location-badge {
-            background: var(--glass);
-            border: 1px solid var(--card-border);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            backdrop-filter: blur(8px);
-            max-width: 180px;
-            overflow: hidden;
-        }
-
-        .location-badge span {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .header-profile-btn {
-            background: var(--glass);
-            border: 1px solid var(--card-border);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-
-        .header-profile-btn:active {
-            background: rgba(255,255,255,0.15);
-        }
-
-        .view-content {
-            flex: 1;
-            position: relative;
-            display: none;
-            overflow: hidden;
-            min-height: 0;
-        }
-
-        .view-content.active {
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-
-        .deck-container {
-            flex: 1;
-            position: relative;
-            margin: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            touch-action: none;
-            min-height: 0;
-        }
-
-        .swipe-card {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 24px;
-            overflow: hidden;
-            background: #12141C;
-            border: 1px solid var(--card-border);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            user-select: none;
-            cursor: grab;
-            will-change: transform;
-        }
-
-        .swipe-card:active {
-            cursor: grabbing;
-        }
-
-        .swipe-badge {
-            position: absolute;
-            top: 40px;
-            padding: 8px 18px;
-            border-radius: 12px;
-            font-size: 24px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            z-index: 20;
-            opacity: 0;
-            pointer-events: none;
-            border: 3px solid;
-            transition: opacity 0.1s linear;
-        }
-
-        .badge-like {
-            left: 20px;
-            color: #30D158;
-            border-color: #30D158;
-            transform: rotate(-15deg);
-        }
-
-        .badge-pass {
-            right: 20px;
-            color: #FF453A;
-            border-color: #FF453A;
-            transform: rotate(15deg);
-        }
-
-        .carousel-container {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
-        .media-item {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        .media-item.active {
-            display: block;
-        }
-
-        .carousel-controls {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 2;
-            display: flex;
-        }
-
-        .carousel-btn-left, .carousel-btn-right {
-            flex: 1;
-            height: 100%;
-        }
-
-        .carousel-indicators {
-            position: absolute;
-            top: 14px;
-            left: 14px; right: 14px;
-            display: flex;
-            gap: 6px;
-            z-index: 3;
-        }
-
-        .indicator-dot {
-            flex: 1;
-            height: 4px;
-            background: rgba(255,255,255,0.25);
-            border-radius: 2px;
-            transition: background 0.3s ease;
-        }
-
-        .indicator-dot.active {
-            background: #FFFFFF;
-            box-shadow: 0 0 8px rgba(255,255,255,0.8);
-        }
-
-        .card-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 35%, rgba(9,10,15,0.95) 100%);
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .card-top-info {
-            position: relative;
-            z-index: 3;
-            display: flex;
-            justify-content: space-between;
-            padding: 24px 16px 0 16px;
-        }
-
-        .distance-tag, .media-type-tag {
-            background: rgba(18, 20, 28, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            padding: 6px 12px;
-            border-radius: 14px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .card-bottom-info {
-            position: relative;
-            z-index: 3;
-            padding: 22px;
-        }
-
-        .card-owner-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.85);
-            pointer-events: none;
-        }
-
-        .owner-rating {
-            color: var(--accent-gold);
-            font-weight: 700;
-            background: rgba(255, 209, 102, 0.15);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            border: 1px solid rgba(255, 209, 102, 0.3);
-        }
-
-        .item-title {
-            font-size: 26px;
-            font-weight: 800;
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .item-swap-for {
-            font-size: 14px;
-            color: #FFD166;
-            margin-bottom: 10px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .item-desc {
-            font-size: 13px;
-            color: rgba(255,255,255,0.75);
-            line-height: 1.45;
-        }
-
-        .controls {
-            padding: 12px 20px 18px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 24px;
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .btn-circle {
-            width: 62px;
-            height: 62px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        }
-
-        .btn-circle:active {
-            transform: scale(0.88);
-        }
-
-        .btn-pass {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid var(--card-border);
-            color: #FF453A;
-        }
-
-        .btn-like {
-            background: var(--primary-grad);
-            color: white;
-            box-shadow: 0 10px 25px rgba(255, 45, 85, 0.4);
-        }
-
-        .map-view-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            position: relative;
-            min-height: 0;
-        }
-
-        .map-header-tools {
-            padding: 12px 16px;
-            background: rgba(9, 10, 15, 0.95);
-            border-bottom: 1px solid var(--card-border);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .map-box-full {
-            flex: 1;
-            width: 100%;
-            z-index: 1;
-            min-height: 0;
-        }
-
-        select, input[type="text"], input[type="tel"], textarea, input[type="range"] {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid var(--card-border);
-            color: white;
-            font-size: 13px;
-            outline: none;
-        }
-
-        select option {
-            background: #12141C;
-            color: white;
-        }
-
-        .radius-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-sub);
-        }
-
-        .btn-gps {
-            background: var(--accent-purple);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 14px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .my-lots-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 14px;
-            padding-bottom: 20px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .my-lot-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            min-width: 0;
-            overflow: hidden;
-        }
-
-        .my-lot-img-wrapper {
-            position: relative;
-            width: 100%;
-            height: 110px;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 8px;
-            background: #1a1c24;
-        }
-
-        .my-lot-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .my-lot-badge {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            background: rgba(18, 20, 28, 0.85);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--card-border);
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #FFF;
-            max-width: calc(100% - 12px);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .my-lot-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-            width: 100%;
-        }
-
-        .my-lot-swap {
-            font-size: 10px;
-            color: var(--text-sub);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 10px;
-            width: 100%;
-        }
-
-        .btn-delete-lot {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #FF2D55;
-            padding: 8px 0;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.2s;
-        }
-
-        .btn-delete-lot:active {
-            background: rgba(255, 45, 85, 0.2);
-        }
-
-        .profile-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background: var(--glass);
-            border-radius: 24px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 20px;
-        }
-
-        .profile-avatar-big {
-            width: 84px;
-            height: 84px;
-            border-radius: 50%;
-            background: var(--primary-grad);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4);
-        }
-
-        .profile-stats {
-            display: flex;
-            width: 100%;
-            justify-content: space-around;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--card-border);
-        }
-
-        .stat-item {
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .stat-val {
-            font-size: 18px;
-            font-weight: 800;
-            color: #FFF;
-        }
-
-        .stat-lbl {
-            font-size: 11px;
-            color: var(--text-sub);
-            margin-top: 2px;
-        }
-
-        .upload-box {
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 16px;
-            padding: 18px;
-            text-align: center;
-            cursor: pointer;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 12px;
-            transition: border-color 0.2s ease;
-        }
-
-        .upload-box:hover {
-            border-color: var(--accent-pink);
-        }
-
-        .media-preview-list {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            margin-bottom: 12px;
-        }
-
-        .preview-thumb {
-            width: 75px;
-            height: 75px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 1px solid var(--card-border);
-            background: #000;
-            flex-shrink: 0;
-        }
-
-        .chat-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px;
-            background: var(--glass);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .chat-item:active {
-            background: rgba(255,255,255,0.12);
-        }
-
-        .chat-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary-grad);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .action-icon-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--card-border);
-            color: #FFF;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .action-icon-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .delete-btn {
-            background: rgba(255, 69, 58, 0.15);
-            border: 1px solid rgba(255, 69, 58, 0.3);
-            color: #FF453A;
-        }
-
-        .single-chat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: rgba(9, 10, 15, 0.9);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--card-border);
-            flex-shrink: 0;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            min-height: 0;
-        }
-
-        .msg-bubble {
-            max-width: 82%;
-            padding: 12px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            line-height: 1.45;
-            word-wrap: break-word;
-        }
-
-        .msg-received {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid var(--card-border);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-
-        .msg-sent {
-            background: var(--primary-grad);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.3);
-        }
-
-        .chat-input-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            background: rgba(9, 10, 15, 0.95);
-            border-top: 1px solid var(--card-border);
-            flex-shrink: 0;
-        }
-
-        .attach-btn, .send-btn {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid var(--card-border);
-            color: #FFF;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .send-btn {
-            background: var(--primary-grad);
-            border: none;
-            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.4);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(16px);
-            z-index: 5000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-box {
-            background: #12141C;
-            border: 1px solid var(--card-border);
-            width: 100%;
-            max-width: 380px;
-            border-radius: 28px;
-            padding: 22px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-        .offer-item-check {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--card-border);
-            cursor: pointer;
-        }
-
-        .offer-item-check input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--accent-pink);
-            cursor: pointer;
-        }
-
-        .star-rating {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            font-size: 32px;
-            cursor: pointer;
-            margin: 6px 0;
-        }
-
-        .star-rating .star {
-            color: rgba(255,255,255,0.2);
-            transition: color 0.2s;
-        }
-
-        .star-rating .star.selected {
-            color: var(--accent-gold);
-        }
-
-        .review-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 10px;
-        }
-
-        .bottom-nav {
-            height: 68px;
-            background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95));
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid var(--card-border);
-            z-index: 100;
-            flex-shrink: 0;
-            padding: 6px 0;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: var(--tg-theme-hint-color, var(--text-sub));
-            font-size: 10px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: color 0.2s ease;
-            padding: 4px 12px;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .nav-item:active {
-            opacity: 0.6;
-        }
-
-        .nav-item.active {
-            color: var(--tg-theme-button-color, var(--accent-pink));
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            display: block;
-            flex-shrink: 0;
-            fill: currentColor;
-            color: inherit;
-            transition: transform 0.2s ease;
-        }
-
-        .nav-item.active .nav-icon {
-            transform: scale(1.05);
-        }
-
-        .match-toast {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: var(--primary-grad);
-            color: white;
-            padding: 12px 22px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 10px 25px rgba(255, 45, 85, 0.5);
-            z-index: 9999;
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            max-width: 90%;
-        }
-
-        .match-toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .leaflet-container {
-            background: #1a1c24;
-            font-family: inherit;
-        }
-        .leaflet-control-attribution {
-            font-size: 9px !important;
-            background: rgba(0,0,0,0.6) !important;
-            color: #aaa !important;
-        }
-        .leaflet-control-attribution a {
-            color: #ccc !important;
-        }
-        .leaflet-control-attribution svg,
-        .leaflet-control-attribution img,
-        img.leaflet-attribution-flag {
-            display: none !important;
-        }
-        .leaflet-tooltip {
-            background: rgba(18, 20, 28, 0.95);
-            color: #fff;
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            font-size: 12px;
-            padding: 4px 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        .leaflet-tooltip-top:before {
-            border-top-color: var(--card-border);
-        }
-        .leaflet-control-zoom a {
-            background: rgba(18, 20, 28, 0.9) !important;
-            color: #fff !important;
-            border: 1px solid var(--card-border) !important;
-        }
-        .leaflet-control-zoom a:hover {
-            background: rgba(30, 33, 45, 0.95) !important;
-        }
-
-        .custom-marker-icon {
-            background: transparent !important;
-            border: none !important;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow: hidden; }
+        body { background-color: #030305; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 420px; height: 100vh; max-height: 880px; background-color: var(--bg-dark); position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
+        @media (min-width: 421px) { .app-container { border-radius: 32px; height: 92vh; border: 1px solid var(--card-border); } }
+        body.telegram-mini-app .app-container { max-width: 100%; max-height: 100%; border-radius: 0; box-shadow: none; border: none; }
+
+        .app-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(9, 10, 15, 0.85); backdrop-filter: blur(16px); z-index: 100; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
+        .logo { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; background: var(--primary-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .location-badge { background: var(--glass); border: 1px solid var(--card-border); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; backdrop-filter: blur(8px); max-width: 180px; overflow: hidden; }
+        .location-badge span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .header-profile-btn { background: var(--glass); border: 1px solid var(--card-border); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+        .header-profile-btn:active { background: rgba(255,255,255,0.15); }
+
+        .view-content { flex: 1; position: relative; display: none; overflow: hidden; min-height: 0; }
+        .view-content.active { display: flex; flex-direction: column; min-height: 0; }
+
+        .deck-container { flex: 1; position: relative; margin: 12px; display: flex; justify-content: center; align-items: center; touch-action: none; min-height: 0; }
+        .swipe-card { position: absolute; width: 100%; height: 100%; border-radius: 24px; overflow: hidden; background: #12141C; border: 1px solid var(--card-border); display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 15px 35px rgba(0,0,0,0.6); user-select: none; cursor: grab; will-change: transform; }
+        .swipe-card:active { cursor: grabbing; }
+        .swipe-badge { position: absolute; top: 40px; padding: 8px 18px; border-radius: 12px; font-size: 24px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; z-index: 20; opacity: 0; pointer-events: none; border: 3px solid; transition: opacity 0.1s linear; }
+        .badge-like { left: 20px; color: #30D158; border-color: #30D158; transform: rotate(-15deg); }
+        .badge-pass { right: 20px; color: #FF453A; border-color: #FF453A; transform: rotate(15deg); }
+        .carousel-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; z-index: 0; }
+        .media-item { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .media-item.active { display: block; }
+        .carousel-controls { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; }
+        .carousel-btn-left, .carousel-btn-right { flex: 1; height: 100%; }
+        .carousel-indicators { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; gap: 6px; z-index: 3; }
+        .indicator-dot { flex: 1; height: 4px; background: rgba(255,255,255,0.25); border-radius: 2px; transition: background 0.3s ease; }
+        .indicator-dot.active { background: #FFFFFF; box-shadow: 0 0 8px rgba(255,255,255,0.8); }
+        .card-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 35%, rgba(9,10,15,0.95) 100%); z-index: 1; pointer-events: none; }
+        .card-top-info { position: relative; z-index: 3; display: flex; justify-content: space-between; padding: 24px 16px 0 16px; }
+        .distance-tag, .media-type-tag { background: rgba(18, 20, 28, 0.7); backdrop-filter: blur(12px); border: 1px solid var(--card-border); padding: 6px 12px; border-radius: 14px; font-size: 12px; font-weight: 600; }
+        .card-bottom-info { position: relative; z-index: 3; padding: 22px; }
+        .card-owner-info { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; color: rgba(255, 255, 255, 0.85); pointer-events: none; }
+        .owner-rating { color: var(--accent-gold); font-weight: 700; background: rgba(255, 209, 102, 0.15); padding: 2px 8px; border-radius: 10px; font-size: 11px; border: 1px solid rgba(255, 209, 102, 0.3); }
+        .item-title { font-size: 26px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .item-swap-for { font-size: 14px; color: #FFD166; margin-bottom: 10px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .item-desc { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.45; }
+
+        .controls { padding: 12px 20px 18px 20px; display: flex; justify-content: center; align-items: center; gap: 24px; z-index: 10; flex-shrink: 0; }
+        .btn-circle { width: 62px; height: 62px; border-radius: 50%; border: none; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .btn-circle:active { transform: scale(0.88); }
+        .btn-pass { background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: #FF453A; }
+        .btn-like { background: var(--primary-grad); color: white; box-shadow: 0 10px 25px rgba(255, 45, 85, 0.4); }
+
+        .map-view-container { display: flex; flex-direction: column; height: 100%; position: relative; min-height: 0; }
+        .map-header-tools { padding: 12px 16px; background: rgba(9, 10, 15, 0.95); border-bottom: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 8px; z-index: 10; flex-shrink: 0; }
+        .map-box-full { flex: 1; width: 100%; z-index: 1; min-height: 0; }
+
+        select, input[type="text"], input[type="tel"], textarea, input[type="range"] { width: 100%; padding: 10px 14px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: white; font-size: 13px; outline: none; }
+        select option { background: #12141C; color: white; }
+        .radius-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sub); }
+        .btn-gps { background: var(--accent-purple); color: white; border: none; padding: 10px 16px; border-radius: 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+        .my-lots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; padding-bottom: 20px; width: 100%; box-sizing: border-box; }
+        .my-lot-card { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--card-border); border-radius: 18px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; position: relative; min-width: 0; overflow: hidden; }
+        .my-lot-img-wrapper { position: relative; width: 100%; height: 110px; border-radius: 12px; overflow: hidden; margin-bottom: 8px; background: #1a1c24; }
+        .my-lot-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .my-lot-badge { position: absolute; top: 6px; right: 6px; background: rgba(18, 20, 28, 0.85); backdrop-filter: blur(8px); border: 1px solid var(--card-border); padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; color: #FFF; max-width: calc(100% - 12px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .my-lot-title { font-size: 13px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; width: 100%; }
+        .my-lot-swap { font-size: 10px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; width: 100%; }
+        .btn-delete-lot { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); color: #FF2D55; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; transition: background 0.2s; }
+
+        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--glass); border-radius: 24px; border: 1px solid var(--card-border); margin-bottom: 20px; }
+        .profile-avatar-big { width: 84px; height: 84px; border-radius: 50%; background: var(--primary-grad); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 12px; box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4); }
+        .profile-stats { display: flex; width: 100%; justify-content: space-around; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--card-border); }
+        .stat-item { text-align: center; cursor: pointer; }
+        .stat-val { font-size: 18px; font-weight: 800; color: #FFF; }
+        .stat-lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+        .upload-box { border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 18px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.03); margin-bottom: 12px; transition: border-color 0.2s ease; }
+        .media-preview-list { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 12px; }
+        .preview-thumb { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 1px solid var(--card-border); background: #000; flex-shrink: 0; }
+
+        .chat-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: var(--glass); border: 1px solid var(--card-border); border-radius: 18px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s ease; }
+        .chat-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--primary-grad); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .action-icon-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: #FFF; width: 36px; height: 36px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .delete-btn { background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #FF453A; }
+
+        .single-chat-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(9, 10, 15, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
+        .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+        .msg-bubble { max-width: 82%; padding: 12px 16px; border-radius: 20px; font-size: 14px; line-height: 1.45; word-wrap: break-word; }
+        .msg-received { background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-sent { background: var(--primary-grad); align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(112, 0, 255, 0.3); }
+        .chat-input-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: rgba(9, 10, 15, 0.95); border-top: 1px solid var(--card-border); flex-shrink: 0; }
+        .attach-btn, .send-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: #FFF; width: 42px; height: 42px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .send-btn { background: var(--primary-grad); border: none; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(16px); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto; }
+        .offer-item-check { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); cursor: pointer; }
+        .star-rating { display: flex; justify-content: center; gap: 8px; font-size: 32px; cursor: pointer; margin: 6px 0; }
+        .star-rating .star { color: rgba(255,255,255,0.2); transition: color 0.2s; }
+        .star-rating .star.selected { color: var(--accent-gold); }
+        .review-card { background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+
+        .bottom-nav { height: 68px; background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95)); backdrop-filter: blur(16px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--card-border); z-index: 100; flex-shrink: 0; padding: 6px 0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tg-theme-hint-color, var(--text-sub)); font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.2s ease; padding: 4px 12px; user-select: none; }
+        .nav-item.active { color: var(--tg-theme-button-color, var(--accent-pink)); }
+        .nav-icon { width: 24px; height: 24px; display: block; flex-shrink: 0; fill: currentColor; }
+
+        .match-toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary-grad); color: white; padding: 12px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 25px rgba(255, 45, 85, 0.5); z-index: 9999; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90%; }
+        .match-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        .loader-overlay { position: fixed; inset: 0; background: #090A0F; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; gap: 16px; transition: opacity 0.3s ease; }
+        .loader-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loader-spinner { width: 48px; height: 48px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent-pink); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { font-size: 13px; color: var(--text-sub); }
+
+        .leaflet-container { background: #1a1c24; font-family: inherit; }
+        .leaflet-control-attribution { font-size: 9px !important; background: rgba(0,0,0,0.6) !important; color: #aaa !important; }
+        .leaflet-control-attribution a { color: #ccc !important; }
+        .leaflet-control-attribution svg, .leaflet-control-attribution img, img.leaflet-attribution-flag { display: none !important; }
+        .leaflet-tooltip { background: rgba(18, 20, 28, 0.95); color: #fff; border: 1px solid var(--card-border); border-radius: 8px; font-size: 12px; padding: 4px 10px; }
+        .leaflet-tooltip-top:before { border-top-color: var(--card-border); }
+        .leaflet-control-zoom a { background: rgba(18, 20, 28, 0.9) !important; color: #fff !important; border: 1px solid var(--card-border) !important; }
+        .custom-marker-icon { background: transparent !important; border: none !important; }
     </style>
 </head>
 <body>
 
+<!-- LOADER -->
+<div id="loader" class="loader-overlay">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Загрузка ДарМаркет...</div>
+</div>
+
 <div class="app-container">
-    <div id="toast" class="match-toast">
-        <span id="toast-text">❤️ Взаимность отправлена!</span>
-    </div>
+    <div id="toast" class="match-toast"><span id="toast-text">❤️</span></div>
 
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-box">
@@ -978,17 +172,17 @@
     <div id="offer-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="text-align:center; font-weight:800;">Что вы предлагаете взамен?</h3>
-            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Выберите свои лоты, которые готовы обменять на <b id="offer-target-title" style="color:#FFF;">вещь</b></p>
+            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Выберите свои лоты для обмена на <b id="offer-target-title" style="color:#FFF;">вещь</b></p>
             <div id="offer-items-list" style="display:flex; flex-direction:column; gap:8px; margin:10px 0; max-height:220px; overflow-y:auto;"></div>
             <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" onclick="confirmOfferAndSwipe()">Предложить обмен 🔄</button>
-            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="cancelOfferModal()">Пропустить предложение</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="cancelOfferModal()">Пропустить</button>
         </div>
     </div>
 
     <div id="rate-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="text-align:center; font-weight:800;">Завершение сделки</h3>
-            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Оцените обменяющегося пользователя и оставьте отзыв</p>
+            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Оцените пользователя</p>
             <div class="star-rating" id="star-rating-box">
                 <span class="star" onclick="setRating(1)">★</span>
                 <span class="star" onclick="setRating(2)">★</span>
@@ -996,7 +190,7 @@
                 <span class="star" onclick="setRating(4)">★</span>
                 <span class="star" onclick="setRating(5)">★</span>
             </div>
-            <textarea id="review-text" placeholder="Напишите пару слов об обмене..." rows="3"></textarea>
+            <textarea id="review-text" placeholder="Пара слов об обмене..." rows="3"></textarea>
             <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" onclick="submitReview()">Отправить отзыв 🌟</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('rate-modal')">Отмена</button>
         </div>
@@ -1004,11 +198,11 @@
 
     <div id="add-lot-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
-            <h2 style="text-align:center; font-weight:800;">Выложить лот на обмен</h2>
+            <h2 style="text-align:center; font-weight:800;">Выложить лот</h2>
             <input type="text" id="add-title" placeholder="Название вещи">
             <input type="text" id="add-swap" placeholder="Что вы хотите взамен?">
             <div>
-                <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">Состояние предмета:</label>
+                <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">Состояние:</label>
                 <select id="add-condition">
                     <option value="Новое с биркой">Новое с биркой</option>
                     <option value="Отличное" selected>Отличное</option>
@@ -1016,22 +210,19 @@
                     <option value="Среднее">Среднее</option>
                 </select>
             </div>
-            <textarea id="add-desc" placeholder="Описание состояния вещи..." rows="3"></textarea>
-            <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы (фото / видео):</label>
+            <textarea id="add-desc" placeholder="Описание..." rows="3"></textarea>
+            <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы:</label>
             <div class="upload-box" onclick="document.getElementById('file-input').click()">
-                📸 Нажмите, чтобы загрузить файлы
-                <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleFileSelect(event)">
+                📸 Нажмите для загрузки
+                <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFileSelect(event)">
             </div>
             <div class="media-preview-list" id="preview-list"></div>
-            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение — кликните по карте:</label>
+            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение:</label>
             <div style="display:flex; gap:8px;">
                 <button class="btn-gps" style="font-size:12px; padding:8px 12px;" onclick="setNewItemToCurrentGPS()">🎯 Моё гео</button>
-                <span id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); align-self:center;">Кликните по карте или перетащите метку</span>
+                <span id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); align-self:center;">Кликните по карте</span>
             </div>
             <div id="map-add" style="height:190px; border-radius:16px; margin-top:6px; overflow:hidden; border:1px solid var(--card-border);"></div>
-            <div style="font-size:11px; color:var(--text-sub); text-align:center;">
-                💡 Нажмите на карту, чтобы поставить метку туда, где находится вещь
-            </div>
             <button class="btn-gps" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px;" onclick="publishItem()">Опубликовать лот</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('add-lot-modal')">Отмена</button>
         </div>
@@ -1046,13 +237,13 @@
             </div>
             <div style="padding:18px;">
                 <div class="card-owner-info" style="margin-bottom:8px;">
-                    <span id="map-modal-owner">👤 </span>
+                    <span id="map-modal-owner"></span>
                     <span id="map-modal-rating" class="owner-rating">★ 5.0</span>
                 </div>
                 <h2 id="map-modal-title" style="font-size:20px; font-weight:800; margin-bottom:4px;"></h2>
                 <div id="map-modal-swap" style="font-size:13px; color:var(--accent-gold); font-weight:600; margin-bottom:10px;"></div>
                 <div id="map-modal-desc" style="font-size:12px; color:var(--text-sub); line-height:1.4; margin-bottom:16px;"></div>
-                <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; font-size:14px;" onclick="triggerOfferFromMap()">Предложить обмен 🔄</button>
+                <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" onclick="triggerOfferFromMap()">Предложить обмен 🔄</button>
                 <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px; margin-top:8px;" onclick="closeModal('map-item-modal')">Закрыть</button>
             </div>
         </div>
@@ -1066,12 +257,8 @@
     <div class="app-header">
         <div class="logo" onclick="switchTab('swipe')">ДарМаркет</div>
         <div class="header-actions">
-            <div class="location-badge" onclick="getUserGPS()" title="Определить моё местоположение">
-                📍 <span id="current-region-label">Определение...</span>
-            </div>
-            <div class="header-profile-btn" onclick="switchTab('profile')" title="Мой профиль">
-                👤
-            </div>
+            <div class="location-badge" onclick="getUserGPS()">📍 <span id="current-region-label">Определение...</span></div>
+            <div class="header-profile-btn" onclick="switchTab('profile')">👤</div>
         </div>
     </div>
 
@@ -1101,7 +288,7 @@
     </div>
 
     <div id="view-chats" class="view-content" style="padding: 18px; overflow-y:auto;">
-        <h2 style="margin-bottom:18px; font-weight:800; letter-spacing:-0.5px;">Чаты и совпадения</h2>
+        <h2 style="margin-bottom:18px; font-weight:800;">Чаты и совпадения</h2>
         <div id="chats-list"></div>
     </div>
 
@@ -1111,19 +298,17 @@
                 <button style="background:none; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeChat()">←</button>
                 <div class="chat-avatar" id="single-chat-avatar" style="width:40px; height:40px; font-size:18px;">💬</div>
                 <div>
-                    <div id="single-chat-name" style="font-weight:700; font-size:14px;">Имя пользователя</div>
+                    <div id="single-chat-name" style="font-weight:700; font-size:14px;">Имя</div>
                     <div style="font-size:10px; color:#30D158;">● В сети</div>
                 </div>
             </div>
             <div style="display:flex; gap:6px;">
-                <button class="action-icon-btn" title="Завершить сделку и оценить" onclick="openRatingModal()">🤝</button>
-                <button class="action-icon-btn delete-btn" title="Удалить диалог" onclick="deleteActiveChat()">🗑️</button>
+                <button class="action-icon-btn" onclick="openRatingModal()">🤝</button>
+                <button class="action-icon-btn delete-btn" onclick="deleteActiveChat()">🗑️</button>
             </div>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-bar">
-            <button class="attach-btn" onclick="document.getElementById('chat-file-input').click()">📎</button>
-            <input type="file" id="chat-file-input" accept="image/*,video/*" multiple style="display:none;" onchange="sendChatMediaMultiple(event)">
             <input type="text" id="chat-input" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendChatMessage()">
             <button class="send-btn" onclick="sendChatMessage()">➔</button>
         </div>
@@ -1133,9 +318,9 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
             <div>
                 <h2 style="font-weight:900; font-size:22px;">Мои Лоты</h2>
-                <div style="font-size:12px; color:var(--text-sub);">Вещи, которые вы готовы обменять</div>
+                <div style="font-size:12px; color:var(--text-sub);">Вещи для обмена</div>
             </div>
-            <button class="btn-gps" style="background:var(--accent-pink); padding:8px 14px; border-radius:18px; font-size:12px;" onclick="openCreateLotModal()">+ Добавить лот</button>
+            <button class="btn-gps" style="background:var(--accent-pink); padding:8px 14px; border-radius:18px; font-size:12px;" onclick="openCreateLotModal()">+ Добавить</button>
         </div>
         <div class="my-lots-grid" id="my-lots-grid-container"></div>
     </div>
@@ -1144,1357 +329,1144 @@
         <div class="profile-header">
             <div class="profile-avatar-big" id="profile-avatar-icon">👤</div>
             <h2 id="profile-display-name" style="font-size:20px; font-weight:800;">Пользователь</h2>
-            <div id="profile-display-phone" style="font-size:12px; color:var(--text-sub); margin-top:2px;">+7 (___) ___-__-__</div>
-            <div id="profile-display-city" style="font-size:12px; color:var(--accent-pink); margin-top:4px;">📍 г. Санкт-Петербург</div>
+            <div id="profile-display-phone" style="font-size:12px; color:var(--text-sub); margin-top:2px;"></div>
+            <div id="profile-display-city" style="font-size:12px; color:var(--accent-pink); margin-top:4px;"></div>
             <div class="profile-stats">
-                <div class="stat-item" onclick="switchTab('my-lots')">
-                    <div class="stat-val" id="profile-items-count">0</div>
-                    <div class="stat-lbl">Мои лоты</div>
-                </div>
-                <div class="stat-item" onclick="switchTab('chats')">
-                    <div class="stat-val" id="profile-matches-count">0</div>
-                    <div class="stat-lbl">Совпадения</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-val" id="profile-rating-val" style="color:var(--accent-gold);">5.0 ★</div>
-                    <div class="stat-lbl">Рейтинг</div>
-                </div>
+                <div class="stat-item" onclick="switchTab('my-lots')"><div class="stat-val" id="profile-items-count">0</div><div class="stat-lbl">Мои лоты</div></div>
+                <div class="stat-item" onclick="switchTab('chats')"><div class="stat-val" id="profile-matches-count">0</div><div class="stat-lbl">Совпадения</div></div>
+                <div class="stat-item"><div class="stat-val" id="profile-rating-val" style="color:var(--accent-gold);">5.0 ★</div><div class="stat-lbl">Рейтинг</div></div>
             </div>
         </div>
-        <button class="btn-gps" style="width:100%; background:var(--glass); border:1px solid var(--card-border); color:white; margin-bottom:18px; padding:14px; display:flex; justify-content:space-between; align-items:center;" onclick="switchTab('my-lots')">
-            <span>📦 Управление моими лотами</span>
-            <span>➔</span>
-        </button>
-        <h3 style="margin-bottom:12px; font-size:16px;">Отзывы об обменах:</h3>
-        <div id="profile-reviews-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <h3 style="margin-bottom:12px; font-size:16px;">Отзывы:</h3>
+        <div id="profile-reviews-list"></div>
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
     </div>
 
 <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('swipe')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
-        </svg>
-        <span>Обмен</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('map')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
-        </svg>
-        <span>Карта</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('my-lots')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
-        </svg>
-        <span>Мои лоты</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('chats')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 9h10v2H7V9zm6 5H7v-2h6v2zm4-6H7V6h10v2z"/>
-        </svg>
-        <span>Чаты</span>
-    </div>
+    <div class="nav-item active" onclick="switchTab('swipe')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z"/></svg><span>Обмен</span></div>
+    <div class="nav-item" onclick="switchTab('map')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg><span>Карта</span></div>
+    <div class="nav-item" onclick="switchTab('my-lots')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg><span>Мои лоты</span></div>
+    <div class="nav-item" onclick="switchTab('chats')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>Чаты</span></div>
 </div>
 
 <script>
-    const TelegramApp = {
-        webApp: null,
-        isInTelegram: false,
-        user: null,
+/* ============================================================
+   SUPABASE ПОДКЛЮЧЕНИЕ
+   ============================================================ */
+const SUPABASE_URL = 'https://pqmxnapfzprtbkjfke.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbWx4bmFwZmp6cHJ0YmtqZmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzcyOTksImV4cCI6MjEwNDk1MzI5OX0.cRW_goFrXxjg3q209USNjkTcJpUy9yF5_ib_4DEjdaE';
 
-        init() {
-            try {
-                this.webApp = (window.Telegram && window.Telegram.WebApp) || null;
-                if (this.webApp && this.webApp.initData !== undefined) {
-                    this.isInTelegram = true;
-                    document.body.classList.add('telegram-mini-app');
-                    this.webApp.ready();
-                    this.webApp.expand();
-                    this.user = (this.webApp.initDataUnsafe && this.webApp.initDataUnsafe.user) || null;
-                    this.applyTheme();
-                    this.applySafeArea();
-                    if (this.webApp.onEvent) {
-                        this.webApp.onEvent('themeChanged', () => this.applyTheme());
-                        this.webApp.onEvent('viewportChanged', () => this.applySafeArea());
-                    }
-                    console.log('✅ Работаем внутри Telegram Mini App', this.user);
-                } else {
-                    console.log('🌐 Работаем как обычное веб-приложение');
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ============================================================
+   TELEGRAM
+   ============================================================ */
+const TelegramApp = {
+    webApp: null,
+    isInTelegram: false,
+    user: null,
+    init() {
+        try {
+            this.webApp = (window.Telegram && window.Telegram.WebApp) || null;
+            if (this.webApp && this.webApp.initData !== undefined) {
+                this.isInTelegram = true;
+                document.body.classList.add('telegram-mini-app');
+                this.webApp.ready();
+                this.webApp.expand();
+                this.user = (this.webApp.initDataUnsafe && this.webApp.initDataUnsafe.user) || null;
+                this.applyTheme();
+                if (this.webApp.onEvent) {
+                    this.webApp.onEvent('themeChanged', () => this.applyTheme());
                 }
-            } catch (e) {
-                console.warn('TelegramApp init error:', e);
+                console.log('✅ Telegram:', this.user);
+            } else {
+                console.log('🌐 Обычный веб');
             }
-        },
+        } catch (e) { console.warn('Telegram err:', e); }
+    },
+    applyTheme() {
+        try {
+            const t = this.webApp && this.webApp.themeParams;
+            if (!t) return;
+            const r = document.documentElement;
+            if (t.bg_color) r.style.setProperty('--tg-theme-bg-color', t.bg_color);
+            if (t.text_color) r.style.setProperty('--tg-theme-text-color', t.text_color);
+            if (t.hint_color) r.style.setProperty('--tg-theme-hint-color', t.hint_color);
+            if (t.button_color) r.style.setProperty('--tg-theme-button-color', t.button_color);
+            if (t.secondary_bg_color) r.style.setProperty('--tg-theme-secondary-bg-color', t.secondary_bg_color);
+        } catch (e) {}
+    },
+    haptic(type) {
+        try {
+            const hf = this.webApp && this.webApp.HapticFeedback;
+            if (!hf) return;
+            if (['light','medium','heavy','rigid','soft'].includes(type)) hf.impactOccurred(type);
+            else if (['success','error','warning'].includes(type)) hf.notificationOccurred(type);
+        } catch (e) {}
+    },
+    showBackButton(show) {
+        try {
+            const bb = this.webApp && this.webApp.BackButton;
+            if (!bb) return;
+            if (show) bb.show(); else bb.hide();
+        } catch (e) {}
+    }
+};
 
-        applyTheme() {
-            try {
-                const theme = this.webApp && this.webApp.themeParams;
-                if (!theme) return;
-                const root = document.documentElement;
-                if (theme.bg_color) root.style.setProperty('--tg-theme-bg-color', theme.bg_color);
-                if (theme.text_color) root.style.setProperty('--tg-theme-text-color', theme.text_color);
-                if (theme.hint_color) root.style.setProperty('--tg-theme-hint-color', theme.hint_color);
-                if (theme.button_color) root.style.setProperty('--tg-theme-button-color', theme.button_color);
-                if (theme.button_text_color) root.style.setProperty('--tg-theme-button-text-color', theme.button_text_color);
-                if (theme.secondary_bg_color) root.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color);
-            } catch (e) {}
-        },
+/* ============================================================
+   СОСТОЯНИЕ
+   ============================================================ */
+let userLat = 59.9342, userLng = 30.3351;
+let newItemLat = 59.9342, newItemLng = 30.3351;
+let currentRadiusKm = 15;
 
-        applySafeArea() {
-            try {
-                const safeArea = this.webApp && this.webApp.safeAreaInset;
-                const contentSafeArea = this.webApp && this.webApp.contentSafeAreaInset;
-                const root = document.documentElement;
-                if (safeArea) {
-                    root.style.setProperty('--tg-viewport-safe-area-inset-top', safeArea.top + 'px');
-                    root.style.setProperty('--tg-viewport-safe-area-inset-bottom', safeArea.bottom + 'px');
-                }
-                if (contentSafeArea) {
-                    root.style.setProperty('--tg-viewport-content-safe-area-inset-top', contentSafeArea.top + 'px');
-                }
-            } catch (e) {}
-        },
+let mapFull = null, mapAdd = null;
+let userMarker = null, addMarker = null, userCircle = null;
+let markersLayer = null, myMarkersLayer = null;
 
-        haptic(type) {
-            try {
-                const hf = this.webApp && this.webApp.HapticFeedback;
-                if (!hf) return;
-                if (type === 'medium' || type === 'light' || type === 'heavy' || type === 'rigid' || type === 'soft') {
-                    hf.impactOccurred(type);
-                } else if (type === 'success' || type === 'error' || type === 'warning') {
-                    hf.notificationOccurred(type);
-                }
-            } catch (e) {}
-        },
+let uploadedMedia = [];
+let activeChatId = null;
+let pendingSwipeCard = null;
+let selectedRating = 5;
+let selectedMapItem = null;
 
-        showBackButton(show) {
-            try {
-                const bb = this.webApp && this.webApp.BackButton;
-                if (!bb) return;
-                if (show) bb.show(); else bb.hide();
-            } catch (e) {}
-        }
-    };
+let userProfile = {
+    id: null, name: 'Гость', phone: '', username: '',
+    city: 'Санкт-Петербург', rating: 5.0, reviews: []
+};
 
-    const regionsRF = [
-        { name: 'Республика Адыгея', lat: 44.6068, lng: 40.1024 },
-        { name: 'Республика Алтай', lat: 51.9583, lng: 85.9603 },
-        { name: 'Республика Башкортостан', lat: 54.7348, lng: 55.9579 },
-        { name: 'Республика Бурятия', lat: 51.8272, lng: 107.6064 },
-        { name: 'Республика Дагестан', lat: 42.9764, lng: 47.5022 },
-        { name: 'Донецкая Народная Республика', lat: 48.0159, lng: 37.8028 },
-        { name: 'Республика Ингушетия', lat: 43.1687, lng: 44.8133 },
-        { name: 'Кабардино-Балкарская Республика', lat: 43.4981, lng: 43.6189 },
-        { name: 'Республика Калмыкия', lat: 46.3078, lng: 44.2558 },
-        { name: 'Карачаево-Черкесская Республика', lat: 44.2270, lng: 42.0469 },
-        { name: 'Республика Карелия', lat: 61.7850, lng: 34.3469 },
-        { name: 'Республика Коми', lat: 61.6688, lng: 50.8364 },
-        { name: 'Республика Крым', lat: 44.9521, lng: 34.1024 },
-        { name: 'Луганская Народная Республика', lat: 48.5670, lng: 39.3170 },
-        { name: 'Республика Марий Эл', lat: 56.6388, lng: 47.8908 },
-        { name: 'Республика Мордовия', lat: 54.1838, lng: 45.1749 },
-        { name: 'Республика Саха (Якутия)', lat: 62.0281, lng: 129.7326 },
-        { name: 'Республика Северная Осетия — Алания', lat: 43.0367, lng: 44.6678 },
-        { name: 'Республика Татарстан', lat: 55.7961, lng: 49.1064 },
-        { name: 'Республика Тыва', lat: 51.7191, lng: 94.4378 },
-        { name: 'Удмуртская Республика', lat: 56.8527, lng: 53.2115 },
-        { name: 'Республика Хакасия', lat: 53.7156, lng: 91.4292 },
-        { name: 'Чеченская Республика', lat: 43.3188, lng: 45.6981 },
-        { name: 'Чувашская Республика', lat: 56.1462, lng: 47.2519 },
-        { name: 'Алтайский край', lat: 53.3548, lng: 83.7698 },
-        { name: 'Забайкальский край', lat: 52.0340, lng: 113.4994 },
-        { name: 'Камчатский край', lat: 53.0452, lng: 158.6483 },
-        { name: 'Краснодарский край', lat: 45.0355, lng: 38.9753 },
-        { name: 'Красноярский край', lat: 56.0090, lng: 92.8526 },
-        { name: 'Пермский край', lat: 58.0105, lng: 56.2502 },
-        { name: 'Приморский край', lat: 43.1155, lng: 131.8855 },
-        { name: 'Ставропольский край', lat: 45.0428, lng: 41.9734 },
-        { name: 'Хабаровский край', lat: 48.4827, lng: 135.0838 },
-        { name: 'Амурская область', lat: 50.2907, lng: 127.5272 },
-        { name: 'Архангельская область', lat: 64.5393, lng: 40.5180 },
-        { name: 'Астраханская область', lat: 46.3497, lng: 48.0408 },
-        { name: 'Белгородская область', lat: 50.5952, lng: 36.5873 },
-        { name: 'Брянская область', lat: 53.2434, lng: 34.3639 },
-        { name: 'Владимирская область', lat: 56.1290, lng: 40.4075 },
-        { name: 'Волгоградская область', lat: 48.7080, lng: 44.5133 },
-        { name: 'Вологодская область', lat: 59.2205, lng: 39.8915 },
-        { name: 'Воронежская область', lat: 51.6720, lng: 39.1843 },
-        { name: 'Запорожская область', lat: 46.8380, lng: 35.3675 },
-        { name: 'Ивановская область', lat: 56.9995, lng: 40.9739 },
-        { name: 'Иркутская область', lat: 52.2864, lng: 104.2807 },
-        { name: 'Калининградская область', lat: 54.7104, lng: 20.4522 },
-        { name: 'Калужская область', lat: 54.5138, lng: 36.2612 },
-        { name: 'Кемеровская область', lat: 55.3547, lng: 86.0873 },
-        { name: 'Кировская область', lat: 58.6035, lng: 49.6679 },
-        { name: 'Костромская область', lat: 57.7679, lng: 40.9269 },
-        { name: 'Курганская область', lat: 55.4408, lng: 65.3411 },
-        { name: 'Курская область', lat: 51.7373, lng: 36.1874 },
-        { name: 'Ленинградская область', lat: 59.9342, lng: 30.3351 },
-        { name: 'Липецкая область', lat: 52.6088, lng: 39.5992 },
-        { name: 'Магаданская область', lat: 59.5638, lng: 150.8035 },
-        { name: 'Московская область', lat: 55.7558, lng: 37.6173 },
-        { name: 'Мурманская область', lat: 68.9585, lng: 33.0827 },
-        { name: 'Нижегородская область', lat: 56.3269, lng: 44.0059 },
-        { name: 'Новгородская область', lat: 58.5215, lng: 31.2755 },
-        { name: 'Новосибирская область', lat: 55.0084, lng: 82.9357 },
-        { name: 'Омская область', lat: 54.9885, lng: 73.3242 },
-        { name: 'Оренбургская область', lat: 51.7682, lng: 55.0969 },
-        { name: 'Орловская область', lat: 52.9651, lng: 36.0785 },
-        { name: 'Пензенская область', lat: 53.2007, lng: 45.0046 },
-        { name: 'Псковская область', lat: 57.8194, lng: 28.3318 },
-        { name: 'Ростовская область', lat: 47.2225, lng: 39.7188 },
-        { name: 'Рязанская область', lat: 54.6269, lng: 39.6916 },
-        { name: 'Самарская область', lat: 53.1959, lng: 50.1002 },
-        { name: 'Саратовская область', lat: 51.5336, lng: 46.0343 },
-        { name: 'Сахалинская область', lat: 46.9591, lng: 142.7380 },
-        { name: 'Свердловская область', lat: 56.8389, lng: 60.6057 },
-        { name: 'Смоленская область', lat: 54.7814, lng: 32.0401 },
-        { name: 'Тамбовская область', lat: 52.7212, lng: 41.4523 },
-        { name: 'Тверская область', lat: 56.8587, lng: 35.9176 },
-        { name: 'Томская область', lat: 56.4846, lng: 84.9476 },
-        { name: 'Тульская область', lat: 54.1961, lng: 37.6182 },
-        { name: 'Тюменская область', lat: 57.1522, lng: 65.5272 },
-        { name: 'Ульяновская область', lat: 54.3142, lng: 48.4031 },
-        { name: 'Херсонская область', lat: 46.6354, lng: 32.6169 },
-        { name: 'Челябинская область', lat: 55.1644, lng: 61.4368 },
-        { name: 'Ярославская область', lat: 57.6261, lng: 39.8845 },
-        { name: 'Москва', lat: 55.7558, lng: 37.6173 },
-        { name: 'Санкт-Петербург', lat: 59.9342, lng: 30.3351 },
-        { name: 'Севастополь', lat: 44.6166, lng: 33.5254 },
-        { name: 'Еврейская автономная область', lat: 48.7947, lng: 132.9217 },
-        { name: 'Ненецкий автономный округ', lat: 67.6380, lng: 53.0069 },
-        { name: 'Ханты-Мансийский автономный округ — Югра', lat: 61.0042, lng: 69.0019 },
-        { name: 'Чукотский автономный округ', lat: 64.7337, lng: 177.5168 },
-        { name: 'Ямало-Ненецкий автономный округ', lat: 66.5299, lng: 66.6135 }
-    ];
+let allItems = [];   // Все лоты из базы
+let chatList = [];   // Все чаты пользователя
+let currentMessages = [];
 
-    let userLat = 59.9342;
-    let userLng = 30.3351;
-    let newItemLat = 59.9342;
-    let newItemLng = 30.3351;
+const regionsRF = [
+    { name: 'Москва', lat: 55.7558, lng: 37.6173 },
+    { name: 'Санкт-Петербург', lat: 59.9342, lng: 30.3351 },
+    { name: 'Новосибирск', lat: 55.0084, lng: 82.9357 },
+    { name: 'Екатеринбург', lat: 56.8389, lng: 60.6057 },
+    { name: 'Казань', lat: 55.7961, lng: 49.1064 },
+    { name: 'Нижний Новгород', lat: 56.3269, lng: 44.0059 },
+    { name: 'Челябинск', lat: 55.1644, lng: 61.4368 },
+    { name: 'Самара', lat: 53.1959, lng: 50.1002 },
+    { name: 'Омск', lat: 54.9885, lng: 73.3242 },
+    { name: 'Ростов-на-Дону', lat: 47.2225, lng: 39.7188 },
+    { name: 'Уфа', lat: 54.7348, lng: 55.9579 },
+    { name: 'Краснодар', lat: 45.0355, lng: 38.9753 },
+    { name: 'Воронеж', lat: 51.6720, lng: 39.1843 },
+    { name: 'Пермь', lat: 58.0105, lng: 56.2502 },
+    { name: 'Волгоград', lat: 48.7080, lng: 44.5133 },
+    { name: 'Красноярск', lat: 56.0090, lng: 92.8526 },
+    { name: 'Саратов', lat: 51.5336, lng: 46.0343 },
+    { name: 'Тюмень', lat: 57.1522, lng: 65.5272 },
+    { name: 'Иркутск', lat: 52.2864, lng: 104.2807 },
+    { name: 'Владивосток', lat: 43.1155, lng: 131.8855 }
+];
 
-    let currentRadiusKm = 15;
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', async () => {
+    TelegramApp.init();
+    populateRegions();
 
-    let mapFull = null;
-    let mapAdd = null;
-    let userMarker = null;
-    let addMarker = null;
-    let userCircle = null;
-    let markersLayer = null;
-    let myMarkersLayer = null;
-
-    let uploadedMedia = [];
-    let activeChatId = null;
-    let pendingSwipeCard = null;
-    let selectedRating = 5;
-    let selectedMapItem = null;
-
-    let userProfile = {
-        name: "Александр",
-        phone: "+7 (921) 123-45-67",
-        city: "Санкт-Петербург",
-        rating: 5.0,
-        reviews: [
-            { author: "Елена", stars: 5, text: "Отличный обмен! Вещь в прекрасном состоянии." }
-        ]
-    };
-
-    let mockItems = [
-        {
-            id: 101, title: "Наушники Sony WH-CH700N", swapFor: "Клавиатура или Настолки", desc: "Санкт-Петербург, Невский проспект. Идеальное состояние.", condition: "Отличное",
-            media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600' }],
-            lat: 59.9350, lng: 30.3250, isMine: true, ownerName: "Александр", ownerRating: 5.0
-        },
-        {
-            id: 102, title: "Набор настольных игр (Catan)", swapFor: "Книги по дизайну", desc: "СПб, полный комплект компонентов.", condition: "Хорошее",
-            media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=600' }],
-            lat: 59.9660, lng: 30.3110, isMine: true, ownerName: "Александр", ownerRating: 5.0
-        },
-        {
-            id: 103, title: "Игровая консоль PS4 Slim", swapFor: "Электросамокат или велик", desc: "СПб, ст.м. Петроградская. 2 геймпада.", condition: "Отличное",
-            media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600' }],
-            lat: 59.9400, lng: 30.2780, isMine: false, ownerName: "Дмитрий", ownerRating: 4.8
-        }
-    ];
-
-    let chatData = [
-        {
-            id: 'chat_1',
-            name: 'Алексей (PS4 Slim)',
-            avatar: '🎮',
-            messages: [
-                { sender: 'them', text: 'Привет! Готов обсудить обмен.' }
-            ]
-        }
-    ];
-
-    window.onload = function() {
-        TelegramApp.init();
-
-        const savedProfile = localStorage.getItem('darmarket_user');
-        if (!savedProfile && TelegramApp.isInTelegram && TelegramApp.user) {
-            userProfile.name = TelegramApp.user.first_name || userProfile.name;
-            if (TelegramApp.user.username) {
-                userProfile.phone = '@' + TelegramApp.user.username;
-            }
-        }
-
-        populateRegions();
-        loadStoredProfile();
+    try {
+        await initUser();
+        await loadItems();
+        await loadChats();
+        renderProfile();
         renderChatsList();
         renderCards();
         renderMyLotsGrid();
-        renderProfileReviews();
 
         if (typeof L !== 'undefined') {
             initLeafletMaps();
-        } else {
-            console.warn('Leaflet не загружен');
         }
-    };
+    } catch (e) {
+        console.error('Init error:', e);
+        showToast('⚠️ Ошибка загрузки');
+    }
 
-    function loadStoredProfile() {
-        const saved = localStorage.getItem('darmarket_user');
-        if (saved) {
-            userProfile = JSON.parse(saved);
+    // Скрыть лоадер
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if (loader) loader.classList.add('hidden');
+    }, 400);
+
+    // Realtime — слушаем новые сообщения
+    sb.channel('messages-realtime')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+            const msg = payload.new;
+            if (String(msg.chat_id) === String(activeChatId)) {
+                currentMessages.push(msg);
+                renderMessages();
+            }
+            // Обновить превью чата
+            loadChats().then(() => {
+                if (!activeChatId) renderChatsList();
+            });
+        })
+        .subscribe();
+
+    // Realtime — новые лоты
+    sb.channel('items-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
+            loadItems().then(() => {
+                renderCards();
+                renderMyLotsGrid();
+                updateMapMarkers();
+            });
+        })
+        .subscribe();
+});
+
+/* ============================================================
+   АВТОРИЗАЦИЯ / ПРОФИЛЬ
+   ============================================================ */
+async function initUser() {
+    const tgUser = TelegramApp.user;
+    let userId = tgUser ? tgUser.id : null;
+
+    if (!userId) {
+        // Fallback для тестирования вне Telegram
+        userId = parseInt(localStorage.getItem('dm_uid') || '0') || Math.floor(1e9 + Math.random() * 9e8);
+        localStorage.setItem('dm_uid', String(userId));
+    }
+
+    userProfile.id = userId;
+
+    // Пробуем загрузить профиль из БД
+    const { data, error } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
+
+    if (error) console.warn('Profile load error:', error);
+
+    if (data) {
+        userProfile = { ...userProfile, ...data, reviews: [] };
+    } else {
+        // Создаём новый профиль
+        const newProfile = {
+            id: userId,
+            name: tgUser ? (tgUser.first_name || 'Пользователь') : 'Гость',
+            username: tgUser ? (tgUser.username || null) : null,
+            phone: null,
+            city: 'Санкт-Петербург',
+            lat: userLat,
+            lng: userLng
+        };
+        const { data: created, error: createErr } = await sb.from('profiles').insert(newProfile).select().single();
+        if (createErr) {
+            console.error('Profile create error:', createErr);
+            showToast('⚠️ Ошибка профиля');
+        } else if (created) {
+            userProfile = { ...userProfile, ...created, reviews: [] };
         }
-        updateProfileUI();
     }
 
-    function saveRegistration() {
-        const name = document.getElementById('reg-name').value.trim();
-        const phone = document.getElementById('reg-phone').value.trim();
-        const city = document.getElementById('reg-city').value.trim();
+    // Загружаем отзывы о себе
+    const { data: reviewsData } = await sb.from('reviews').select('*').eq('to_user_id', userId).order('created_at', { ascending: false });
+    if (reviewsData) userProfile.reviews = reviewsData;
 
-        if (!name) {
-            showToast('⚠️ Укажите ваше имя');
-            return;
-        }
+    updateProfileUI();
+    updateHeaderCity();
+}
 
-        userProfile.name = name;
-        userProfile.phone = phone;
-        userProfile.city = city;
-        localStorage.setItem('darmarket_user', JSON.stringify(userProfile));
+function updateProfileUI() {
+    document.getElementById('profile-display-name').innerText = userProfile.name || 'Гость';
+    document.getElementById('profile-display-phone').innerText = userProfile.phone || (userProfile.username ? '@' + userProfile.username : 'Телефон не указан');
+    document.getElementById('profile-display-city').innerText = `📍 ${userProfile.city || 'Санкт-Петербург'}`;
+    document.getElementById('profile-avatar-icon').innerText = userProfile.name ? userProfile.name[0].toUpperCase() : '👤';
+    document.getElementById('profile-rating-val').innerText = `${(userProfile.rating || 5).toFixed(1)} ★`;
+    renderProfileReviews();
+}
 
-        updateProfileUI();
-        closeModal('auth-modal');
-        showToast('✅ Профиль сохранён!');
-    }
-
-    function updateProfileUI() {
-        document.getElementById('profile-display-name').innerText = userProfile.name || "Гость";
-        document.getElementById('profile-display-phone').innerText = userProfile.phone || "Телефон не указан";
-        document.getElementById('profile-display-city').innerText = `📍 ${userProfile.city || "Санкт-Петербург"}`;
-        document.getElementById('profile-avatar-icon').innerText = userProfile.name ? userProfile.name[0].toUpperCase() : "👤";
-        document.getElementById('profile-rating-val').innerText = `${userProfile.rating.toFixed(1)} ★`;
-    }
-
-    function renderProfileReviews() {
-        const container = document.getElementById('profile-reviews-list');
-        if (!userProfile.reviews || userProfile.reviews.length === 0) {
-            container.innerHTML = `<div style="font-size:12px; color:var(--text-sub);">Пока нет отзывов</div>`;
-            return;
-        }
-        container.innerHTML = userProfile.reviews.map(r => `
-            <div class="review-card">
-                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <span style="font-weight:700; font-size:13px;">${r.author}</span>
-                    <span style="color:var(--accent-gold); font-size:12px;">${'★'.repeat(r.stars)}</span>
-                </div>
-                <div style="font-size:12px; color:rgba(255,255,255,0.8);">${r.text}</div>
-            </div>
-        `).join('');
-    }
-
-    function openAuthModal() {
-        document.getElementById('reg-name').value = userProfile.name || "";
-        document.getElementById('reg-phone').value = userProfile.phone || "";
-        document.getElementById('reg-city').value = userProfile.city || "Санкт-Петербург";
-        openModal('auth-modal');
-    }
-
-    function openModal(id) {
-        document.getElementById(id).classList.add('active');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('active');
-    }
-
-    function populateRegions() {
-        const select = document.getElementById('region-select');
-        select.innerHTML = '';
-        regionsRF.forEach((reg, index) => {
-            const opt = document.createElement('option');
-            opt.value = index;
-            opt.innerText = reg.name;
-            select.appendChild(opt);
-        });
-        const spbIndex = regionsRF.findIndex(r => r.name === 'Санкт-Петербург');
-        select.value = spbIndex >= 0 ? spbIndex : 0;
-    }
-
-    /* ============================================================
-       LEAFLET + CARTO VOYAGER (с вашим API-ключом)
-       ============================================================ */
-    function initLeafletMaps() {
-    initFullMap();
-    initAddMap();
-    updateMapMarkers();
-    // ✅ GPS НЕ вызываем автоматически — только по кнопке
-    // Показываем город по умолчанию (Санкт-Петербург)
+function updateHeaderCity() {
     const label = document.getElementById('current-region-label');
     if (label) label.innerText = userProfile.city || 'Санкт-Петербург';
 }
 
-    /* Капля — для метки "Моё гео" */
-    function makePinIcon(color) {
-        const colors = {
-            violet: '#7000FF',
-            green:  '#30D158',
-            pink:   '#FF2D55',
-            red:    '#FF453A'
-        };
-        const fill = colors[color] || '#7000FF';
+function renderProfile() {
+    updateProfileUI();
+}
 
-        const svg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44">
-                <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z"
-                      fill="${fill}" stroke="#FFFFFF" stroke-width="2"/>
-                <circle cx="16" cy="16" r="6" fill="#FFFFFF"/>
-            </svg>
-        `;
-
-        return L.divIcon({
-            html: svg,
-            className: 'custom-marker-icon',
-            iconSize: [32, 44],
-            iconAnchor: [16, 44],
-            popupAnchor: [0, -44],
-            tooltipAnchor: [16, -44]
-        });
+function renderProfileReviews() {
+    const container = document.getElementById('profile-reviews-list');
+    const reviews = userProfile.reviews || [];
+    if (reviews.length === 0) {
+        container.innerHTML = '<div style="font-size:12px; color:var(--text-sub);">Пока нет отзывов</div>';
+        return;
     }
-
-    /* Кружок — для меток лотов */
-    function makeCircleIcon(color) {
-        const colors = {
-            violet: '#7000FF',
-            green:  '#30D158',
-            pink:   '#FF2D55',
-            red:    '#FF453A'
-        };
-        const fill = colors[color] || '#7000FF';
-
-        const svg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-                <circle cx="14" cy="14" r="11" fill="${fill}" stroke="#FFFFFF" stroke-width="2.5"/>
-            </svg>
-        `;
-
-        return L.divIcon({
-            html: svg,
-            className: 'custom-marker-icon',
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
-            popupAnchor: [0, -14],
-            tooltipAnchor: [14, -14]
-        });
-    }
-
-    /* CARTO Voyager с API-ключом */
-    const TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_3k76_1_566394757fe80d1742b933c9';
-    const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>';
-    const TILE_SUBDOMAINS = 'abcd';
-    const TILE_MAX_ZOOM = 20;
-
-    function initFullMap() {
-        mapFull = L.map('map-full', {
-            zoomControl: true,
-            attributionControl: true
-        }).setView([userLat, userLng], 11);
-
-        L.tileLayer(TILE_URL, {
-            subdomains: TILE_SUBDOMAINS,
-            maxZoom: TILE_MAX_ZOOM,
-            attribution: TILE_ATTR
-        }).addTo(mapFull);
-
-        markersLayer = L.layerGroup().addTo(mapFull);
-        myMarkersLayer = L.layerGroup().addTo(mapFull);
-
-        userMarker = L.marker([userLat, userLng], {
-            draggable: true,
-            icon: makePinIcon('violet')
-        }).addTo(mapFull);
-
-        userCircle = L.circle([userLat, userLng], {
-            radius: currentRadiusKm * 1000,
-            color: '#7000FF',
-            fillColor: '#7000FF',
-            fillOpacity: 0.12,
-            weight: 2
-        }).addTo(mapFull);
-
-        userMarker.on('dragend', function() {
-            const pos = userMarker.getLatLng();
-            userLat = pos.lat;
-            userLng = pos.lng;
-            userCircle.setLatLng([userLat, userLng]);
-            reverseGeocode(userLat, userLng);
-            renderCards();
-            updateMapMarkers();
-        });
-    }
-
-    function initAddMap() {
-        mapAdd = L.map('map-add', {
-            zoomControl: true,
-            attributionControl: true
-        }).setView([newItemLat, newItemLng], 13);
-
-        L.tileLayer(TILE_URL, {
-            subdomains: TILE_SUBDOMAINS,
-            maxZoom: TILE_MAX_ZOOM,
-            attribution: TILE_ATTR
-        }).addTo(mapAdd);
-
-        addMarker = L.marker([newItemLat, newItemLng], {
-            draggable: true,
-            icon: makeCircleIcon('red')
-        }).addTo(mapAdd);
-
-        addMarker.on('dragend', function() {
-            const pos = addMarker.getLatLng();
-            newItemLat = pos.lat;
-            newItemLng = pos.lng;
-            updateCoordsLabel(newItemLat, newItemLng);
-        });
-
-        mapAdd.on('click', function(e) {
-            newItemLat = e.latlng.lat;
-            newItemLng = e.latlng.lng;
-            addMarker.setLatLng(e.latlng);
-            updateCoordsLabel(newItemLat, newItemLng);
-            showToast('📍 Метка установлена');
-        });
-    }
-
-    function updateCoordsLabel(lat, lng) {
-        const label = document.getElementById('add-item-coords-label');
-        if (label) {
-            label.innerText = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-            label.style.color = 'var(--accent-green)';
-        }
-    }
-
-    function getUserGPS() {
-        showToast('🛰️ Определение местоположения...');
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    userLat = pos.coords.latitude;
-                    userLng = pos.coords.longitude;
-                    newItemLat = userLat;
-                    newItemLng = userLng;
-                    updateMapAndAddress(userLat, userLng);
-                    showToast('📍 Геолокация обновлена!');
-                },
-                err => {
-                    showToast('⚠️ Ошибка GPS, использовано по умолчанию');
-                    updateMapAndAddress(userLat, userLng);
-                },
-                { enableHighAccuracy: true, timeout: 8000 }
-            );
-        } else {
-            showToast('⚠️ Геолокация не поддерживается');
-        }
-    }
-
-    function setNewItemToCurrentGPS() {
-        getUserGPS();
-    }
-
-    function updateMapAndAddress(lat, lng) {
-        if (mapFull) {
-            mapFull.setView([lat, lng], 11);
-            userMarker.setLatLng([lat, lng]);
-            userCircle.setLatLng([lat, lng]);
-        }
-        if (mapAdd) {
-            mapAdd.setView([lat, lng], 13);
-            addMarker.setLatLng([lat, lng]);
-        }
-        reverseGeocode(lat, lng);
-        renderCards();
-        updateMapMarkers();
-    }
-
-    function reverseGeocode(lat, lng) {
-        const label = document.getElementById('current-region-label');
-
-        fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=ru`)
-            .then(r => r.json())
-            .then(data => {
-                if (data && data.features && data.features.length > 0) {
-                    const p = data.features[0].properties || {};
-                    const city = p.city || p.town || p.village || p.county || p.state;
-                    if (city) {
-                        if (label) label.innerText = city;
-                        userProfile.city = city;
-                        updateProfileUI();
-                        return;
-                    }
-                }
-                throw new Error('Photon: empty');
-            })
-            .catch(() => {
-                fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ru`)
-                    .then(r => r.json())
-                    .then(data => {
-                        const city = data.city || data.locality || data.principalSubdivision;
-                        if (city && label) {
-                            label.innerText = city;
-                            userProfile.city = city;
-                            updateProfileUI();
-                        } else if (label) {
-                            label.innerText = 'Ваш город';
-                        }
-                    })
-                    .catch(() => {
-                        if (label) label.innerText = 'Ваш город';
-                    });
-            });
-    }
-
-    function onRegionChange() {
-        const regIndex = document.getElementById('region-select').value;
-        const reg = regionsRF[regIndex];
-        if (!reg) return;
-        userLat = reg.lat;
-        userLng = reg.lng;
-        document.getElementById('current-region-label').innerText = reg.name.split(" ")[0];
-        if (mapFull) {
-            mapFull.setView([userLat, userLng], 11);
-            userMarker.setLatLng([userLat, userLng]);
-            userCircle.setLatLng([userLat, userLng]);
-        }
-        renderCards();
-        updateMapMarkers();
-    }
-
-    function updateRadius(val) {
-        currentRadiusKm = parseInt(val);
-        document.getElementById('radius-val').innerText = val + " км";
-        if (userCircle) userCircle.setRadius(currentRadiusKm * 1000);
-        renderCards();
-        updateMapMarkers();
-    }
-
-    function updateMapMarkers() {
-        if (!markersLayer || !myMarkersLayer) return;
-        markersLayer.clearLayers();
-        myMarkersLayer.clearLayers();
-
-        mockItems.forEach(item => {
-            const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
-
-            if (!item.isMine && dist > currentRadiusKm) return;
-
-            const color = item.isMine ? 'green' : 'pink';
-            const hint = item.isMine ? `🟢 Ваш лот: ${item.title}` : item.title;
-
-            const marker = L.marker([item.lat, item.lng], {
-                icon: makeCircleIcon(color)
-            });
-
-            marker.bindTooltip(hint, {
-                direction: 'top',
-                offset: [0, -14],
-                opacity: 0.95
-            });
-
-            marker.on('click', function() {
-                if (item.isMine) {
-                    showToast(`🟢 Ваш лот: ${item.title}`);
-                } else {
-                    openMapItemModal(item, dist);
-                }
-            });
-
-            if (item.isMine) {
-                marker.addTo(myMarkersLayer);
-            } else {
-                marker.addTo(markersLayer);
-            }
-        });
-    }
-
-    function openMapItemModal(item, dist) {
-        selectedMapItem = item;
-        document.getElementById('map-modal-title').innerText = item.title;
-        document.getElementById('map-modal-swap').innerText = `🔄 Взамен: ${item.swapFor}`;
-        document.getElementById('map-modal-desc').innerText = item.desc || "Описание отсутствует";
-        document.getElementById('map-modal-condition').innerText = item.condition || "Отличное";
-        document.getElementById('map-modal-dist').innerText = `📍 ~${dist} км`;
-        document.getElementById('map-modal-owner').innerText = `👤 ${item.ownerName || 'Пользователь'}`;
-        document.getElementById('map-modal-rating').innerText = `★ ${item.ownerRating ? item.ownerRating.toFixed(1) : '5.0'}`;
-        document.getElementById('map-modal-img').src = item.media[0].url;
-
-        openModal('map-item-modal');
-    }
-
-    function triggerOfferFromMap() {
-        closeModal('map-item-modal');
-        if (selectedMapItem) {
-            openOfferModal(selectedMapItem.title);
-        }
-    }
-
-    function getDistanceKm(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-    }
-
-    function renderCards() {
-        const deck = document.getElementById('deck');
-        const controls = document.getElementById('controls-bar');
-        deck.innerHTML = '';
-
-        const filtered = mockItems.filter(item => {
-            if (item.isMine) return false;
-            const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
-            item.currentDist = dist;
-            return dist <= currentRadiusKm;
-        });
-
-        if (filtered.length === 0) {
-            deck.innerHTML = `
-                <div style="text-align:center; padding:32px 20px; background:var(--card-bg); border-radius:24px; border:1px solid var(--card-border); max-width:320px;">
-                    <div style="font-size:48px; margin-bottom:12px;">🎉</div>
-                    <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">На сегодня лоты закончились</h3>
-                    <p style="color:var(--text-sub); font-size:13px; line-height:1.4;">Вы все просмотрели в этом радиусе. Попробуйте увеличить радиус поиска на Карте или зайдите позже!</p>
-                </div>
-            `;
-            controls.style.display = 'none';
-            return;
-        } else {
-            controls.style.display = 'flex';
-        }
-
-        filtered.forEach((item, i) => {
-            const card = document.createElement('div');
-            card.className = 'swipe-card';
-            card.style.zIndex = filtered.length - i;
-            card.dataset.title = item.title;
-            card.dataset.itemId = item.id;
-
-            let mediaElements = '';
-            let indicators = '';
-            item.media.forEach((med, mIdx) => {
-                const activeClass = mIdx === 0 ? 'active' : '';
-                indicators += `<div class="indicator-dot ${activeClass}" id="ind-${item.id}-${mIdx}"></div>`;
-                if (med.type === 'image') {
-                    mediaElements += `<img src="${med.url}" class="media-item ${activeClass}" id="med-${item.id}-${mIdx}">`;
-                } else {
-                    mediaElements += `<video src="${med.url}" class="media-item ${activeClass}" id="med-${item.id}-${mIdx}" autoplay loop muted playsinline></video>`;
-                }
-            });
-
-            card.innerHTML = `
-                <div class="swipe-badge badge-like">ОБМЕН</div>
-                <div class="swipe-badge badge-pass">ПРОПУСК</div>
-                <div class="carousel-container">${mediaElements}</div>
-                <div class="carousel-indicators">${indicators}</div>
-                <div class="carousel-controls">
-                    <div class="carousel-btn-left" onclick="changeMedia(${item.id}, ${item.media.length}, -1, event)"></div>
-                    <div class="carousel-btn-right" onclick="changeMedia(${item.id}, ${item.media.length}, 1, event)"></div>
-                </div>
-                <div class="card-overlay"></div>
-                <div class="card-top-info">
-                    <span class="distance-tag">📍 ~${item.currentDist} км</span>
-                    <span class="media-type-tag" id="type-tag-${item.id}">${item.media[0].type === 'video' ? '🎥 Видео' : '📷 Фото'}</span>
-                </div>
-                <div class="card-bottom-info">
-                    <div class="card-owner-info">
-                        <span>👤 ${item.ownerName || 'Пользователь'}</span>
-                        <span class="owner-rating">★ ${item.ownerRating ? item.ownerRating.toFixed(1) : '5.0'}</span>
-                    </div>
-                    <div class="item-title">${item.title}</div>
-                    <div class="item-swap-for">🔄 ${item.swapFor}</div>
-                    <div class="item-desc">${item.desc}</div>
-                </div>
-            `;
-            deck.appendChild(card);
-            card.mediaIndex = 0;
-
-            initSwipeEvents(card);
-        });
-    }
-
-    function initSwipeEvents(card) {
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let currentX = 0, currentY = 0;
-
-        const badgeLike = card.querySelector('.badge-like');
-        const badgePass = card.querySelector('.badge-pass');
-
-        const getPoint = (e) => {
-            if (e.touches && e.touches.length) {
-                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            }
-            if (e.changedTouches && e.changedTouches.length) {
-                return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
-            }
-            return { x: e.clientX, y: e.clientY };
-        };
-
-        const onStart = (e) => {
-            isDragging = true;
-            const p = getPoint(e);
-            startX = p.x;
-            startY = p.y;
-            card.style.transition = 'none';
-        };
-
-        const onMove = (e) => {
-            if (!isDragging) return;
-            const p = getPoint(e);
-            currentX = p.x - startX;
-            currentY = p.y - startY;
-
-            const rotate = currentX * 0.08;
-            card.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${rotate}deg)`;
-
-            if (currentX > 30) {
-                badgeLike.style.opacity = Math.min(currentX / 100, 1);
-                badgePass.style.opacity = '0';
-            } else if (currentX < -30) {
-                badgePass.style.opacity = Math.min(Math.abs(currentX) / 100, 1);
-                badgeLike.style.opacity = '0';
-            } else {
-                badgeLike.style.opacity = '0';
-                badgePass.style.opacity = '0';
-            }
-        };
-
-        const onEnd = () => {
-            if (!isDragging) return;
-            isDragging = false;
-            card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-
-            if (currentX > 120) {
-                pendingSwipeCard = card;
-                TelegramApp.haptic('medium');
-                openOfferModal(card.dataset.title);
-                card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
-                badgeLike.style.opacity = '0';
-            } else if (currentX < -120) {
-                TelegramApp.haptic('light');
-                completeSwipe(card, false);
-            } else {
-                card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
-                badgeLike.style.opacity = '0';
-                badgePass.style.opacity = '0';
-            }
-
-            currentX = 0; currentY = 0;
-        };
-
-        card.addEventListener('mousedown', onStart);
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onEnd);
-
-        card.addEventListener('touchstart', onStart, { passive: true });
-        window.addEventListener('touchmove', onMove, { passive: true });
-        window.addEventListener('touchend', onEnd);
-    }
-
-    function openOfferModal(targetTitle) {
-        document.getElementById('offer-target-title').innerText = `«${targetTitle}»`;
-        const container = document.getElementById('offer-items-list');
-        const myItems = mockItems.filter(i => i.isMine);
-
-        if (myItems.length === 0) {
-            container.innerHTML = `
-                <div style="text-align:center; padding:12px; color:var(--text-sub); font-size:13px;">
-                    У вас пока нет своих лотов.<br>
-                    <span style="color:var(--accent-pink); cursor:pointer;" onclick="closeModal('offer-modal'); openCreateLotModal();">✚ Добавить лот</span>
-                </div>
-            `;
-        } else {
-            container.innerHTML = myItems.map(item => `
-                <label class="offer-item-check">
-                    <input type="checkbox" value="${item.id}" class="offer-checkbox">
-                    <img src="${item.media[0].url}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                    <div style="font-size:13px; font-weight:600;">${item.title}</div>
-                </label>
-            `).join('');
-        }
-
-        openModal('offer-modal');
-    }
-
-    function cancelOfferModal() {
-        closeModal('offer-modal');
-        if (pendingSwipeCard) {
-            const card = pendingSwipeCard;
-            pendingSwipeCard = null;
-            completeSwipe(card, false);
-        }
-    }
-
-    function confirmOfferAndSwipe() {
-        closeModal('offer-modal');
-        const checkboxes = document.querySelectorAll('.offer-checkbox:checked');
-        const selectedIds = Array.from(checkboxes).map(c => c.value);
-
-        if (pendingSwipeCard) {
-            const card = pendingSwipeCard;
-            pendingSwipeCard = null;
-            completeSwipe(card, true, selectedIds);
-        } else if (selectedMapItem) {
-            addMatchChat(selectedMapItem.title, selectedIds);
-            showToast('🔥 Взаимность отправлена!');
-            selectedMapItem = null;
-        }
-    }
-
-    function completeSwipe(card, isLike, offeredIds = []) {
-        const itemTitle = card.dataset.title || "вещь";
-        const itemId = card.dataset.itemId;
-        const moveX = isLike ? window.innerWidth : -window.innerWidth;
-
-        card.style.transform = `translate3d(${moveX}px, ${card.offsetHeight}px, 0) rotate(${isLike ? 30 : -30}deg)`;
-        card.style.opacity = '0';
-
-        if (isLike) {
-            showToast(`🔥 Взаимность отправлена!`);
-            addMatchChat(itemTitle, offeredIds);
-        }
-
-        if (itemId) {
-            mockItems = mockItems.filter(item => String(item.id) !== String(itemId));
-        }
-
-        setTimeout(() => {
-            card.remove();
-            renderCards();
-            updateMapMarkers();
-        }, 250);
-    }
-
-    function triggerBtnSwipe(isLike) {
-        const cards = document.querySelectorAll('.swipe-card');
-        if (!cards.length) return;
-        if (isLike) {
-            pendingSwipeCard = cards[0];
-            openOfferModal(cards[0].dataset.title);
-        } else {
-            completeSwipe(cards[0], false);
-        }
-    }
-
-    function changeMedia(itemId, totalMedia, direction, event) {
-        if (event) event.stopPropagation();
-        const cards = document.querySelectorAll('.swipe-card');
-        if (!cards.length) return;
-        const topCard = cards[0];
-
-        let currentIndex = topCard.mediaIndex || 0;
-        let newIndex = currentIndex + direction;
-
-        if (newIndex >= 0 && newIndex < totalMedia) {
-            document.getElementById(`med-${itemId}-${currentIndex}`).classList.remove('active');
-            document.getElementById(`ind-${itemId}-${currentIndex}`).classList.remove('active');
-
-            document.getElementById(`med-${itemId}-${newIndex}`).classList.add('active');
-            document.getElementById(`ind-${itemId}-${newIndex}`).classList.add('active');
-
-            topCard.mediaIndex = newIndex;
-        }
-    }
-
-    function handleFileSelect(evt) {
-        const files = evt.target.files;
-        const list = document.getElementById('preview-list');
-
-        for (let file of files) {
-            const isVideo = file.type.startsWith('video');
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const fileDataUrl = e.target.result;
-                uploadedMedia.push({ type: isVideo ? 'video' : 'image', url: fileDataUrl });
-
-                if (isVideo) {
-                    list.innerHTML += `<video src="${fileDataUrl}" class="preview-thumb" autoplay loop muted></video>`;
-                } else {
-                    list.innerHTML += `<img src="${fileDataUrl}" class="preview-thumb">`;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function openCreateLotModal() {
-        newItemLat = userLat;
-        newItemLng = userLng;
-
-        openModal('add-lot-modal');
-
-        setTimeout(() => {
-            if (mapAdd) {
-                mapAdd.invalidateSize();
-                mapAdd.setView([newItemLat, newItemLng], 13);
-                addMarker.setLatLng([newItemLat, newItemLng]);
-                updateCoordsLabel(newItemLat, newItemLng);
-            }
-        }, 250);
-    }
-
-    function publishItem() {
-        const title = document.getElementById('add-title').value.trim();
-        const swap = document.getElementById('add-swap').value.trim();
-        const condition = document.getElementById('add-condition').value;
-        const desc = document.getElementById('add-desc').value.trim();
-
-        if (!title || !swap) {
-            showToast('⚠️ Заполните название и желаемый обмен!');
-            return;
-        }
-
-        if (uploadedMedia.length === 0) {
-            showToast('📸 Загрузите хотя бы одно фото/видео!');
-            return;
-        }
-
-        const newItem = {
-            id: Date.now(),
-            title: title,
-            swapFor: swap,
-            desc: desc || "Новое предложение",
-            condition: condition,
-            media: [...uploadedMedia],
-            lat: newItemLat,
-            lng: newItemLng,
-            isMine: true,
-            ownerName: userProfile.name || "Александр",
-            ownerRating: userProfile.rating || 5.0
-        };
-
-        mockItems.unshift(newItem);
-        uploadedMedia = [];
-        document.getElementById('preview-list').innerHTML = '';
-        document.getElementById('add-title').value = '';
-        document.getElementById('add-swap').value = '';
-        document.getElementById('add-desc').value = '';
-
-        closeModal('add-lot-modal');
-        updateMapMarkers();
-        renderCards();
-        renderMyLotsGrid();
-
-        showToast('🎉 Лот опубликован! Смотрите на карте (зелёный кружок)');
-    }
-
-    function renderMyLotsGrid() {
-        const container = document.getElementById('my-lots-grid-container');
-        const myItems = mockItems.filter(i => i.isMine);
-
-        document.getElementById('profile-items-count').innerText = myItems.length;
-
-        if (myItems.length === 0) {
-            container.innerHTML = `
-                <div style="grid-column: span 2; text-align:center; padding:40px 10px; color:var(--text-sub);">
-                    <div style="font-size:36px; margin-bottom:8px;">📦</div>
-                    <div>У вас пока нет добавленных лотов</div>
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = myItems.map(item => `
-            <div class="my-lot-card">
-                <div class="my-lot-img-wrapper">
-                    <img src="${item.media[0].url}" class="my-lot-img">
-                    <span class="my-lot-badge">${item.condition || 'Отличное'}</span>
-                </div>
-                <div class="my-lot-title">${item.title}</div>
-                <div class="my-lot-swap">Ищу: ${item.swapFor}</div>
-                <button class="btn-delete-lot" onclick="deleteMyItem(${item.id})">Удалить лот</button>
+    container.innerHTML = reviews.map(r => `
+        <div class="review-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="font-weight:700; font-size:13px;">Отзыв</span>
+                <span style="color:var(--accent-gold); font-size:12px;">${'★'.repeat(r.stars)}</span>
             </div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.8);">${escapeHtml(r.text || '')}</div>
+        </div>
+    `).join('');
+}
+
+function openAuthModal() {
+    document.getElementById('reg-name').value = userProfile.name || '';
+    document.getElementById('reg-phone').value = userProfile.phone || '';
+    document.getElementById('reg-city').value = userProfile.city || 'Санкт-Петербург';
+    openModal('auth-modal');
+}
+
+async function saveRegistration() {
+    const name = document.getElementById('reg-name').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const city = document.getElementById('reg-city').value.trim();
+
+    if (!name) { showToast('⚠️ Укажите имя'); return; }
+
+    const { error } = await sb.from('profiles').update({
+        name, phone, city, updated_at: new Date().toISOString()
+    }).eq('id', userProfile.id);
+
+    if (error) {
+        showToast('⚠️ Ошибка сохранения');
+        console.error(error);
+        return;
+    }
+
+    userProfile.name = name;
+    userProfile.phone = phone;
+    userProfile.city = city;
+    updateProfileUI();
+    updateHeaderCity();
+    closeModal('auth-modal');
+    showToast('✅ Профиль сохранён!');
+}
+
+/* ============================================================
+   ЛОТЫ
+   ============================================================ */
+async function loadItems() {
+    const { data, error } = await sb.from('items')
+        .select('*, profiles!items_owner_id_fkey(name, rating)')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+    if (error) {
+        console.error('Load items error:', error);
+        showToast('⚠️ Ошибка загрузки лотов');
+        return;
+    }
+
+    allItems = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        swapFor: item.swap_for,
+        desc: item.description || '',
+        condition: item.condition,
+        media: item.media || [],
+        lat: item.lat,
+        lng: item.lng,
+        isMine: item.owner_id === userProfile.id,
+        ownerId: item.owner_id,
+        ownerName: item.profiles?.name || 'Пользователь',
+        ownerRating: item.profiles?.rating || 5.0
+    }));
+}
+
+async function publishItem() {
+    const title = document.getElementById('add-title').value.trim();
+    const swap = document.getElementById('add-swap').value.trim();
+    const condition = document.getElementById('add-condition').value;
+    const desc = document.getElementById('add-desc').value.trim();
+
+    if (!title || !swap) { showToast('⚠️ Заполните название и обмен'); return; }
+    if (uploadedMedia.length === 0) { showToast('📸 Загрузите фото'); return; }
+
+    const newItem = {
+        owner_id: userProfile.id,
+        title, swap_for: swap,
+        description: desc || 'Новое предложение',
+        condition,
+        media: uploadedMedia.map(m => ({ type: m.type, url: m.url })),
+        lat: newItemLat,
+        lng: newItemLng
+    };
+
+    const { data, error } = await sb.from('items').insert(newItem).select().single();
+
+    if (error) {
+        console.error(error);
+        showToast('⚠️ Ошибка публикации');
+        return;
+    }
+
+    uploadedMedia = [];
+    document.getElementById('preview-list').innerHTML = '';
+    document.getElementById('add-title').value = '';
+    document.getElementById('add-swap').value = '';
+    document.getElementById('add-desc').value = '';
+
+    closeModal('add-lot-modal');
+    await loadItems();
+    renderCards();
+    renderMyLotsGrid();
+    updateMapMarkers();
+    showToast('🎉 Лот опубликован!');
+}
+
+async function deleteMyItem(id) {
+    const { error } = await sb.from('items').delete().eq('id', id);
+    if (error) { showToast('⚠️ Ошибка удаления'); return; }
+    await loadItems();
+    renderCards();
+    renderMyLotsGrid();
+    updateMapMarkers();
+    showToast('🗑️ Лот удалён');
+}
+
+function renderMyLotsGrid() {
+    const container = document.getElementById('my-lots-grid-container');
+    const myItems = allItems.filter(i => i.isMine);
+    document.getElementById('profile-items-count').innerText = myItems.length;
+
+    if (myItems.length === 0) {
+        container.innerHTML = `<div style="grid-column:span 2; text-align:center; padding:40px 10px; color:var(--text-sub);"><div style="font-size:36px; margin-bottom:8px;">📦</div><div>У вас пока нет лотов</div></div>`;
+        return;
+    }
+
+    container.innerHTML = myItems.map(item => `
+        <div class="my-lot-card">
+            <div class="my-lot-img-wrapper">
+                <img src="${escapeHtml(item.media[0]?.url || '')}" class="my-lot-img">
+                <span class="my-lot-badge">${escapeHtml(item.condition)}</span>
+            </div>
+            <div class="my-lot-title">${escapeHtml(item.title)}</div>
+            <div class="my-lot-swap">Ищу: ${escapeHtml(item.swapFor)}</div>
+            <button class="btn-delete-lot" onclick="deleteMyItem(${item.id})">Удалить</button>
+        </div>
+    `).join('');
+}
+
+/* ============================================================
+   КАРТОЧКИ СВАЙПА
+   ============================================================ */
+function renderCards() {
+    const deck = document.getElementById('deck');
+    const controls = document.getElementById('controls-bar');
+    deck.innerHTML = '';
+
+    const filtered = allItems.filter(item => {
+        if (item.isMine) return false;
+        const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
+        item.currentDist = dist;
+        return dist <= currentRadiusKm;
+    });
+
+    if (filtered.length === 0) {
+        deck.innerHTML = `<div style="text-align:center; padding:32px 20px; background:var(--card-bg); border-radius:24px; border:1px solid var(--card-border); max-width:320px;">
+            <div style="font-size:48px; margin-bottom:12px;">🎉</div>
+            <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">Лоты закончились</h3>
+            <p style="color:var(--text-sub); font-size:13px; line-height:1.4;">Попробуйте увеличить радиус или зайдите позже</p>
+        </div>`;
+        controls.style.display = 'none';
+        return;
+    }
+    controls.style.display = 'flex';
+
+    filtered.slice(0, 10).forEach((item, i) => {
+        const card = document.createElement('div');
+        card.className = 'swipe-card';
+        card.style.zIndex = filtered.length - i;
+        card.dataset.itemId = item.id;
+        card.dataset.title = item.title;
+        card._item = item;
+        card._mediaIndex = 0;
+
+        let mediaElements = '', indicators = '';
+        item.media.forEach((med, mIdx) => {
+            const cls = mIdx === 0 ? 'active' : '';
+            indicators += `<div class="indicator-dot ${cls}"></div>`;
+            if (med.type === 'image') {
+                mediaElements += `<img src="${escapeHtml(med.url)}" class="media-item ${cls}" data-idx="${mIdx}">`;
+            } else {
+                mediaElements += `<video src="${escapeHtml(med.url)}" class="media-item ${cls}" data-idx="${mIdx}" autoplay loop muted playsinline></video>`;
+            }
+        });
+
+        card.innerHTML = `
+            <div class="swipe-badge badge-like">ОБМЕН</div>
+            <div class="swipe-badge badge-pass">ПРОПУСК</div>
+            <div class="carousel-container">${mediaElements}</div>
+            <div class="carousel-indicators">${indicators}</div>
+            <div class="carousel-controls">
+                <div class="carousel-btn-left"></div>
+                <div class="carousel-btn-right"></div>
+            </div>
+            <div class="card-overlay"></div>
+            <div class="card-top-info">
+                <span class="distance-tag">📍 ~${item.currentDist} км</span>
+                <span class="media-type-tag">${item.media[0]?.type === 'video' ? '🎥 Видео' : '📷 Фото'}</span>
+            </div>
+            <div class="card-bottom-info">
+                <div class="card-owner-info">
+                    <span>👤 ${escapeHtml(item.ownerName)}</span>
+                    <span class="owner-rating">★ ${item.ownerRating.toFixed(1)}</span>
+                </div>
+                <div class="item-title">${escapeHtml(item.title)}</div>
+                <div class="item-swap-for">🔄 ${escapeHtml(item.swapFor)}</div>
+                <div class="item-desc">${escapeHtml(item.desc)}</div>
+            </div>
+        `;
+        deck.appendChild(card);
+
+        // Карусель
+        const leftBtn = card.querySelector('.carousel-btn-left');
+        const rightBtn = card.querySelector('.carousel-btn-right');
+        leftBtn.addEventListener('click', (e) => { e.stopPropagation(); changeMedia(card, -1); });
+        rightBtn.addEventListener('click', (e) => { e.stopPropagation(); changeMedia(card, 1); });
+
+        initSwipeEvents(card);
+    });
+}
+
+function changeMedia(card, direction) {
+    const els = card.querySelectorAll('.media-item');
+    const dots = card.querySelectorAll('.indicator-dot');
+    const total = els.length;
+    if (total <= 1) return;
+    let ni = card._mediaIndex + direction;
+    if (ni < 0 || ni >= total) return;
+    els[card._mediaIndex].classList.remove('active');
+    dots[card._mediaIndex].classList.remove('active');
+    els[ni].classList.add('active');
+    dots[ni].classList.add('active');
+    card._mediaIndex = ni;
+}
+
+function initSwipeEvents(card) {
+    let dragging = false, startX = 0, startY = 0, curX = 0, curY = 0;
+
+    const badgeLike = card.querySelector('.badge-like');
+    const badgePass = card.querySelector('.badge-pass');
+
+    const getPoint = (e) => {
+        if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+    };
+
+    const onStart = (e) => {
+        if (e.target.closest('.carousel-controls')) return;
+        dragging = true;
+        const p = getPoint(e);
+        startX = p.x; startY = p.y;
+        card.style.transition = 'none';
+    };
+    const onMove = (e) => {
+        if (!dragging) return;
+        const p = getPoint(e);
+        curX = p.x - startX;
+        curY = p.y - startY;
+        card.style.transform = `translate3d(${curX}px, ${curY}px, 0) rotate(${curX * 0.08}deg)`;
+        if (curX > 30) { badgeLike.style.opacity = Math.min(curX / 100, 1); badgePass.style.opacity = '0'; }
+        else if (curX < -30) { badgePass.style.opacity = Math.min(Math.abs(curX) / 100, 1); badgeLike.style.opacity = '0'; }
+        else { badgeLike.style.opacity = '0'; badgePass.style.opacity = '0'; }
+    };
+    const onEnd = () => {
+        if (!dragging) return;
+        dragging = false;
+        card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        if (curX > 120) {
+            pendingSwipeCard = card;
+            TelegramApp.haptic('medium');
+            openOfferModal(card.dataset.title);
+            card.style.transform = 'translate3d(0,0,0) rotate(0)';
+            badgeLike.style.opacity = '0';
+        } else if (curX < -120) {
+            TelegramApp.haptic('light');
+            completeSwipe(card, false);
+        } else {
+            card.style.transform = 'translate3d(0,0,0) rotate(0)';
+            badgeLike.style.opacity = '0';
+            badgePass.style.opacity = '0';
+        }
+        curX = curY = 0;
+    };
+
+    card.addEventListener('mousedown', onStart);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    card.addEventListener('touchstart', onStart, { passive: true });
+    window.addEventListener('touchmove', onMove, { passive: true });
+    window.addEventListener('touchend', onEnd);
+}
+
+function completeSwipe(card, isLike, offeredIds = []) {
+    const item = card._item;
+    if (!item) return;
+    const moveX = isLike ? window.innerWidth : -window.innerWidth;
+    card.style.transform = `translate3d(${moveX}px, ${card.offsetHeight}px, 0) rotate(${isLike ? 30 : -30}deg)`;
+    card.style.opacity = '0';
+
+    if (isLike) {
+        showToast('🔥 Взаимность отправлена!');
+        createChatWith(item, offeredIds);
+    }
+
+    setTimeout(() => {
+        card.remove();
+        renderCards();
+    }, 250);
+}
+
+function triggerBtnSwipe(isLike) {
+    const cards = document.querySelectorAll('.swipe-card');
+    if (!cards.length) return;
+    if (isLike) {
+        pendingSwipeCard = cards[0];
+        openOfferModal(cards[0].dataset.title);
+    } else {
+        completeSwipe(cards[0], false);
+    }
+}
+
+/* ============================================================
+   OFFER MODAL
+   ============================================================ */
+function openOfferModal(targetTitle) {
+    document.getElementById('offer-target-title').innerText = `«${targetTitle}»`;
+    const container = document.getElementById('offer-items-list');
+    const myItems = allItems.filter(i => i.isMine);
+
+    if (myItems.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:12px; color:var(--text-sub); font-size:13px;">
+            У вас пока нет лотов.<br>
+            <span style="color:var(--accent-pink); cursor:pointer;" onclick="closeModal('offer-modal'); openCreateLotModal();">✚ Добавить лот</span>
+        </div>`;
+    } else {
+        container.innerHTML = myItems.map(item => `
+            <label class="offer-item-check">
+                <input type="checkbox" value="${item.id}" class="offer-checkbox">
+                <img src="${escapeHtml(item.media[0]?.url || '')}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                <div style="font-size:13px; font-weight:600;">${escapeHtml(item.title)}</div>
+            </label>
         `).join('');
     }
+    openModal('offer-modal');
+}
 
-    function deleteMyItem(id) {
-        mockItems = mockItems.filter(i => i.id !== id);
-        renderMyLotsGrid();
-        renderCards();
-        updateMapMarkers();
-        showToast('🗑️ Лот удалён');
+function cancelOfferModal() {
+    closeModal('offer-modal');
+    if (pendingSwipeCard) {
+        const card = pendingSwipeCard;
+        pendingSwipeCard = null;
+        completeSwipe(card, false);
     }
+}
 
-    function renderChatsList() {
-        const chatsList = document.getElementById('chats-list');
-        chatsList.innerHTML = '';
+function confirmOfferAndSwipe() {
+    closeModal('offer-modal');
+    const selectedIds = Array.from(document.querySelectorAll('.offer-checkbox:checked')).map(c => parseInt(c.value));
 
-        document.getElementById('profile-matches-count').innerText = chatData.length;
-
-        if (chatData.length === 0) {
-            chatsList.innerHTML = `<div style="text-align:center; padding:40px 0; color:var(--text-sub);">У вас пока нет чатов</div>`;
-            return;
-        }
-
-        chatData.forEach(chat => {
-            const lastMsgObj = chat.messages.length > 0 ? chat.messages[chat.messages.length - 1] : null;
-            let lastMsgText = 'Начните диалог';
-            if (lastMsgObj) {
-                if (lastMsgObj.mediaList && lastMsgObj.mediaList.length > 0) {
-                    lastMsgText = `📎 Медиафайлы (${lastMsgObj.mediaList.length})`;
-                } else if (lastMsgObj.text) {
-                    lastMsgText = lastMsgObj.text;
-                }
-            }
-
-            const item = document.createElement('div');
-            item.className = 'chat-item';
-            item.innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px; flex:1;" onclick="openChat('${chat.id}')">
-                    <div class="chat-avatar">${chat.avatar}</div>
-                    <div>
-                        <div style="font-weight:700; font-size:14px;">${chat.name}</div>
-                        <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">${lastMsgText}</div>
-                    </div>
-                </div>
-                <button class="action-icon-btn delete-btn" title="Удалить диалог" onclick="event.stopPropagation(); deleteChat('${chat.id}')">🗑️</button>
-            `;
-            chatsList.appendChild(item);
-        });
+    if (pendingSwipeCard) {
+        const card = pendingSwipeCard;
+        pendingSwipeCard = null;
+        completeSwipe(card, true, selectedIds);
+    } else if (selectedMapItem) {
+        createChatWith(selectedMapItem, selectedIds);
+        showToast('🔥 Взаимность отправлена!');
+        selectedMapItem = null;
     }
+}
 
-    function deleteChat(chatId) {
-        chatData = chatData.filter(c => c.id !== chatId);
-        renderChatsList();
-        showToast('🗑️ Диалог удалён');
-    }
+/* ============================================================
+   ЧАТЫ
+   ============================================================ */
+async function createChatWith(item, offeredIds = []) {
+    if (!item.ownerId || item.ownerId === userProfile.id) return;
 
-    function deleteActiveChat() {
-        if (!activeChatId) return;
-        deleteChat(activeChatId);
-        closeChat();
-    }
+    // Проверяем, есть ли уже чат
+    const { data: existing } = await sb.from('chats')
+        .select('*')
+        .or(`and(user1_id.eq.${userProfile.id},user2_id.eq.${item.ownerId}),and(user1_id.eq.${item.ownerId},user2_id.eq.${userProfile.id})`)
+        .eq('item_id', item.id)
+        .maybeSingle();
 
-    function addMatchChat(title, offeredIds = []) {
-        const newChatId = 'chat_' + Date.now();
-        const offeredItems = mockItems.filter(i => offeredIds.includes(String(i.id)) || offeredIds.includes(i.id));
+    let chatId;
+    if (existing) {
+        chatId = existing.id;
+    } else {
+        const { data: newChat, error } = await sb.from('chats').insert({
+            user1_id: userProfile.id,
+            user2_id: item.ownerId,
+            item_id: item.id,
+            offered_item_id: offeredIds[0] || null
+        }).select().single();
 
-        let offerText = "";
-        if (offeredItems.length > 0) {
-            const namesList = offeredItems.map(i => `«${i.title}»`).join(', ');
-            offerText = `\n\nПредложено на обмен взамен: ${namesList}`;
-        } else {
-            offerText = `\n\nХочу обсудить варианты обмена!`;
-        }
+        if (error) { console.error(error); return; }
+        chatId = newChat.id;
 
-        const newChat = {
-            id: newChatId,
-            name: `${title}`,
-            avatar: '✨',
-            messages: [
-                { sender: 'them', text: `Здравствуйте! Интересует ваш лот «${title}».${offerText}` }
-            ]
-        };
-        chatData.unshift(newChat);
-        renderChatsList();
-    }
+        // Первое сообщение от лица «покупателя»
+        const offeredItems = allItems.filter(i => offeredIds.includes(i.id));
+        const names = offeredItems.map(i => `«${i.title}»`).join(', ');
+        const text = names
+            ? `Здравствуйте! Интересует ваш лот «${item.title}».\n\nПредлагаю взамен: ${names}`
+            : `Здравствуйте! Интересует ваш лот «${item.title}».`;
 
-    function openChat(chatId) {
-        activeChatId = chatId;
-        const chat = chatData.find(c => c.id === chatId);
-        if (!chat) return;
-
-        document.getElementById('single-chat-name').innerText = chat.name;
-        document.getElementById('single-chat-avatar').innerText = chat.avatar;
-
-        renderMessages(chat.messages);
-
-        document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-single-chat').style.display = 'flex';
-        document.getElementById('view-single-chat').classList.add('active');
-
-        TelegramApp.showBackButton(true);
-    }
-
-    function closeChat() {
-        document.getElementById('view-single-chat').style.display = 'none';
-        TelegramApp.showBackButton(false);
-        switchTab('chats');
-    }
-
-    function renderMessages(messages) {
-        const container = document.getElementById('chat-messages');
-        container.innerHTML = '';
-        messages.forEach(msg => {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `msg-bubble ${msg.sender === 'me' ? 'msg-sent' : 'msg-received'}`;
-
-            let contentHtml = '';
-            if (msg.text) contentHtml += `<div style="white-space: pre-line;">${msg.text}</div>`;
-
-            if (msg.mediaList && msg.mediaList.length > 0) {
-                contentHtml += `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:6px; margin-top:6px;">`;
-                msg.mediaList.forEach(m => {
-                    if (m.type === 'image') {
-                        contentHtml += `<img src="${m.url}" style="width:100%; height:80px; object-fit:cover; border-radius:8px; cursor:pointer;" onclick="openLightbox('image', '${m.url}')">`;
-                    } else {
-                        contentHtml += `<video src="${m.url}" style="width:100%; height:80px; object-fit:cover; border-radius:8px; cursor:pointer;" onclick="openLightbox('video', '${m.url}')"></video>`;
-                    }
-                });
-                contentHtml += `</div>`;
-            }
-
-            msgDiv.innerHTML = contentHtml;
-            container.appendChild(msgDiv);
-        });
-        container.scrollTop = container.scrollHeight;
-    }
-
-    function sendChatMessage() {
-        const input = document.getElementById('chat-input');
-        const text = input.value.trim();
-        if (!text || !activeChatId) return;
-
-        const chat = chatData.find(c => c.id === activeChatId);
-        if (chat) {
-            chat.messages.push({ sender: 'me', text: text });
-            renderMessages(chat.messages);
-            input.value = '';
-            renderChatsList();
-        }
-    }
-
-    function sendChatMediaMultiple(evt) {
-        const files = Array.from(evt.target.files);
-        if (!files.length || !activeChatId) return;
-
-        const mediaList = [];
-        let loadedCount = 0;
-
-        files.forEach(file => {
-            const isVideo = file.type.startsWith('video');
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                mediaList.push({ type: isVideo ? 'video' : 'image', url: e.target.result });
-                loadedCount++;
-
-                if (loadedCount === files.length) {
-                    const chat = chatData.find(c => c.id === activeChatId);
-                    if (chat) {
-                        chat.messages.push({
-                            sender: 'me',
-                            text: files.length > 1 ? `📸 Прикреплено файлов: ${files.length}` : '',
-                            mediaList: mediaList
-                        });
-                        renderMessages(chat.messages);
-                        renderChatsList();
-                    }
-                }
-            };
-            reader.readAsDataURL(file);
-        });
-
-        evt.target.value = '';
-    }
-
-    function openRatingModal() {
-        setRating(5);
-        document.getElementById('review-text').value = '';
-        openModal('rate-modal');
-    }
-
-    function setRating(val) {
-        selectedRating = val;
-        const stars = document.querySelectorAll('#star-rating-box .star');
-        stars.forEach((star, idx) => {
-            if (idx < val) star.classList.add('selected');
-            else star.classList.remove('selected');
-        });
-    }
-
-    function submitReview() {
-        const text = document.getElementById('review-text').value.trim();
-        if (!text) {
-            showToast('⚠️ Напишите короткий отзыв');
-            return;
-        }
-
-        userProfile.reviews.unshift({
-            author: userProfile.name || "Пользователь",
-            stars: selectedRating,
+        await sb.from('messages').insert({
+            chat_id: chatId,
+            sender_id: userProfile.id,
             text: text
         });
-
-        const totalStars = userProfile.reviews.reduce((acc, r) => acc + r.stars, 0);
-        userProfile.rating = totalStars / userProfile.reviews.length;
-
-        updateProfileUI();
-        renderProfileReviews();
-        closeModal('rate-modal');
-        showToast('🌟 Отзыв успешно опубликован!');
     }
 
-    function openLightbox(type, url) {
-        const modal = document.getElementById('lightbox');
-        const body = document.getElementById('lightbox-body');
-        if (type === 'image') {
-            body.innerHTML = `<img src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;">`;
-        } else {
-            body.innerHTML = `<video src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;" controls autoplay></video>`;
+    await loadChats();
+    renderChatsList();
+}
+
+async function loadChats() {
+    if (!userProfile.id) return;
+
+    const { data, error } = await sb.from('chats')
+        .select('*, item:items!chats_item_id_fkey(id, title, media, owner_id)')
+        .or(`user1_id.eq.${userProfile.id},user2_id.eq.${userProfile.id}`)
+        .order('created_at', { ascending: false });
+
+    if (error) { console.error(error); return; }
+
+    chatList = [];
+
+    for (const chat of data || []) {
+        const otherId = chat.user1_id === userProfile.id ? chat.user2_id : chat.user1_id;
+        const { data: otherProfile } = await sb.from('profiles').select('name, username').eq('id', otherId).maybeSingle();
+
+        const { data: lastMsgs } = await sb.from('messages')
+            .select('*').eq('chat_id', chat.id).order('created_at', { ascending: false }).limit(1);
+
+        chatList.push({
+            id: chat.id,
+            otherUserId: otherId,
+            otherName: otherProfile?.name || 'Пользователь',
+            itemTitle: chat.item?.title || 'Обмен',
+            itemMedia: chat.item?.media?.[0]?.url || '',
+            lastMessage: lastMsgs?.[0]?.text || 'Начните диалог',
+            createdAt: chat.created_at
+        });
+    }
+}
+
+function renderChatsList() {
+    const container = document.getElementById('chats-list');
+    container.innerHTML = '';
+    document.getElementById('profile-matches-count').innerText = chatList.length;
+
+    if (chatList.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px 0; color:var(--text-sub);">У вас пока нет чатов</div>';
+        return;
+    }
+
+    chatList.forEach(chat => {
+        const el = document.createElement('div');
+        el.className = 'chat-item';
+        el.innerHTML = `
+            <div style="display:flex; align-items:center; gap:12px; flex:1;" onclick="openChat(${chat.id})">
+                <div class="chat-avatar">💬</div>
+                <div style="min-width:0;">
+                    <div style="font-weight:700; font-size:14px;">${escapeHtml(chat.otherName)}</div>
+                    <div style="font-size:12px; color:var(--text-sub); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(chat.lastMessage)}</div>
+                </div>
+            </div>
+            <button class="action-icon-btn delete-btn" onclick="event.stopPropagation(); deleteChat(${chat.id})">🗑️</button>
+        `;
+        container.appendChild(el);
+    });
+}
+
+async function openChat(chatId) {
+    activeChatId = chatId;
+    const chat = chatList.find(c => c.id === chatId);
+    if (!chat) return;
+
+    document.getElementById('single-chat-name').innerText = chat.otherName;
+    document.getElementById('single-chat-avatar').innerText = '💬';
+
+    await loadMessages(chatId);
+    renderMessages();
+
+    document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+    const view = document.getElementById('view-single-chat');
+    view.style.display = 'flex';
+    view.classList.add('active');
+
+    TelegramApp.showBackButton(true);
+}
+
+async function loadMessages(chatId) {
+    const { data, error } = await sb.from('messages')
+        .select('*').eq('chat_id', chatId).order('created_at', { ascending: true });
+    if (error) { console.error(error); return; }
+    currentMessages = data || [];
+}
+
+function renderMessages() {
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '';
+    currentMessages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `msg-bubble ${msg.sender_id === userProfile.id ? 'msg-sent' : 'msg-received'}`;
+        div.innerHTML = `<div style="white-space: pre-line;">${escapeHtml(msg.text || '')}</div>`;
+        container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text || !activeChatId) return;
+
+    const { error } = await sb.from('messages').insert({
+        chat_id: activeChatId,
+        sender_id: userProfile.id,
+        text: text
+    });
+
+    if (error) { showToast('⚠️ Ошибка отправки'); return; }
+    input.value = '';
+}
+
+function closeChat() {
+    document.getElementById('view-single-chat').style.display = 'none';
+    TelegramApp.showBackButton(false);
+    switchTab('chats');
+}
+
+async function deleteChat(chatId) {
+    const { error } = await sb.from('chats').delete().eq('id', chatId);
+    if (error) { showToast('⚠️ Ошибка удаления'); return; }
+    await loadChats();
+    renderChatsList();
+    if (activeChatId === chatId) closeChat();
+    showToast('🗑️ Диалог удалён');
+}
+
+function deleteActiveChat() {
+    if (activeChatId) deleteChat(activeChatId);
+}
+
+/* ============================================================
+   ОТЗЫВЫ
+   ============================================================ */
+function openRatingModal() {
+    setRating(5);
+    document.getElementById('review-text').value = '';
+    openModal('rate-modal');
+}
+
+function setRating(val) {
+    selectedRating = val;
+    document.querySelectorAll('#star-rating-box .star').forEach((s, i) => {
+        s.classList.toggle('selected', i < val);
+    });
+}
+
+async function submitReview() {
+    const text = document.getElementById('review-text').value.trim();
+    if (!text) { showToast('⚠️ Напишите отзыв'); return; }
+    if (!activeChatId) return;
+
+    const chat = chatList.find(c => c.id === activeChatId);
+    if (!chat) return;
+
+    const { error } = await sb.from('reviews').insert({
+        from_user_id: userProfile.id,
+        to_user_id: chat.otherUserId,
+        stars: selectedRating,
+        text
+    });
+
+    if (error) { showToast('⚠️ Ошибка отзыва'); return; }
+
+    closeModal('rate-modal');
+    showToast('🌟 Отзыв опубликован!');
+}
+
+/* ============================================================
+   КАРТА
+   ============================================================ */
+const TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_3k76_1_566394757fe80d1742b933c9';
+const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>';
+
+function initLeafletMaps() {
+    initFullMap();
+    initAddMap();
+    updateMapMarkers();
+}
+
+function makePinIcon(color) {
+    const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z" fill="${fill}" stroke="#FFF" stroke-width="2"/><circle cx="16" cy="16" r="6" fill="#FFF"/></svg>`;
+    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [32, 44], iconAnchor: [16, 44], popupAnchor: [0, -44], tooltipAnchor: [16, -44] });
+}
+
+function makeCircleIcon(color) {
+    const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="${fill}" stroke="#FFF" stroke-width="2.5"/></svg>`;
+    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14], tooltipAnchor: [14, -14] });
+}
+
+function initFullMap() {
+    mapFull = L.map('map-full', { zoomControl: true, attributionControl: true }).setView([userLat, userLng], 11);
+    L.tileLayer(TILE_URL, { subdomains: 'abcd', maxZoom: 20, attribution: TILE_ATTR }).addTo(mapFull);
+    markersLayer = L.layerGroup().addTo(mapFull);
+    myMarkersLayer = L.layerGroup().addTo(mapFull);
+
+    userMarker = L.marker([userLat, userLng], { draggable: true, icon: makePinIcon('violet') }).addTo(mapFull);
+    userCircle = L.circle([userLat, userLng], { radius: currentRadiusKm * 1000, color: '#7000FF', fillColor: '#7000FF', fillOpacity: 0.12, weight: 2 }).addTo(mapFull);
+
+    userMarker.on('dragend', () => {
+        const pos = userMarker.getLatLng();
+        userLat = pos.lat; userLng = pos.lng;
+        userCircle.setLatLng([userLat, userLng]);
+        reverseGeocode(userLat, userLng);
+        renderCards();
+        updateMapMarkers();
+    });
+}
+
+function initAddMap() {
+    mapAdd = L.map('map-add', { zoomControl: true, attributionControl: true }).setView([newItemLat, newItemLng], 13);
+    L.tileLayer(TILE_URL, { subdomains: 'abcd', maxZoom: 20, attribution: TILE_ATTR }).addTo(mapAdd);
+
+    addMarker = L.marker([newItemLat, newItemLng], { draggable: true, icon: makeCircleIcon('red') }).addTo(mapAdd);
+    addMarker.on('dragend', () => {
+        const p = addMarker.getLatLng();
+        newItemLat = p.lat; newItemLng = p.lng;
+        updateCoordsLabel(newItemLat, newItemLng);
+    });
+    mapAdd.on('click', (e) => {
+        newItemLat = e.latlng.lat; newItemLng = e.latlng.lng;
+        addMarker.setLatLng(e.latlng);
+        updateCoordsLabel(newItemLat, newItemLng);
+    });
+}
+
+function updateCoordsLabel(lat, lng) {
+    const label = document.getElementById('add-item-coords-label');
+    if (label) { label.innerText = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`; label.style.color = 'var(--accent-green)'; }
+}
+
+function updateMapMarkers() {
+    if (!markersLayer || !myMarkersLayer) return;
+    markersLayer.clearLayers();
+    myMarkersLayer.clearLayers();
+
+    allItems.forEach(item => {
+        const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
+        if (!item.isMine && dist > currentRadiusKm) return;
+
+        const marker = L.marker([item.lat, item.lng], { icon: makeCircleIcon(item.isMine ? 'green' : 'pink') });
+        marker.bindTooltip(item.isMine ? `🟢 Ваш: ${item.title}` : item.title, { direction: 'top', offset: [0, -14] });
+        marker.on('click', () => {
+            if (item.isMine) showToast(`🟢 Ваш лот: ${item.title}`);
+            else openMapItemModal(item, dist);
+        });
+        if (item.isMine) marker.addTo(myMarkersLayer); else marker.addTo(markersLayer);
+    });
+}
+
+function openMapItemModal(item, dist) {
+    selectedMapItem = item;
+    document.getElementById('map-modal-title').innerText = item.title;
+    document.getElementById('map-modal-swap').innerText = `🔄 Взамен: ${item.swapFor}`;
+    document.getElementById('map-modal-desc').innerText = item.desc || 'Описание отсутствует';
+    document.getElementById('map-modal-condition').innerText = item.condition || 'Отличное';
+    document.getElementById('map-modal-dist').innerText = `📍 ~${dist} км`;
+    document.getElementById('map-modal-owner').innerText = `👤 ${item.ownerName}`;
+    document.getElementById('map-modal-rating').innerText = `★ ${item.ownerRating.toFixed(1)}`;
+    document.getElementById('map-modal-img').src = item.media[0]?.url || '';
+    openModal('map-item-modal');
+}
+
+function triggerOfferFromMap() {
+    closeModal('map-item-modal');
+    if (selectedMapItem) openOfferModal(selectedMapItem.title);
+}
+
+function getUserGPS() {
+    showToast('🛰️ Определение...');
+    if (!navigator.geolocation) { showToast('⚠️ GPS не поддерживается'); return; }
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            userLat = pos.coords.latitude;
+            userLng = pos.coords.longitude;
+            newItemLat = userLat; newItemLng = userLng;
+            updateMapAndAddress(userLat, userLng);
+            showToast('📍 Обновлено!');
+        },
+        err => { showToast('⚠️ Ошибка GPS'); },
+        { enableHighAccuracy: true, timeout: 8000 }
+    );
+}
+
+function setNewItemToCurrentGPS() { getUserGPS(); }
+
+function updateMapAndAddress(lat, lng) {
+    if (mapFull) {
+        mapFull.setView([lat, lng], 11);
+        userMarker.setLatLng([lat, lng]);
+        userCircle.setLatLng([lat, lng]);
+    }
+    if (mapAdd) {
+        mapAdd.setView([lat, lng], 13);
+        addMarker.setLatLng([lat, lng]);
+    }
+    reverseGeocode(lat, lng);
+    renderCards();
+    updateMapMarkers();
+}
+
+function reverseGeocode(lat, lng) {
+    fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=ru`)
+        .then(r => r.json())
+        .then(data => {
+            if (data?.features?.length) {
+                const p = data.features[0].properties || {};
+                const city = p.city || p.town || p.village || p.county || p.state;
+                if (city) {
+                    const label = document.getElementById('current-region-label');
+                    if (label) label.innerText = city;
+                    userProfile.city = city;
+                    updateProfileUI();
+                }
+            }
+        })
+        .catch(() => {});
+}
+
+function onRegionChange() {
+    const idx = document.getElementById('region-select').value;
+    const reg = regionsRF[idx];
+    if (!reg) return;
+    userLat = reg.lat; userLng = reg.lng;
+    document.getElementById('current-region-label').innerText = reg.name;
+    if (mapFull) {
+        mapFull.setView([userLat, userLng], 11);
+        userMarker.setLatLng([userLat, userLng]);
+        userCircle.setLatLng([userLat, userLng]);
+    }
+    renderCards();
+    updateMapMarkers();
+}
+
+function updateRadius(val) {
+    currentRadiusKm = parseInt(val);
+    document.getElementById('radius-val').innerText = val + ' км';
+    if (userCircle) userCircle.setRadius(currentRadiusKm * 1000);
+    renderCards();
+    updateMapMarkers();
+}
+
+function populateRegions() {
+    const select = document.getElementById('region-select');
+    select.innerHTML = '';
+    regionsRF.forEach((reg, i) => {
+        const opt = document.createElement('option');
+        opt.value = i; opt.innerText = reg.name;
+        select.appendChild(opt);
+    });
+    select.value = 1;
+}
+
+function getDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
+    return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+/* ============================================================
+   MEDIA (локально — пока без загрузки на сервер)
+   ============================================================ */
+function handleFileSelect(evt) {
+    const files = evt.target.files;
+    const list = document.getElementById('preview-list');
+    for (const file of files) {
+        const isVideo = file.type.startsWith('video');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const url = e.target.result;
+            uploadedMedia.push({ type: isVideo ? 'video' : 'image', url });
+            if (isVideo) list.innerHTML += `<video src="${url}" class="preview-thumb" autoplay loop muted></video>`;
+            else list.innerHTML += `<img src="${url}" class="preview-thumb">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+/* ============================================================
+   UI ХЕЛПЕРЫ
+   ============================================================ */
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function openCreateLotModal() {
+    newItemLat = userLat; newItemLng = userLng;
+    openModal('add-lot-modal');
+    setTimeout(() => {
+        if (mapAdd) {
+            mapAdd.invalidateSize();
+            mapAdd.setView([newItemLat, newItemLng], 13);
+            addMarker.setLatLng([newItemLat, newItemLng]);
+            updateCoordsLabel(newItemLat, newItemLng);
         }
-        modal.classList.add('active');
-    }
+    }, 250);
+}
 
-    function closeLightbox() {
-        closeModal('lightbox');
-        document.getElementById('lightbox-body').innerHTML = '';
-    }
+function openLightbox(type, url) {
+    const body = document.getElementById('lightbox-body');
+    body.innerHTML = type === 'image'
+        ? `<img src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;">`
+        : `<video src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;" controls autoplay></video>`;
+    document.getElementById('lightbox').classList.add('active');
+}
 
-    function showToast(text) {
-        const toast = document.getElementById('toast');
-        document.getElementById('toast-text').innerText = text;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
+function closeLightbox() {
+    closeModal('lightbox');
+    document.getElementById('lightbox-body').innerHTML = '';
+}
 
-    function switchTab(tabName) {
-        document.getElementById('view-single-chat').style.display = 'none';
-        document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+let _toastTimer = null;
+function showToast(text) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-text').innerText = text;
+    toast.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
 
-        const targetView = document.getElementById(`view-${tabName}`);
-        if (targetView) {
-            targetView.classList.add('active');
-        }
+function switchTab(tabName) {
+    document.getElementById('view-single-chat').style.display = 'none';
+    document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-        const navMap = { 'swipe': 0, 'map': 1, 'my-lots': 2, 'chats': 3 };
-        if (navMap[tabName] !== undefined) {
-            document.querySelectorAll('.nav-item')[navMap[tabName]].classList.add('active');
-        }
+    const target = document.getElementById(`view-${tabName}`);
+    if (target) target.classList.add('active');
 
-        if (tabName === 'map' && mapFull) {
-            setTimeout(() => mapFull.invalidateSize(), 200);
-        }
+    const navMap = { swipe: 0, map: 1, 'my-lots': 2, chats: 3 };
+    if (navMap[tabName] !== undefined) document.querySelectorAll('.nav-item')[navMap[tabName]].classList.add('active');
 
-        TelegramApp.showBackButton(tabName !== 'swipe');
-    }
+    if (tabName === 'map' && mapFull) setTimeout(() => mapFull.invalidateSize(), 200);
+    if (tabName === 'my-lots') renderMyLotsGrid();
+    if (tabName === 'chats') renderChatsList();
+    if (tabName === 'profile') renderProfile();
+
+    TelegramApp.showBackButton(tabName !== 'swipe');
+}
+
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
 </script>
 </body>
 </html>

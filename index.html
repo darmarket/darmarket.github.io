@@ -455,86 +455,99 @@
             white-space: nowrap;
         }
 
-        /* Мои Лоты */
-        .my-lots-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 14px;
-        }
+        /* ===== MY LOTS ===== */
+.my-lots-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+    padding-bottom: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
 
-        .my-lot-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-        }
+.my-lot-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    min-width: 0; /* ВАЖНО: не даёт элементу вылезать за границы grid-ячейки */
+    overflow: hidden;
+}
 
-        .my-lot-img-wrapper {
-            position: relative;
-            width: 100%;
-            height: 110px;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
+.my-lot-img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 110px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: #1a1c24;
+}
 
-        .my-lot-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+.my-lot-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 
-        .my-lot-badge {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            background: rgba(18, 20, 28, 0.85);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--card-border);
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #FFF;
-        }
+.my-lot-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(18, 20, 28, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--card-border);
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #FFF;
+    max-width: calc(100% - 12px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-        .my-lot-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #FFF;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-        }
+.my-lot-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+    width: 100%;
+}
 
-        .my-lot-swap {
-            font-size: 10px;
-            color: var(--text-sub);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 10px;
-        }
+.my-lot-swap {
+    font-size: 10px;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 10px;
+    width: 100%;
+}
 
-        .btn-delete-lot {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #FF2D55;
-            padding: 8px 0;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.2s;
-        }
+.btn-delete-lot {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #FF2D55;
+    padding: 8px 0;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s;
+}
 
         .btn-delete-lot:active {
             background: rgba(255, 45, 85, 0.2);

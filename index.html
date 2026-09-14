@@ -1539,11 +1539,14 @@
        LEAFLET + CARTO VOYAGER (с вашим API-ключом)
        ============================================================ */
     function initLeafletMaps() {
-        initFullMap();
-        initAddMap();
-        updateMapMarkers();
-        getUserGPS();
-    }
+    initFullMap();
+    initAddMap();
+    updateMapMarkers();
+    // ✅ GPS НЕ вызываем автоматически — только по кнопке
+    // Показываем город по умолчанию (Санкт-Петербург)
+    const label = document.getElementById('current-region-label');
+    if (label) label.innerText = userProfile.city || 'Санкт-Петербург';
+}
 
     /* Капля — для метки "Моё гео" */
     function makePinIcon(color) {

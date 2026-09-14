@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ДарМаркет — P2P Обмен вещами</title>
-    
-    <!-- 1. ПОДКЛЮЧАЕМ TELEGRAM WEB APP API -->
+    <!-- Telegram WebApp API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Яндекс Карты API -->
+    <!-- Яндекс Карты API 2.1 -->
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-    
     <style>
-        /* 2. ПЕРЕМЕННЫЕ ТЕМЫ — используются как фолбэк, если Telegram-тема недоступна */
         :root {
             --bg-dark: #090A0F;
             --card-bg: rgba(22, 24, 35, 0.85);
@@ -27,31 +23,6 @@
             --text-main: #FFFFFF;
             --text-sub: #8E8E93;
             --glass: rgba(255, 255, 255, 0.05);
-            
-            /* Telegram-тема подхватится автоматически через JS */
-            --tg-theme-bg-color: var(--bg-dark);
-            --tg-theme-text-color: var(--text-main);
-            --tg-theme-hint-color: var(--text-sub);
-            --tg-theme-button-color: var(--accent-pink);
-            --tg-theme-button-text-color: #FFFFFF;
-            --tg-theme-secondary-bg-color: #12141C;
-            --tg-theme-section-bg-color: #12141C;
-            --tg-theme-section-separator-color: var(--card-border);
-            
-            /* Safe area для iPhone с вырезом */
-            --tg-viewport-safe-area-inset-top: 0px;
-            --tg-viewport-safe-area-inset-bottom: 0px;
-            --tg-viewport-content-safe-area-inset-top: 0px;
-        }
-
-        /* 3. АДАПТАЦИЯ ПОД ТЕМНУЮ/СВЕТЛУЮ ТЕМУ TELEGRAM */
-        [data-tg-theme="light"] {
-            --bg-dark: #FFFFFF;
-            --card-bg: rgba(240, 240, 245, 0.95);
-            --card-border: rgba(0, 0, 0, 0.08);
-            --text-main: #000000;
-            --text-sub: #6D6D72;
-            --glass: rgba(0, 0, 0, 0.04);
         }
 
         * {
@@ -68,23 +39,19 @@
         }
 
         body {
-            background-color: var(--tg-theme-bg-color, var(--bg-dark));
-            color: var(--tg-theme-text-color, var(--text-main));
+            background-color: #030305;
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 4. ВЫСОТА С УЧЁТОМ SAFE AREA */
-            min-height: calc(100dvh - var(--tg-viewport-safe-area-inset-top, 0px) - var(--tg-viewport-safe-area-inset-bottom, 0px));
-            min-height: calc(100vh - var(--tg-viewport-safe-area-inset-top, 0px) - var(--tg-viewport-safe-area-inset-bottom, 0px));
-            padding-top: var(--tg-viewport-content-safe-area-inset-top, 0px);
-            padding-bottom: var(--tg-viewport-safe-area-inset-bottom, 0px);
+            min-height: 100vh;
         }
 
-        /* ===== КОНТЕЙНЕР ПРИЛОЖЕНИЯ ===== */
         .app-container {
             width: 100%;
             max-width: 420px;
-            height: 100%;
+            height: 100vh;
+            max-height: 880px;
             background-color: var(--bg-dark);
             position: relative;
             display: flex;
@@ -93,34 +60,30 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.9);
         }
 
-        /* На десктопе — рамка телефона */
         @media (min-width: 421px) {
-            body {
-                padding: 16px;
-            }
             .app-container {
                 border-radius: 32px;
-                height: min(92dvh, 880px);
-                height: min(92vh, 880px);
+                height: 92vh;
                 border: 1px solid var(--card-border);
             }
         }
 
-        /* Внутри Telegram — без рамки, на весь экран */
+        /* Внутри Telegram — на весь экран, без рамки */
         body.telegram-mini-app .app-container {
             max-width: 100%;
+            max-height: 100%;
             border-radius: 0;
             box-shadow: none;
             border: none;
         }
 
-        /* ===== HEADER ===== */
+        /* Header */
         .app-header {
             padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.85));
+            background: rgba(9, 10, 15, 0.85);
             backdrop-filter: blur(16px);
             z-index: 100;
             border-bottom: 1px solid var(--card-border);
@@ -184,7 +147,7 @@
             background: rgba(255,255,255,0.15);
         }
 
-        /* ===== VIEWS ===== */
+        /* Views */
         .view-content {
             flex: 1;
             position: relative;
@@ -199,7 +162,7 @@
             min-height: 0;
         }
 
-        /* ===== DECK & CARDS ===== */
+        /* Deck & Cards */
         .deck-container {
             flex: 1;
             position: relative;
@@ -390,7 +353,6 @@
             line-height: 1.45;
         }
 
-        /* ===== CONTROLS ===== */
         .controls {
             padding: 12px 20px 18px 20px;
             display: flex;
@@ -431,7 +393,7 @@
             box-shadow: 0 10px 25px rgba(255, 45, 85, 0.4);
         }
 
-        /* ===== MAP ===== */
+        /* MAP VIEW */
         .map-view-container {
             display: flex;
             flex-direction: column;
@@ -442,7 +404,7 @@
 
         .map-header-tools {
             padding: 12px 16px;
-            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.95));
+            background: rgba(9, 10, 15, 0.95);
             border-bottom: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
@@ -464,7 +426,7 @@
             border-radius: 14px;
             background: rgba(255,255,255,0.06);
             border: 1px solid var(--card-border);
-            color: var(--text-main);
+            color: white;
             font-size: 13px;
             outline: none;
         }
@@ -493,7 +455,7 @@
             white-space: nowrap;
         }
 
-        /* ===== MY LOTS ===== */
+        /* Мои Лоты */
         .my-lots-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -544,7 +506,7 @@
         .my-lot-title {
             font-size: 13px;
             font-weight: 700;
-            color: var(--text-main);
+            color: #FFF;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -578,7 +540,7 @@
             background: rgba(255, 45, 85, 0.2);
         }
 
-        /* ===== PROFILE ===== */
+        /* Profile */
         .profile-header {
             display: flex;
             flex-direction: column;
@@ -620,7 +582,7 @@
         .stat-val {
             font-size: 18px;
             font-weight: 800;
-            color: var(--text-main);
+            color: #FFF;
         }
 
         .stat-lbl {
@@ -629,7 +591,7 @@
             margin-top: 2px;
         }
 
-        /* ===== UPLOAD ===== */
+        /* Upload */
         .upload-box {
             border: 2px dashed rgba(255,255,255,0.2);
             border-radius: 16px;
@@ -662,7 +624,7 @@
             flex-shrink: 0;
         }
 
-        /* ===== CHAT ===== */
+        /* Chat */
         .chat-item {
             display: flex;
             align-items: center;
@@ -695,7 +657,7 @@
         .action-icon-btn {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--card-border);
-            color: var(--text-main);
+            color: #FFF;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -722,7 +684,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 12px 16px;
-            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.9));
+            background: rgba(9, 10, 15, 0.9);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--card-border);
             flex-shrink: 0;
@@ -766,7 +728,7 @@
             align-items: center;
             gap: 10px;
             padding: 12px 16px;
-            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.95));
+            background: rgba(9, 10, 15, 0.95);
             border-top: 1px solid var(--card-border);
             flex-shrink: 0;
         }
@@ -774,7 +736,7 @@
         .attach-btn, .send-btn {
             background: rgba(255,255,255,0.08);
             border: 1px solid var(--card-border);
-            color: var(--text-main);
+            color: #FFF;
             width: 42px;
             height: 42px;
             border-radius: 50%;
@@ -792,7 +754,7 @@
             box-shadow: 0 4px 12px rgba(255, 45, 85, 0.4);
         }
 
-        /* ===== MODALS ===== */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -810,7 +772,7 @@
         }
 
         .modal-box {
-            background: var(--tg-theme-section-bg-color, #12141C);
+            background: #12141C;
             border: 1px solid var(--card-border);
             width: 100%;
             max-width: 380px;
@@ -820,8 +782,7 @@
             flex-direction: column;
             gap: 14px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            max-height: 90dvh;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
@@ -869,10 +830,10 @@
             margin-bottom: 10px;
         }
 
-        /* ===== BOTTOM NAV ===== */
+        /* Bottom Nav */
         .bottom-nav {
             height: 64px;
-            background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95));
+            background: rgba(12, 14, 22, 0.95);
             backdrop-filter: blur(16px);
             display: flex;
             justify-content: space-around;
@@ -887,7 +848,7 @@
             flex-direction: column;
             align-items: center;
             gap: 3px;
-            color: var(--tg-theme-hint-color, var(--text-sub));
+            color: var(--text-sub);
             font-size: 10px;
             font-weight: 500;
             cursor: pointer;
@@ -895,14 +856,14 @@
         }
 
         .nav-item.active {
-            color: var(--tg-theme-button-color, var(--accent-pink));
+            color: var(--accent-pink);
         }
 
         .nav-icon {
             font-size: 18px;
         }
 
-        /* ===== TOAST ===== */
+        /* Toast */
         .match-toast {
             position: absolute;
             top: 20px;
@@ -929,16 +890,12 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
-
-        /* Плавный скролл для тача */
-        #view-chats, #view-my-lots, #view-profile, .chat-messages, .modal-box {
-            -webkit-overflow-scrolling: touch;
-        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <!-- Toast notification -->
     <div id="toast" class="match-toast">
         <span id="toast-text">❤️ Взаимность отправлена!</span>
     </div>
@@ -948,11 +905,13 @@
         <div class="modal-box">
             <h2 style="text-align:center; font-weight:900; background:var(--primary-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Профиль</h2>
             <p style="text-align:center; font-size:12px; color:var(--text-sub);">Ваши данные для обмена</p>
-            <input type="text" id="reg-name" placeholder="Ваше имя" maxlength="40">
-            <input type="tel" id="reg-phone" placeholder="+7 (999) 000-00-00" maxlength="20">
-            <input type="text" id="reg-city" placeholder="Ваш город" value="Санкт-Петербург" maxlength="50">
-            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; margin-top:8px;" data-action="save-registration">Сохранить</button>
-            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-close-modal="auth-modal">Отмена</button>
+            
+            <input type="text" id="reg-name" placeholder="Ваше имя">
+            <input type="tel" id="reg-phone" placeholder="+7 (999) 000-00-00">
+            <input type="text" id="reg-city" placeholder="Ваш город" value="Санкт-Петербург">
+            
+            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; margin-top:8px;" onclick="saveRegistration()">Сохранить</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('auth-modal')">Отмена</button>
         </div>
     </div>
 
@@ -960,10 +919,12 @@
     <div id="offer-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="text-align:center; font-weight:800;">Что вы предлагаете взамен?</h3>
-            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Выберите свои лоты, которые готовы обменять на <b id="offer-target-title" style="color:var(--text-main);">вещь</b></p>
+            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Выберите свои лоты, которые готовы обменять на <b id="offer-target-title" style="color:#FFF;">вещь</b></p>
+            
             <div id="offer-items-list" style="display:flex; flex-direction:column; gap:8px; margin:10px 0; max-height:220px; overflow-y:auto;"></div>
-            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" data-action="confirm-offer">Предложить обмен 🔄</button>
-            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-action="cancel-offer">Пропустить предложение</button>
+
+            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" onclick="confirmOfferAndSwipe()">Предложить обмен 🔄</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="cancelOfferModal()">Пропустить предложение</button>
         </div>
     </div>
 
@@ -972,16 +933,19 @@
         <div class="modal-box">
             <h3 style="text-align:center; font-weight:800;">Завершение сделки</h3>
             <p style="font-size:12px; color:var(--text-sub); text-align:center;">Оцените обменяющегося пользователя и оставьте отзыв</p>
+            
             <div class="star-rating" id="star-rating-box">
-                <span class="star" data-star="1">★</span>
-                <span class="star" data-star="2">★</span>
-                <span class="star" data-star="3">★</span>
-                <span class="star" data-star="4">★</span>
-                <span class="star" data-star="5">★</span>
+                <span class="star" onclick="setRating(1)">★</span>
+                <span class="star" onclick="setRating(2)">★</span>
+                <span class="star" onclick="setRating(3)">★</span>
+                <span class="star" onclick="setRating(4)">★</span>
+                <span class="star" onclick="setRating(5)">★</span>
             </div>
-            <textarea id="review-text" placeholder="Напишите пару слов об обмене..." rows="3" maxlength="500"></textarea>
-            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" data-action="submit-review">Отправить отзыв 🌟</button>
-            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-close-modal="rate-modal">Отмена</button>
+
+            <textarea id="review-text" placeholder="Напишите пару слов об обмене..." rows="3"></textarea>
+
+            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" onclick="submitReview()">Отправить отзыв 🌟</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('rate-modal')">Отмена</button>
         </div>
     </div>
 
@@ -989,8 +953,10 @@
     <div id="add-lot-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
             <h2 style="text-align:center; font-weight:800;">Выложить лот на обмен</h2>
-            <input type="text" id="add-title" placeholder="Название вещи" maxlength="80">
-            <input type="text" id="add-swap" placeholder="Что вы хотите взамен?" maxlength="120">
+            
+            <input type="text" id="add-title" placeholder="Название вещи">
+            <input type="text" id="add-swap" placeholder="Что вы хотите взамен?">
+            
             <div>
                 <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">Состояние предмета:</label>
                 <select id="add-condition">
@@ -1000,26 +966,26 @@
                     <option value="Среднее">Среднее</option>
                 </select>
             </div>
-            <textarea id="add-desc" placeholder="Описание состояния вещи..." rows="3" maxlength="500"></textarea>
+
+            <textarea id="add-desc" placeholder="Описание состояния вещи..." rows="3"></textarea>
+
             <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы (фото / видео):</label>
-            <div class="upload-box" id="upload-trigger">
+            <div class="upload-box" onclick="document.getElementById('file-input').click()">
                 📸 Нажмите, чтобы загрузить файлы
-                <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;">
+                <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleFileSelect(event)">
             </div>
+
             <div class="media-preview-list" id="preview-list"></div>
-            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение — кликните по карте:</label>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <button class="btn-gps" style="font-size:12px; padding:8px 12px;" data-action="set-gps">🎯 Моё гео</button>
-                <span id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); flex:1; line-height:1.3;">
-                    Кликните по карте или перетащите метку
-                </span>
+
+            <label style="font-size:12px; color:var(--text-sub); display:block;">Местонахождение на карте:</label>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-gps" style="font-size:12px; padding:8px 12px;" onclick="setNewItemToCurrentGPS()">📍 Моё гео</button>
+                <span id="add-item-coords-label" style="font-size:12px; color:var(--accent-pink); align-self:center;">Метка установлена</span>
             </div>
-            <div id="map-add" style="height:190px; border-radius:16px; margin-top:6px; overflow:hidden; border:1px solid var(--card-border);"></div>
-            <div style="font-size:11px; color:var(--text-sub); text-align:center;">
-                💡 Нажмите на карту, чтобы поставить метку туда, где находится вещь
-            </div>
-            <button class="btn-gps" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px;" data-action="publish-item">Опубликовать лот</button>
-            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-close-modal="add-lot-modal">Отмена</button>
+            <div id="map-add" class="map-box-full" style="height:150px; border-radius:16px; margin-top:6px;"></div>
+
+            <button class="btn-gps" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px;" onclick="publishItem()">Опубликовать лот</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('add-lot-modal')">Отмена</button>
         </div>
     </div>
 
@@ -1027,38 +993,42 @@
     <div id="map-item-modal" class="modal-overlay">
         <div class="modal-box" style="padding:0; overflow:hidden; border-radius:24px;">
             <div style="position:relative; width:100%; height:220px; background:#000;">
-                <img id="map-modal-img" src="" alt="" style="width:100%; height:100%; object-fit:cover;">
+                <img id="map-modal-img" src="" style="width:100%; height:100%; object-fit:cover;">
                 <span id="map-modal-condition" class="my-lot-badge" style="top:12px; right:12px; font-size:12px; padding:4px 10px;"></span>
                 <span id="map-modal-dist" class="distance-tag" style="position:absolute; bottom:12px; left:12px; z-index:2;"></span>
             </div>
             <div style="padding:18px;">
                 <div class="card-owner-info" style="margin-bottom:8px;">
-                    <span id="map-modal-owner"></span>
+                    <span id="map-modal-owner">👤 </span>
                     <span id="map-modal-rating" class="owner-rating">★ 5.0</span>
                 </div>
                 <h2 id="map-modal-title" style="font-size:20px; font-weight:800; margin-bottom:4px;"></h2>
                 <div id="map-modal-swap" style="font-size:13px; color:var(--accent-gold); font-weight:600; margin-bottom:10px;"></div>
                 <div id="map-modal-desc" style="font-size:12px; color:var(--text-sub); line-height:1.4; margin-bottom:16px;"></div>
-                <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; font-size:14px;" data-action="offer-from-map">Предложить обмен 🔄</button>
-                <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px; margin-top:8px;" data-close-modal="map-item-modal">Закрыть</button>
+
+                <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; font-size:14px;" onclick="triggerOfferFromMap()">Предложить обмен 🔄</button>
+                <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px; margin-top:8px;" onclick="closeModal('map-item-modal')">Закрыть</button>
             </div>
         </div>
     </div>
 
     <!-- Lightbox -->
-    <div id="lightbox" class="modal-overlay">
-        <span style="position:absolute; top:20px; right:20px; font-size:32px; color:#fff; cursor:pointer; z-index:2;" data-close-modal="lightbox">&times;</span>
+    <div id="lightbox" class="modal-overlay" onclick="closeLightbox()">
+        <span style="position:absolute; top:20px; right:20px; font-size:32px; color:#fff; cursor:pointer;">&times;</span>
         <div id="lightbox-body"></div>
     </div>
 
     <!-- Header -->
     <div class="app-header">
-        <div class="logo" data-tab="swipe">ДарМаркет</div>
+        <div class="logo" onclick="switchTab('swipe')">ДарМаркет</div>
+        
         <div class="header-actions">
-            <div class="location-badge" data-action="get-gps" title="Определить моё местоположение">
+            <div class="location-badge" onclick="getUserGPS()" title="Определить моё местоположение">
                 📍 <span id="current-region-label">Определение...</span>
             </div>
-            <div class="header-profile-btn" data-tab="profile" title="Мой профиль">👤</div>
+            <div class="header-profile-btn" onclick="switchTab('profile')" title="Мой профиль">
+                👤
+            </div>
         </div>
     </div>
 
@@ -1066,8 +1036,8 @@
     <div id="view-swipe" class="view-content active">
         <div class="deck-container" id="deck"></div>
         <div class="controls" id="controls-bar">
-            <button class="btn-circle btn-pass" data-action="swipe-pass">✕</button>
-            <button class="btn-circle btn-like" data-action="swipe-like">♥</button>
+            <button class="btn-circle btn-pass" onclick="triggerBtnSwipe(false)">✕</button>
+            <button class="btn-circle btn-like" onclick="triggerBtnSwipe(true)">♥</button>
         </div>
     </div>
 
@@ -1076,15 +1046,16 @@
         <div class="map-view-container">
             <div class="map-header-tools">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                    <select id="region-select" style="flex:1;"></select>
-                    <button class="btn-gps" data-action="get-gps">📍 Моё гео</button>
+                    <select id="region-select" onchange="onRegionChange()" style="flex:1;"></select>
+                    <button class="btn-gps" onclick="getUserGPS()">📍 Моё гео</button>
                 </div>
                 <div class="radius-info">
                     <span>Радиус обмена:</span>
                     <span id="radius-val" style="color:white; font-weight:bold;">15 км</span>
                 </div>
-                <input type="range" id="radius-slider" min="1" max="100" value="15">
+                <input type="range" id="radius-slider" min="1" max="100" value="15" oninput="updateRadius(this.value)">
             </div>
+            
             <div id="map-full" class="map-box-full"></div>
         </div>
     </div>
@@ -1096,27 +1067,29 @@
     </div>
 
     <!-- VIEW 3.1: SINGLE CHAT -->
-    <div id="view-single-chat" class="view-content" style="flex-direction:column; height:100%;">
+    <div id="view-single-chat" class="view-content" style="display:none; flex-direction:column; height:100%;">
         <div class="single-chat-header">
             <div style="display:flex; align-items:center; gap:10px;">
-                <button style="background:none; border:none; color:var(--text-main); font-size:20px; cursor:pointer;" data-action="close-chat">←</button>
+                <button style="background:none; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeChat()">←</button>
                 <div class="chat-avatar" id="single-chat-avatar" style="width:40px; height:40px; font-size:18px;">💬</div>
                 <div>
-                    <div id="single-chat-name" style="font-weight:700; font-size:14px;">Имя</div>
+                    <div id="single-chat-name" style="font-weight:700; font-size:14px;">Имя пользователя</div>
                     <div style="font-size:10px; color:#30D158;">● В сети</div>
                 </div>
             </div>
             <div style="display:flex; gap:6px;">
-                <button class="action-icon-btn" title="Завершить сделку" data-action="open-rating">🤝</button>
-                <button class="action-icon-btn delete-btn" title="Удалить" data-action="delete-active-chat">🗑️</button>
+                <button class="action-icon-btn" title="Завершить сделку и оценить" onclick="openRatingModal()">🤝</button>
+                <button class="action-icon-btn delete-btn" title="Удалить диалог" onclick="deleteActiveChat()">🗑️</button>
             </div>
         </div>
+        
         <div class="chat-messages" id="chat-messages"></div>
+
         <div class="chat-input-bar">
-            <button class="attach-btn" id="chat-attach-btn">📎</button>
-            <input type="file" id="chat-file-input" accept="image/*,video/*" multiple style="display:none;">
-            <input type="text" id="chat-input" placeholder="Напишите сообщение..." maxlength="1000">
-            <button class="send-btn" data-action="send-message">➔</button>
+            <button class="attach-btn" onclick="document.getElementById('chat-file-input').click()">📎</button>
+            <input type="file" id="chat-file-input" accept="image/*,video/*" multiple style="display:none;" onchange="sendChatMediaMultiple(event)">
+            <input type="text" id="chat-input" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+            <button class="send-btn" onclick="sendChatMessage()">➔</button>
         </div>
     </div>
 
@@ -1127,8 +1100,9 @@
                 <h2 style="font-weight:900; font-size:22px;">Мои Лоты</h2>
                 <div style="font-size:12px; color:var(--text-sub);">Вещи, которые вы готовы обменять</div>
             </div>
-            <button class="btn-gps" style="background:var(--accent-pink); padding:8px 14px; border-radius:18px; font-size:12px;" data-action="open-create-lot">+ Добавить лот</button>
+            <button class="btn-gps" style="background:var(--accent-pink); padding:8px 14px; border-radius:18px; font-size:12px;" onclick="openCreateLotModal()">+ Добавить лот</button>
         </div>
+
         <div class="my-lots-grid" id="my-lots-grid-container"></div>
     </div>
 
@@ -1137,14 +1111,15 @@
         <div class="profile-header">
             <div class="profile-avatar-big" id="profile-avatar-icon">👤</div>
             <h2 id="profile-display-name" style="font-size:20px; font-weight:800;">Пользователь</h2>
-            <div id="profile-display-phone" style="font-size:12px; color:var(--text-sub); margin-top:2px;"></div>
-            <div id="profile-display-city" style="font-size:12px; color:var(--accent-pink); margin-top:4px;"></div>
+            <div id="profile-display-phone" style="font-size:12px; color:var(--text-sub); margin-top:2px;">+7 (___) ___-__-__</div>
+            <div id="profile-display-city" style="font-size:12px; color:var(--accent-pink); margin-top:4px;">📍 г. Санкт-Петербург</div>
+
             <div class="profile-stats">
-                <div class="stat-item" data-tab="my-lots">
+                <div class="stat-item" onclick="switchTab('my-lots')">
                     <div class="stat-val" id="profile-items-count">0</div>
                     <div class="stat-lbl">Мои лоты</div>
                 </div>
-                <div class="stat-item" data-tab="chats">
+                <div class="stat-item" onclick="switchTab('chats')">
                     <div class="stat-val" id="profile-matches-count">0</div>
                     <div class="stat-lbl">Совпадения</div>
                 </div>
@@ -1154,866 +1129,611 @@
                 </div>
             </div>
         </div>
-        <button class="btn-gps" style="width:100%; background:var(--glass); border:1px solid var(--card-border); color:var(--text-main); margin-bottom:18px; padding:14px; display:flex; justify-content:space-between; align-items:center;" data-tab="my-lots">
-            <span>📦 Управление моими лотами</span><span>➔</span>
+
+        <button class="btn-gps" style="width:100%; background:var(--glass); border:1px solid var(--card-border); color:white; margin-bottom:18px; padding:14px; display:flex; justify-content:space-between; align-items:center;" onclick="switchTab('my-lots')">
+            <span>📦 Управление моими лотами</span>
+            <span>➔</span>
         </button>
+
         <h3 style="margin-bottom:12px; font-size:16px;">Отзывы об обменах:</h3>
         <div id="profile-reviews-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-        <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:var(--text-main); margin-top:20px; padding:12px;" data-action="open-auth">✏️ Редактировать профиль</button>
+
+        <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
     </div>
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <div class="nav-item active" data-tab="swipe"><span class="nav-icon">🔥</span><span>Обмен</span></div>
-        <div class="nav-item" data-tab="map"><span class="nav-icon">🗺️</span><span>Карта</span></div>
-        <div class="nav-item" data-tab="my-lots"><span class="nav-icon">📦</span><span>Мои лоты</span></div>
-        <div class="nav-item" data-tab="chats"><span class="nav-icon">💬</span><span>Чаты</span></div>
+        <div class="nav-item active" onclick="switchTab('swipe')">
+            <span class="nav-icon">🔥</span>
+            <span>Обмен</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('map')">
+            <span class="nav-icon">🗺️</span>
+            <span>Карта</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('my-lots')">
+            <span class="nav-icon">📦</span>
+            <span>Мои лоты</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('chats')">
+            <span class="nav-icon">💬</span>
+            <span>Чаты</span>
+        </div>
     </div>
 </div>
 
 <script>
-/* ============================================================
-   TELEGRAM MINI APP INTEGRATION MODULE
-   Работает и внутри Telegram, и как обычное веб-приложение
-   ============================================================ */
-const TelegramApp = {
-    webApp: null,
-    isInTelegram: false,
-    user: null,
+    /* ============================================================
+       TELEGRAM MINI APP ИНТЕГРАЦИЯ
+       Работает безопасно: если Telegram нет — приложение работает как обычно
+       ============================================================ */
+    const TelegramApp = {
+        webApp: null,
+        isInTelegram: false,
+        user: null,
 
-    init() {
-        // Проверяем, запущены ли мы внутри Telegram
-        this.webApp = window.Telegram?.WebApp;
-        
-        if (this.webApp && this.webApp.initData !== undefined) {
-            this.isInTelegram = true;
-            document.body.classList.add('telegram-mini-app');
-            
-            // Сообщаем Telegram, что приложение готово
-            this.webApp.ready();
-            
-            // Разворачиваем на весь экран
-            this.webApp.expand();
-            
-            // Получаем данные пользователя
-            this.user = this.webApp.initDataUnsafe?.user || null;
-            
-            // Применяем тему Telegram
-            this.applyTheme();
-            
-            // Применяем safe area (для iPhone с вырезом)
-            this.applySafeArea();
-            
-            // Следим за сменой темы
-            this.webApp.onEvent('themeChanged', () => {
-                this.applyTheme();
-            });
-            
-            // Следим за изменением viewport (клавиатура, поворот)
-            this.webApp.onEvent('viewportChanged', () => {
-                this.applySafeArea();
-            });
-            
-            // Настраиваем кнопку "Назад" в Telegram
-            this.setupBackButton();
-            
-            // Применяем цвет header
-            this.webApp.setHeaderColor('bg_color');
-            
-            console.log('✅ Работаем внутри Telegram Mini App');
-        } else {
-            console.log('🌐 Работаем как обычное веб-приложение');
-        }
-    },
-
-    /** Применяет тему Telegram к CSS-переменным */
-    applyTheme() {
-        if (!this.webApp) return;
-        
-        const theme = this.webApp.themeParams;
-        if (!theme) return;
-        
-        const root = document.documentElement;
-        
-        // Основные цвета
-        if (theme.bg_color) {
-            root.style.setProperty('--tg-theme-bg-color', theme.bg_color);
-            root.style.setProperty('--bg-dark', theme.bg_color);
-        }
-        if (theme.text_color) {
-            root.style.setProperty('--tg-theme-text-color', theme.text_color);
-            root.style.setProperty('--text-main', theme.text_color);
-        }
-        if (theme.hint_color) {
-            root.style.setProperty('--tg-theme-hint-color', theme.hint_color);
-            root.style.setProperty('--text-sub', theme.hint_color);
-        }
-        if (theme.button_color) {
-            root.style.setProperty('--tg-theme-button-color', theme.button_color);
-        }
-        if (theme.button_text_color) {
-            root.style.setProperty('--tg-theme-button-text-color', theme.button_text_color);
-        }
-        if (theme.secondary_bg_color) {
-            root.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color);
-        }
-        if (theme.section_bg_color) {
-            root.style.setProperty('--tg-theme-section-bg-color', theme.section_bg_color);
-        }
-        if (theme.section_separator_color) {
-            root.style.setProperty('--tg-theme-section-separator-color', theme.section_separator_color);
-            root.style.setProperty('--card-border', theme.section_separator_color);
-        }
-        
-        // Определяем светлая/тёмная тема
-        const isDark = this.webApp.colorScheme === 'dark';
-        document.body.dataset.tgTheme = isDark ? 'dark' : 'light';
-    },
-
-    /** Применяет safe area (вырез iPhone, системные панели) */
-    applySafeArea() {
-        if (!this.webApp) return;
-        
-        const root = document.documentElement;
-        const safeArea = this.webApp.safeAreaInset;
-        const contentSafeArea = this.webApp.contentSafeAreaInset;
-        
-        if (safeArea) {
-            root.style.setProperty('--tg-viewport-safe-area-inset-top', `${safeArea.top}px`);
-            root.style.setProperty('--tg-viewport-safe-area-inset-bottom', `${safeArea.bottom}px`);
-        }
-        if (contentSafeArea) {
-            root.style.setProperty('--tg-viewport-content-safe-area-inset-top', `${contentSafeArea.top}px`);
-        }
-    },
-
-    /** Настраивает кнопку "Назад" в Telegram */
-    setupBackButton() {
-        const backButton = this.webApp.BackButton;
-        if (!backButton) return;
-        
-        // Следим за переключением вкладок, чтобы показывать/скрывать кнопку "Назад"
-        const originalSwitchTab = App.switchTab.bind(App);
-        App.switchTab = (tabName) => {
-            originalSwitchTab(tabName);
-            
-            // Показываем кнопку "Назад" когда не на главном экране
-            if (tabName === 'swipe') {
-                backButton.hide();
-            } else {
-                backButton.show();
-            }
-        };
-        
-        // Обработчик кнопки "Назад"
-        backButton.onClick(() => {
-            App.switchTab('swipe');
-        });
-    },
-
-    /** Тактильный отклик (вибрация) */
-    haptic(type = 'light') {
-        if (!this.webApp?.HapticFeedback) return;
-        try {
-            this.webApp.HapticFeedback.impactOccurred(type);
-        } catch (e) {}
-    },
-
-    /** Показать главную кнопку Telegram */
-    showMainButton(text, onClick) {
-        if (!this.webApp?.MainButton) return;
-        this.webApp.MainButton.setText(text);
-        this.webApp.MainButton.show();
-        this.webApp.MainButton.onClick(onClick);
-    },
-
-    /** Скрыть главную кнопку */
-    hideMainButton() {
-        if (this.webApp?.MainButton) {
-            this.webApp.MainButton.hide();
-        }
-    },
-
-    /** Закрыть приложение */
-    close() {
-        if (this.webApp) {
-            this.webApp.close();
-        }
-    }
-};
-
-/* ============================================================
-   ОСНОВНОЙ КОД ПРИЛОЖЕНИЯ (без изменений в логике)
-   ============================================================ */
-
-const Utils = {
-    escape(str) {
-        if (str == null) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    },
-
-    distanceKm(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) ** 2 +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon / 2) ** 2;
-        return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-    },
-
-    debounce(fn, ms = 150) {
-        let t;
-        return (...args) => {
-            clearTimeout(t);
-            t = setTimeout(() => fn(...args), ms);
-        };
-    },
-
-    uid(prefix = 'id') {
-        return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    },
-
-    storage: {
-        get(key, fallback = null) {
+        init() {
             try {
-                const raw = localStorage.getItem(key);
-                return raw ? JSON.parse(raw) : fallback;
+                this.webApp = (window.Telegram && window.Telegram.WebApp) || null;
+
+                if (this.webApp && this.webApp.initData !== undefined) {
+                    this.isInTelegram = true;
+                    document.body.classList.add('telegram-mini-app');
+
+                    this.webApp.ready();
+                    this.webApp.expand();
+
+                    this.user = (this.webApp.initDataUnsafe && this.webApp.initDataUnsafe.user) || null;
+
+                    this.applyTheme();
+                    this.applySafeArea();
+
+                    // Следим за сменой темы
+                    if (this.webApp.onEvent) {
+                        this.webApp.onEvent('themeChanged', () => this.applyTheme());
+                        this.webApp.onEvent('viewportChanged', () => this.applySafeArea());
+                    }
+
+                    console.log('✅ Работаем внутри Telegram Mini App', this.user);
+                } else {
+                    console.log('🌐 Работаем как обычное веб-приложение');
+                }
             } catch (e) {
-                console.warn('storage.get error:', e);
-                return fallback;
+                console.warn('TelegramApp init error (не критично):', e);
             }
         },
-        set(key, value) {
+
+        applyTheme() {
             try {
-                localStorage.setItem(key, JSON.stringify(value));
-                return true;
-            } catch (e) {
-                console.warn('storage.set error:', e);
-                Toast.show('⚠️ Не удалось сохранить (переполнено)');
-                return false;
-            }
+                const theme = this.webApp && this.webApp.themeParams;
+                if (!theme) return;
+
+                const root = document.documentElement;
+
+                if (theme.bg_color) root.style.setProperty('--tg-theme-bg-color', theme.bg_color);
+                if (theme.text_color) root.style.setProperty('--tg-theme-text-color', theme.text_color);
+                if (theme.hint_color) root.style.setProperty('--tg-theme-hint-color', theme.hint_color);
+                if (theme.button_color) root.style.setProperty('--tg-theme-button-color', theme.button_color);
+                if (theme.button_text_color) root.style.setProperty('--tg-theme-button-text-color', theme.button_text_color);
+                if (theme.secondary_bg_color) root.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color);
+            } catch (e) {}
         },
-        remove(key) {
-            try { localStorage.removeItem(key); } catch (e) {}
+
+        applySafeArea() {
+            try {
+                const safeArea = this.webApp && this.webApp.safeAreaInset;
+                const contentSafeArea = this.webApp && this.webApp.contentSafeAreaInset;
+                const root = document.documentElement;
+
+                if (safeArea) {
+                    root.style.setProperty('--tg-viewport-safe-area-inset-top', safeArea.top + 'px');
+                    root.style.setProperty('--tg-viewport-safe-area-inset-bottom', safeArea.bottom + 'px');
+                }
+                if (contentSafeArea) {
+                    root.style.setProperty('--tg-viewport-content-safe-area-inset-top', contentSafeArea.top + 'px');
+                }
+            } catch (e) {}
+        },
+
+        haptic(type) {
+            try {
+                const hf = this.webApp && this.webApp.HapticFeedback;
+                if (!hf) return;
+                if (type === 'medium' || type === 'light' || type === 'heavy' || type === 'rigid' || type === 'soft') {
+                    hf.impactOccurred(type);
+                } else if (type === 'success' || type === 'error' || type === 'warning') {
+                    hf.notificationOccurred(type);
+                }
+            } catch (e) {}
+        },
+
+        showBackButton(show) {
+            try {
+                const bb = this.webApp && this.webApp.BackButton;
+                if (!bb) return;
+                if (show) bb.show(); else bb.hide();
+            } catch (e) {}
         }
-    }
-};
+    };
 
-const Toast = {
-    _timer: null,
-    show(text) {
-        const toast = document.getElementById('toast');
-        const textEl = document.getElementById('toast-text');
-        if (!toast || !textEl) return;
-        textEl.textContent = text;
-        toast.classList.add('show');
-        clearTimeout(this._timer);
-        this._timer = setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-};
+    /* ============================================================
+       ОСНОВНАЯ ЛОГИКА ПРИЛОЖЕНИЯ (как в рабочем файле)
+       ============================================================ */
+    const regionsRF = [
+        { name: "Москва и МО", lat: 55.7558, lng: 37.6173 },
+        { name: "Санкт-Петербург и ЛО", lat: 59.9342, lng: 30.3351 },
+        { name: "Краснодарский край", lat: 45.0355, lng: 38.9753 },
+        { name: "Свердловская обл.", lat: 56.8389, lng: 60.6057 },
+        { name: "Татарстан (Казань)", lat: 55.7961, lng: 49.1064 }
+    ];
 
-const Modal = {
-    open(id) {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('active');
-    },
-    close(id) {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('active');
-    },
-    closeAll() {
-        document.querySelectorAll('.modal-overlay.active')
-            .forEach(el => el.classList.remove('active'));
-    }
-};
+    let userLat = 59.9342;
+    let userLng = 30.3351;
+    let newItemLat = 59.9342;
+    let newItemLng = 30.3351;
 
-const State = {
-    userLat: 59.9342,
-    userLng: 30.3351,
-    newItemLat: 59.9342,
-    newItemLng: 30.3351,
-    radiusKm: 15,
-    activeChatId: null,
-    pendingSwipeCard: null,
-    selectedRating: 5,
-    selectedMapItem: null,
-    uploadedMedia: [],
+    let currentRadiusKm = 15;
+    let yMapFull = null, yMapAdd = null;
+    let yUserPlacemark = null, yAddItemPlacemark = null, yCircle = null, itemMarkersGroup = null;
+    
+    let uploadedMedia = [];
+    let activeChatId = null;
+    let pendingSwipeCard = null;
+    let selectedRating = 5;
+    let selectedMapItem = null;
 
-    profile: {
-        name: 'Александр',
-        phone: '+7 (921) 123-45-67',
-        city: 'Санкт-Петербург',
+    let userProfile = {
+        name: "Александр",
+        phone: "+7 (921) 123-45-67",
+        city: "Санкт-Петербург",
         rating: 5.0,
         reviews: [
-            { author: 'Елена', stars: 5, text: 'Отличный обмен! Вещь в прекрасном состоянии.' }
+            { author: "Елена", stars: 5, text: "Отличный обмен! Вещь в прекрасном состоянии." }
         ]
-    },
+    };
 
-    items: [],
-    chats: [],
-
-    load() {
-        // 1. Загружаем сохранённый профиль
-        const savedProfile = Utils.storage.get('dm_profile');
-        if (savedProfile) Object.assign(this.profile, savedProfile);
-
-        // 2. Если мы в Telegram и у нас нет сохранённого имени — берём из Telegram
-        if (TelegramApp.isInTelegram && TelegramApp.user) {
-            const tgUser = TelegramApp.user;
-            // Подставляем имя из Telegram, если пользователь ещё не менял его
-            if (!savedProfile?.name || savedProfile.name === 'Александр') {
-                this.profile.name = tgUser.first_name || this.profile.name;
-            }
-            // Если есть username — можно использовать как контакт
-            if (tgUser.username && !savedProfile?.phone) {
-                this.profile.phone = `@${tgUser.username}`;
-            }
+    let mockItems = [
+        { 
+            id: 101, title: "Наушники Sony WH-CH700N", swapFor: "Клавиатура или Настолки", desc: "Санкт-Петербург, Невский проспект. Идеальное состояние.", condition: "Отличное",
+            media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600' }],
+            lat: 59.9350, lng: 30.3250, isMine: true, ownerName: "Александр", ownerRating: 5.0
+        },
+        { 
+            id: 102, title: "Набор настольных игр (Catan)", swapFor: "Книги по дизайну", desc: "СПб, полный комплект компонентов.", condition: "Хорошее",
+            media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=600' }],
+            lat: 59.9660, lng: 30.3110, isMine: true, ownerName: "Александр", ownerRating: 5.0
+        },
+        { 
+            id: 103, title: "Игровая консоль PS4 Slim", swapFor: "Электросамокат или велик", desc: "СПб, ст.м. Петроградская. 2 геймпада.", condition: "Отличное",
+            media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600' }],
+            lat: 59.9400, lng: 30.2780, isMine: false, ownerName: "Дмитрий", ownerRating: 4.8
         }
+    ];
 
-        const savedItems = Utils.storage.get('dm_items');
-        this.items = savedItems || this.defaultItems();
-
-        const savedChats = Utils.storage.get('dm_chats');
-        this.chats = savedChats || this.defaultChats();
-    },
-
-    save() {
-        Utils.storage.set('dm_profile', this.profile);
-        Utils.storage.set('dm_items', this.items.map(i => ({
-            ...i,
-            media: i.media.map(m => ({
-                type: m.type,
-                url: m.url.startsWith('blob:') || m.url.startsWith('data:')
-                    ? (m.url.length < 500000 ? m.url : '')
-                    : m.url
-            })).filter(m => m.url)
-        })));
-        Utils.storage.set('dm_chats', this.chats);
-    },
-
-    defaultItems() {
-        return [
-            {
-                id: 101, title: 'Наушники Sony WH-CH700N', swapFor: 'Клавиатура или Настолки',
-                desc: 'Санкт-Петербург, Невский проспект. Идеальное состояние.',
-                condition: 'Отличное',
-                media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600' }],
-                lat: 59.9350, lng: 30.3250, isMine: true,
-                ownerName: 'Александр', ownerRating: 5.0
-            },
-            {
-                id: 102, title: 'Набор настольных игр (Catan)', swapFor: 'Книги по дизайну',
-                desc: 'СПб, полный комплект компонентов.', condition: 'Хорошее',
-                media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=600' }],
-                lat: 59.9660, lng: 30.3110, isMine: true,
-                ownerName: 'Александр', ownerRating: 5.0
-            },
-            {
-                id: 103, title: 'Игровая консоль PS4 Slim', swapFor: 'Электросамокат или велик',
-                desc: 'СПб, ст.м. Петроградская. 2 геймпада.', condition: 'Отличное',
-                media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600' }],
-                lat: 59.9400, lng: 30.2780, isMine: false,
-                ownerName: 'Дмитрий', ownerRating: 4.8
-            }
-        ];
-    },
-
-    defaultChats() {
-        return [{
+    let chatData = [
+        {
             id: 'chat_1',
             name: 'Алексей (PS4 Slim)',
             avatar: '🎮',
-            messages: [{ sender: 'them', text: 'Привет! Готов обсудить обмен.' }]
-        }];
+            messages: [
+                { sender: 'them', text: 'Привет! Готов обсудить обмен.' }
+            ]
+        }
+    ];
+
+    window.onload = function() {
+        // 1. Инициализируем Telegram (безопасно — если его нет, ничего не сломается)
+        TelegramApp.init();
+
+        // 2. Подставляем имя из Telegram, если профиль ещё не сохранён
+        const savedProfile = localStorage.getItem('darmarket_user');
+        if (!savedProfile && TelegramApp.isInTelegram && TelegramApp.user) {
+            userProfile.name = TelegramApp.user.first_name || userProfile.name;
+            if (TelegramApp.user.username) {
+                userProfile.phone = '@' + TelegramApp.user.username;
+            }
+        }
+
+        // 3. Загружаем всё остальное
+        populateRegions();
+        loadStoredProfile();
+        renderChatsList();
+        renderCards();
+        renderMyLotsGrid();
+        renderProfileReviews();
+
+        // 4. Инициализируем карты
+        if (typeof ymaps !== 'undefined') {
+            ymaps.ready(initYandexMaps);
+        }
+    };
+
+    function loadStoredProfile() {
+        const saved = localStorage.getItem('darmarket_user');
+        if (saved) {
+            userProfile = JSON.parse(saved);
+        }
+        updateProfileUI();
     }
-};
 
-const REGIONS = [
-    { name: 'Москва и МО', lat: 55.7558, lng: 37.6173 },
-    { name: 'Санкт-Петербург и ЛО', lat: 59.9342, lng: 30.3351 },
-    { name: 'Краснодарский край', lat: 45.0355, lng: 38.9753 },
-    { name: 'Свердловская обл.', lat: 56.8389, lng: 60.6057 },
-    { name: 'Татарстан (Казань)', lat: 55.7961, lng: 49.1064 }
-];
+    function saveRegistration() {
+        const name = document.getElementById('reg-name').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const city = document.getElementById('reg-city').value.trim();
 
-const MapModule = {
-    mapFull: null,
-    mapAdd: null,
-    userPlacemark: null,
-    addPlacemark: null,
-    circle: null,
-    markersGroup: null,
-    _markersUpdateScheduled: false,
-
-    init() {
-        if (typeof ymaps === 'undefined') {
-            console.warn('Яндекс.Карты не загружены');
+        if (!name) {
+            showToast('⚠️ Укажите ваше имя');
             return;
         }
-        ymaps.ready(() => {
-            this.initFull();
-            this.initAdd();
-            this.updateMarkers();
+
+        userProfile.name = name;
+        userProfile.phone = phone;
+        userProfile.city = city;
+        localStorage.setItem('darmarket_user', JSON.stringify(userProfile));
+        
+        updateProfileUI();
+        closeModal('auth-modal');
+        showToast('✅ Профиль сохранён!');
+    }
+
+    function updateProfileUI() {
+        document.getElementById('profile-display-name').innerText = userProfile.name || "Гость";
+        document.getElementById('profile-display-phone').innerText = userProfile.phone || "Телефон не указан";
+        document.getElementById('profile-display-city').innerText = `📍 ${userProfile.city || "Санкт-Петербург"}`;
+        document.getElementById('profile-avatar-icon').innerText = userProfile.name ? userProfile.name[0].toUpperCase() : "👤";
+        document.getElementById('profile-rating-val').innerText = `${userProfile.rating.toFixed(1)} ★`;
+    }
+
+    function renderProfileReviews() {
+        const container = document.getElementById('profile-reviews-list');
+        if (!userProfile.reviews || userProfile.reviews.length === 0) {
+            container.innerHTML = `<div style="font-size:12px; color:var(--text-sub);">Пока нет отзывов</div>`;
+            return;
+        }
+        container.innerHTML = userProfile.reviews.map(r => `
+            <div class="review-card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span style="font-weight:700; font-size:13px;">${r.author}</span>
+                    <span style="color:var(--accent-gold); font-size:12px;">${'★'.repeat(r.stars)}</span>
+                </div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.8);">${r.text}</div>
+            </div>
+        `).join('');
+    }
+
+    function openAuthModal() {
+        document.getElementById('reg-name').value = userProfile.name || "";
+        document.getElementById('reg-phone').value = userProfile.phone || "";
+        document.getElementById('reg-city').value = userProfile.city || "Санкт-Петербург";
+        openModal('auth-modal');
+    }
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function populateRegions() {
+        const select = document.getElementById('region-select');
+        select.innerHTML = '';
+        regionsRF.forEach((reg, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.innerText = reg.name;
+            select.appendChild(opt);
         });
-    },
+        select.value = 1;
+    }
 
-    initFull() {
-        this.mapFull = new ymaps.Map('map-full', {
-            center: [State.userLat, State.userLng],
-            zoom: 11,
-            controls: ['zoomControl']
+    /* ИНИЦИАЛИЗАЦИЯ КАРТЫ */
+    function initYandexMaps() {
+        yMapFull = new ymaps.Map("map-full", { center: [userLat, userLng], zoom: 11, controls: ['zoomControl'] });
+        yUserPlacemark = new ymaps.Placemark([userLat, userLng], {}, { draggable: true, preset: 'islands#violetDotIcon' });
+        yCircle = new ymaps.Circle([[userLat, userLng], currentRadiusKm * 1000], {}, { fillColor: "#7000FF22", strokeColor: "#7000FF", strokeWidth: 2 });
+        itemMarkersGroup = new ymaps.GeoObjectCollection();
+
+        yMapFull.geoObjects.add(yUserPlacemark);
+        yMapFull.geoObjects.add(yCircle);
+        yMapFull.geoObjects.add(itemMarkersGroup);
+
+        yUserPlacemark.events.add('dragend', function () {
+            const coords = yUserPlacemark.geometry.getCoordinates();
+            userLat = coords[0]; userLng = coords[1];
+            yCircle.geometry.setCoordinates(coords);
+            reverseGeocode(userLat, userLng);
+            renderCards();
+            updateMapMarkers();
         });
 
-        this.userPlacemark = new ymaps.Placemark(
-            [State.userLat, State.userLng],
-            {},
-            { draggable: true, preset: 'islands#violetDotIcon' }
-        );
+        yMapAdd = new ymaps.Map("map-add", { center: [newItemLat, newItemLng], zoom: 12, controls: ['zoomControl'] });
+        yAddItemPlacemark = new ymaps.Placemark([newItemLat, newItemLng], {}, { draggable: true, preset: 'islands#redIcon' });
+        yMapAdd.geoObjects.add(yAddItemPlacemark);
 
-        this.circle = new ymaps.Circle(
-            [[State.userLat, State.userLng], State.radiusKm * 1000],
-            {},
-            { fillColor: '#7000FF22', strokeColor: '#7000FF', strokeWidth: 2 }
-        );
-
-        this.markersGroup = new ymaps.GeoObjectCollection();
-
-        this.mapFull.geoObjects.add(this.userPlacemark);
-        this.mapFull.geoObjects.add(this.circle);
-        this.mapFull.geoObjects.add(this.markersGroup);
-
-        this.userPlacemark.events.add('dragend', () => {
-            const [lat, lng] = this.userPlacemark.geometry.getCoordinates();
-            State.userLat = lat;
-            State.userLng = lng;
-            this.circle.geometry.setCoordinates([lat, lng]);
-            this.scheduleMarkersUpdate();
-            SwipeModule.scheduleRender();
-        });
-    },
-
-    initAdd() {
-        this.mapAdd = new ymaps.Map('map-add', {
-            center: [State.newItemLat, State.newItemLng],
-            zoom: 13,
-            controls: ['zoomControl']
+        yAddItemPlacemark.events.add('dragend', function () {
+            const coords = yAddItemPlacemark.geometry.getCoordinates();
+            newItemLat = coords[0]; newItemLng = coords[1];
+            updateCoordsLabel(newItemLat, newItemLng);
         });
 
-        this.addPlacemark = new ymaps.Placemark(
-            [State.newItemLat, State.newItemLng],
-            { hintContent: 'Перетащите или кликните по карте' },
-            { draggable: true, preset: 'islands#redIcon' }
-        );
-        this.mapAdd.geoObjects.add(this.addPlacemark);
-
-        this.addPlacemark.events.add('dragend', () => {
-            const [lat, lng] = this.addPlacemark.geometry.getCoordinates();
-            State.newItemLat = lat;
-            State.newItemLng = lng;
-            this.updateCoordsLabel(lat, lng);
-        });
-
-        this.mapAdd.events.add('click', (e) => {
+        // Клик по карте — ставим метку
+        yMapAdd.events.add('click', function (e) {
             const coords = e.get('coords');
-            State.newItemLat = coords[0];
-            State.newItemLng = coords[1];
-            this.addPlacemark.geometry.setCoordinates(coords);
-            this.updateCoordsLabel(coords[0], coords[1]);
-            Toast.show('📍 Метка установлена');
+            newItemLat = coords[0]; newItemLng = coords[1];
+            yAddItemPlacemark.geometry.setCoordinates(coords);
+            updateCoordsLabel(newItemLat, newItemLng);
+            showToast('📍 Метка установлена');
         });
-    },
 
-    updateCoordsLabel(lat, lng) {
+        getUserGPS();
+        updateMapMarkers();
+    }
+
+    function updateCoordsLabel(lat, lng) {
         const label = document.getElementById('add-item-coords-label');
         if (label) {
-            label.textContent = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            label.innerText = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
             label.style.color = 'var(--accent-green)';
         }
-    },
+    }
 
-    scheduleMarkersUpdate() {
-        if (this._markersUpdateScheduled) return;
-        this._markersUpdateScheduled = true;
-        setTimeout(() => {
-            this._markersUpdateScheduled = false;
-            this.updateMarkers();
-        }, 150);
-    },
-
-    updateMarkers() {
-        if (!this.markersGroup) return;
-        this.markersGroup.removeAll();
-
-        State.items.forEach(item => {
-            const dist = Utils.distanceKm(State.userLat, State.userLng, item.lat, item.lng);
-
-            if (!item.isMine && dist > State.radiusKm) return;
-
-            const preset = item.isMine
-                ? 'islands#greenDotIcon'
-                : 'islands#pinkCircleDotIcon';
-
-            const hint = item.isMine
-                ? `🟢 Ваш лот: ${item.title}`
-                : item.title;
-
-            const placemark = new ymaps.Placemark(
-                [item.lat, item.lng],
-                { hintContent: hint },
-                { preset }
+    function getUserGPS() {
+        showToast('🛰️ Определение местоположения...');
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    newItemLat = userLat;
+                    newItemLng = userLng;
+                    updateMapAndAddress(userLat, userLng);
+                    showToast('📍 Геолокация обновлена!');
+                },
+                err => {
+                    showToast('⚠️ Ошибка GPS, использовано по умолчанию');
+                    updateMapAndAddress(userLat, userLng);
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
             );
+        } else {
+            showToast('⚠️ Геолокация не поддерживается');
+        }
+    }
 
-            placemark.events.add('click', () => {
+    function setNewItemToCurrentGPS() {
+        getUserGPS();
+    }
+
+    function updateMapAndAddress(lat, lng) {
+        if (yMapFull) {
+            yMapFull.setCenter([lat, lng], 11);
+            yUserPlacemark.geometry.setCoordinates([lat, lng]);
+            yCircle.geometry.setCoordinates([lat, lng]);
+        }
+        if (yMapAdd) {
+            yMapAdd.setCenter([lat, lng], 12);
+            yAddItemPlacemark.geometry.setCoordinates([lat, lng]);
+        }
+        reverseGeocode(lat, lng);
+        renderCards();
+        updateMapMarkers();
+    }
+
+    function reverseGeocode(lat, lng) {
+        if (!ymaps || !ymaps.geocode) return;
+        ymaps.geocode([lat, lng]).then(res => {
+            const firstGeoObject = res.geoObjects.get(0);
+            if (firstGeoObject) {
+                const city = firstGeoObject.getLocalities()[0] || firstGeoObject.getAdministrativeAreas()[0] || "Санкт-Петербург";
+                document.getElementById('current-region-label').innerText = city;
+                userProfile.city = city;
+                updateProfileUI();
+            }
+        });
+    }
+
+    function onRegionChange() {
+        const regIndex = document.getElementById('region-select').value;
+        const reg = regionsRF[regIndex];
+        userLat = reg.lat; userLng = reg.lng;
+        document.getElementById('current-region-label').innerText = reg.name.split(" ")[0];
+        if (yMapFull) {
+            yMapFull.setCenter([userLat, userLng], 11);
+            yUserPlacemark.geometry.setCoordinates([userLat, userLng]);
+            yCircle.geometry.setCoordinates([userLat, userLng]);
+        }
+        renderCards();
+        updateMapMarkers();
+    }
+
+    function updateRadius(val) {
+        currentRadiusKm = parseInt(val);
+        document.getElementById('radius-val').innerText = val + " км";
+        if (yCircle) yCircle.geometry.setRadius(currentRadiusKm * 1000);
+        renderCards();
+        updateMapMarkers();
+    }
+
+    function updateMapMarkers() {
+        if (!itemMarkersGroup) return;
+        itemMarkersGroup.removeAll();
+
+        mockItems.forEach(item => {
+            const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
+
+            // Свои лоты показываем ВСЕГДА (зелёные), чужие — только в радиусе (розовые)
+            if (!item.isMine && dist > currentRadiusKm) return;
+
+            const preset = item.isMine ? 'islands#greenDotIcon' : 'islands#pinkCircleDotIcon';
+            const hint = item.isMine ? `🟢 Ваш лот: ${item.title}` : item.title;
+
+            const itemPlacemark = new ymaps.Placemark([item.lat, item.lng], {
+                hintContent: hint
+            }, { preset });
+
+            itemPlacemark.events.add('click', function () {
                 if (item.isMine) {
-                    Toast.show(`🟢 Ваш лот: ${item.title}`);
+                    showToast(`🟢 Ваш лот: ${item.title}`);
                 } else {
-                    this.openItemModal(item, dist);
+                    openMapItemModal(item, dist);
                 }
             });
 
-            this.markersGroup.add(placemark);
+            itemMarkersGroup.add(itemPlacemark);
         });
-    },
-
-    openItemModal(item, dist) {
-        State.selectedMapItem = item;
-
-        const setText = (id, text) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-
-        setText('map-modal-title', item.title);
-        setText('map-modal-swap', `🔄 Взамен: ${item.swapFor}`);
-        setText('map-modal-desc', item.desc || 'Описание отсутствует');
-        setText('map-modal-condition', item.condition || 'Отличное');
-        setText('map-modal-dist', `📍 ~${dist} км`);
-        setText('map-modal-owner', `👤 ${item.ownerName || 'Пользователь'}`);
-        setText('map-modal-rating', `★ ${item.ownerRating ? item.ownerRating.toFixed(1) : '5.0'}`);
-
-        const img = document.getElementById('map-modal-img');
-        img.src = item.media[0]?.url || '';
-        img.alt = item.title;
-
-        Modal.open('map-item-modal');
-    },
-
-    setCenter(lat, lng, zoom = 11) {
-        if (this.mapFull) {
-            this.mapFull.setCenter([lat, lng], zoom);
-            this.userPlacemark.geometry.setCoordinates([lat, lng]);
-            this.circle.geometry.setCoordinates([lat, lng]);
-        }
-    },
-
-    setRadius(km) {
-        if (this.circle) this.circle.geometry.setRadius(km * 1000);
-    },
-
-    fitToViewport() {
-        if (this.mapFull && this.mapFull.container) {
-            this.mapFull.container.fitToViewport();
-        }
-        if (this.mapAdd && this.mapAdd.container) {
-            this.mapAdd.container.fitToViewport();
-        }
-    },
-
-    reverseGeocode(lat, lng) {
-        if (typeof ymaps === 'undefined' || !ymaps.geocode) return;
-        ymaps.geocode([lat, lng]).then(res => {
-            const obj = res.geoObjects.get(0);
-            if (!obj) return;
-            const city = obj.getLocalities()[0]
-                || obj.getAdministrativeAreas()[0]
-                || 'Санкт-Петербург';
-
-            const label = document.getElementById('current-region-label');
-            if (label) label.textContent = city;
-            State.profile.city = city;
-            ProfileModule.render();
-            State.save();
-        }).catch(err => console.warn('geocode error:', err));
     }
-};
 
-const MediaManager = {
-    async loadFiles(fileList) {
-        const result = [];
-        for (const file of fileList) {
-            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
-            if (file.size > 20 * 1024 * 1024) {
-                Toast.show(`⚠️ Файл "${file.name}" слишком большой (макс 20 МБ)`);
-                continue;
-            }
-            const url = URL.createObjectURL(file);
-            result.push({
-                type: file.type.startsWith('video/') ? 'video' : 'image',
-                url,
-                file
-            });
-        }
-        return result;
-    },
+    function openMapItemModal(item, dist) {
+        selectedMapItem = item;
+        document.getElementById('map-modal-title').innerText = item.title;
+        document.getElementById('map-modal-swap').innerText = `🔄 Взамен: ${item.swapFor}`;
+        document.getElementById('map-modal-desc').innerText = item.desc || "Описание отсутствует";
+        document.getElementById('map-modal-condition').innerText = item.condition || "Отличное";
+        document.getElementById('map-modal-dist').innerText = `📍 ~${dist} км`;
+        document.getElementById('map-modal-owner').innerText = `👤 ${item.ownerName || 'Пользователь'}`;
+        document.getElementById('map-modal-rating').innerText = `★ ${item.ownerRating ? item.ownerRating.toFixed(1) : '5.0'}`;
+        document.getElementById('map-modal-img').src = item.media[0].url;
 
-    revoke(media) {
-        if (!Array.isArray(media)) media = [media];
-        media.forEach(m => {
-            if (m && m.url && m.url.startsWith('blob:')) {
-                try { URL.revokeObjectURL(m.url); } catch (e) {}
-            }
-        });
-    },
-
-    revokeAllInState() {
-        State.uploadedMedia.forEach(m => this.revoke(m));
-        State.items.forEach(item => {
-            item.media?.forEach(m => {
-                if (m.url?.startsWith('blob:')) this.revoke(m);
-            });
-        });
-        State.chats.forEach(chat => {
-            chat.messages?.forEach(msg => {
-                msg.mediaList?.forEach(m => this.revoke(m));
-            });
-        });
-    },
-
-    createThumb(media) {
-        const el = document.createElement(media.type === 'video' ? 'video' : 'img');
-        el.src = media.url;
-        el.className = 'preview-thumb';
-        if (media.type === 'video') {
-            el.autoplay = true;
-            el.loop = true;
-            el.muted = true;
-            el.playsInline = true;
-        }
-        return el;
+        openModal('map-item-modal');
     }
-};
 
-const SwipeModule = {
-    _cards: [],
-    _renderScheduled: false,
+    function triggerOfferFromMap() {
+        closeModal('map-item-modal');
+        if (selectedMapItem) {
+            openOfferModal(selectedMapItem.title);
+        }
+    }
 
-    scheduleRender() {
-        if (this._renderScheduled) return;
-        this._renderScheduled = true;
-        requestAnimationFrame(() => {
-            this._renderScheduled = false;
-            this.render();
-        });
-    },
+    function getDistanceKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
 
-    cleanup() {
-        this._cards.forEach(({ card, controller }) => {
-            if (controller) controller.abort();
-        });
-        this._cards = [];
-    },
-
-    render() {
+    /* РЕНДЕР КАРТОЧЕК */
+    function renderCards() {
         const deck = document.getElementById('deck');
         const controls = document.getElementById('controls-bar');
-        if (!deck || !controls) return;
-
-        this.cleanup();
         deck.innerHTML = '';
 
-        const filtered = State.items
-            .filter(item => !item.isMine)
-            .map(item => {
-                item.currentDist = Utils.distanceKm(
-                    State.userLat, State.userLng, item.lat, item.lng
-                );
-                return item;
-            })
-            .filter(item => item.currentDist <= State.radiusKm);
+        const filtered = mockItems.filter(item => {
+            if (item.isMine) return false;
+            const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
+            item.currentDist = dist;
+            return dist <= currentRadiusKm;
+        });
 
         if (filtered.length === 0) {
             deck.innerHTML = `
                 <div style="text-align:center; padding:32px 20px; background:var(--card-bg); border-radius:24px; border:1px solid var(--card-border); max-width:320px;">
                     <div style="font-size:48px; margin-bottom:12px;">🎉</div>
                     <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">На сегодня лоты закончились</h3>
-                    <p style="color:var(--text-sub); font-size:13px; line-height:1.4;">Вы всё просмотрели в этом радиусе. Попробуйте увеличить радиус поиска на Карте или зайдите позже!</p>
+                    <p style="color:var(--text-sub); font-size:13px; line-height:1.4;">Вы все просмотрели в этом радиусе. Попробуйте увеличить радиус поиска на Карте или зайдите позже!</p>
                 </div>
             `;
             controls.style.display = 'none';
             return;
+        } else {
+            controls.style.display = 'flex';
         }
-        controls.style.display = 'flex';
 
-        const renderCount = Math.min(filtered.length, 3);
-        for (let i = renderCount - 1; i >= 0; i--) {
-            const item = filtered[i];
-            const card = this.createCard(item, filtered.length - i);
+        filtered.forEach((item, i) => {
+            const card = document.createElement('div');
+            card.className = 'swipe-card';
+            card.style.zIndex = filtered.length - i;
+            card.dataset.title = item.title;
+            card.dataset.itemId = item.id;
+            
+            let mediaElements = '';
+            let indicators = '';
+            item.media.forEach((med, mIdx) => {
+                const activeClass = mIdx === 0 ? 'active' : '';
+                indicators += `<div class="indicator-dot ${activeClass}" id="ind-${item.id}-${mIdx}"></div>`;
+                if (med.type === 'image') {
+                    mediaElements += `<img src="${med.url}" class="media-item ${activeClass}" id="med-${item.id}-${mIdx}">`;
+                } else {
+                    mediaElements += `<video src="${med.url}" class="media-item ${activeClass}" id="med-${item.id}-${mIdx}" autoplay loop muted playsinline></video>`;
+                }
+            });
+
+            card.innerHTML = `
+                <div class="swipe-badge badge-like">ОБМЕН</div>
+                <div class="swipe-badge badge-pass">ПРОПУСК</div>
+                <div class="carousel-container">${mediaElements}</div>
+                <div class="carousel-indicators">${indicators}</div>
+                <div class="carousel-controls">
+                    <div class="carousel-btn-left" onclick="changeMedia(${item.id}, ${item.media.length}, -1, event)"></div>
+                    <div class="carousel-btn-right" onclick="changeMedia(${item.id}, ${item.media.length}, 1, event)"></div>
+                </div>
+                <div class="card-overlay"></div>
+                <div class="card-top-info">
+                    <span class="distance-tag">📍 ~${item.currentDist} км</span>
+                    <span class="media-type-tag" id="type-tag-${item.id}">${item.media[0].type === 'video' ? '🎥 Видео' : '📷 Фото'}</span>
+                </div>
+                <div class="card-bottom-info">
+                    <div class="card-owner-info">
+                        <span>👤 ${item.ownerName || 'Пользователь'}</span>
+                        <span class="owner-rating">★ ${item.ownerRating ? item.ownerRating.toFixed(1) : '5.0'}</span>
+                    </div>
+                    <div class="item-title">${item.title}</div>
+                    <div class="item-swap-for">🔄 ${item.swapFor}</div>
+                    <div class="item-desc">${item.desc}</div>
+                </div>
+            `;
             deck.appendChild(card);
-        }
-    },
+            card.mediaIndex = 0;
 
-    createCard(item, zIndex) {
-        const card = document.createElement('div');
-        card.className = 'swipe-card';
-        card.style.zIndex = zIndex;
-        card.dataset.itemId = item.id;
-        card._item = item;
-        card._mediaIndex = 0;
-
-        const mediaContainer = document.createElement('div');
-        mediaContainer.className = 'carousel-container';
-
-        const indicators = document.createElement('div');
-        indicators.className = 'carousel-indicators';
-
-        item.media.forEach((med, idx) => {
-            const active = idx === 0 ? 'active' : '';
-
-            const mediaEl = document.createElement(med.type === 'video' ? 'video' : 'img');
-            mediaEl.src = med.url;
-            mediaEl.className = `media-item ${active}`;
-            if (med.type === 'video') {
-                mediaEl.autoplay = true;
-                mediaEl.loop = true;
-                mediaEl.muted = true;
-                mediaEl.playsInline = true;
-            }
-            mediaContainer.appendChild(mediaEl);
-
-            const dot = document.createElement('div');
-            dot.className = `indicator-dot ${active}`;
-            indicators.appendChild(dot);
+            initSwipeEvents(card);
         });
+    }
 
-        const topInfo = document.createElement('div');
-        topInfo.className = 'card-top-info';
-        const distTag = document.createElement('span');
-        distTag.className = 'distance-tag';
-        distTag.textContent = `📍 ~${item.currentDist} км`;
-        const mediaTypeTag = document.createElement('span');
-        mediaTypeTag.className = 'media-type-tag';
-        mediaTypeTag.textContent = item.media[0]?.type === 'video' ? '🎥 Видео' : '📷 Фото';
-        topInfo.append(distTag, mediaTypeTag);
-
-        const bottomInfo = document.createElement('div');
-        bottomInfo.className = 'card-bottom-info';
-
-        const ownerInfo = document.createElement('div');
-        ownerInfo.className = 'card-owner-info';
-        const ownerName = document.createElement('span');
-        ownerName.textContent = `👤 ${item.ownerName || 'Пользователь'}`;
-        const ownerRating = document.createElement('span');
-        ownerRating.className = 'owner-rating';
-        ownerRating.textContent = `★ ${(item.ownerRating ?? 5).toFixed(1)}`;
-        ownerInfo.append(ownerName, ownerRating);
-
-        const title = document.createElement('div');
-        title.className = 'item-title';
-        title.textContent = item.title;
-
-        const swapFor = document.createElement('div');
-        swapFor.className = 'item-swap-for';
-        swapFor.textContent = `🔄 ${item.swapFor}`;
-
-        const desc = document.createElement('div');
-        desc.className = 'item-desc';
-        desc.textContent = item.desc || '';
-
-        bottomInfo.append(ownerInfo, title, swapFor, desc);
-
-        const badgeLike = document.createElement('div');
-        badgeLike.className = 'swipe-badge badge-like';
-        badgeLike.textContent = 'ОБМЕН';
-        const badgePass = document.createElement('div');
-        badgePass.className = 'swipe-badge badge-pass';
-        badgePass.textContent = 'ПРОПУСК';
-
-        const overlay = document.createElement('div');
-        overlay.className = 'card-overlay';
-
-        const controls = document.createElement('div');
-        controls.className = 'carousel-controls';
-        const leftBtn = document.createElement('div');
-        leftBtn.className = 'carousel-btn-left';
-        const rightBtn = document.createElement('div');
-        rightBtn.className = 'carousel-btn-right';
-        controls.append(leftBtn, rightBtn);
-
-        card.append(
-            badgeLike, badgePass,
-            mediaContainer, indicators, controls,
-            overlay, topInfo, bottomInfo
-        );
-
-        const onChangeMedia = (dir) => (e) => {
-            e.stopPropagation();
-            this.changeMedia(card, dir);
-        };
-        leftBtn.addEventListener('click', onChangeMedia(-1));
-        rightBtn.addEventListener('click', onChangeMedia(1));
-
-        this.attachSwipe(card, badgeLike, badgePass);
-
-        this._cards.push({ card, controller: card._controller });
-        return card;
-    },
-
-    changeMedia(card, direction) {
-        const mediaEls = card.querySelectorAll('.media-item');
-        const dots = card.querySelectorAll('.indicator-dot');
-        const total = mediaEls.length;
-        if (total <= 1) return;
-
-        let newIndex = card._mediaIndex + direction;
-        if (newIndex < 0 || newIndex >= total) return;
-
-        mediaEls[card._mediaIndex].classList.remove('active');
-        dots[card._mediaIndex].classList.remove('active');
-        mediaEls[newIndex].classList.add('active');
-        dots[newIndex].classList.add('active');
-        card._mediaIndex = newIndex;
-    },
-
-    attachSwipe(card, badgeLike, badgePass) {
-        const controller = new AbortController();
-        card._controller = controller;
-        const { signal } = controller;
-
-        let dragging = false;
+    /* СВАЙП КАРТОЧЕК — используют touch + mouse, чтобы работало и в Telegram WebView, и на ПК */
+    function initSwipeEvents(card) {
+        let isDragging = false;
         let startX = 0, startY = 0;
-        let curX = 0, curY = 0;
-        let pointerId = null;
+        let currentX = 0, currentY = 0;
 
-        const onDown = (e) => {
-            if (e.target.closest('.carousel-controls')) return;
-            dragging = true;
-            pointerId = e.pointerId;
-            startX = e.clientX;
-            startY = e.clientY;
-            curX = curY = 0;
+        const badgeLike = card.querySelector('.badge-like');
+        const badgePass = card.querySelector('.badge-pass');
+
+        const getPoint = (e) => {
+            if (e.touches && e.touches.length) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            if (e.changedTouches && e.changedTouches.length) {
+                return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        };
+
+        const onStart = (e) => {
+            isDragging = true;
+            const p = getPoint(e);
+            startX = p.x;
+            startY = p.y;
             card.style.transition = 'none';
-            card.setPointerCapture?.(e.pointerId);
         };
 
         const onMove = (e) => {
-            if (!dragging || e.pointerId !== pointerId) return;
-            curX = e.clientX - startX;
-            curY = e.clientY - startY;
+            if (!isDragging) return;
+            const p = getPoint(e);
+            currentX = p.x - startX;
+            currentY = p.y - startY;
 
-            const rotate = curX * 0.08;
-            card.style.transform = `translate3d(${curX}px, ${curY}px, 0) rotate(${rotate}deg)`;
+            const rotate = currentX * 0.08;
+            card.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${rotate}deg)`;
 
-            if (curX > 30) {
-                badgeLike.style.opacity = String(Math.min(curX / 100, 1));
+            if (currentX > 30) {
+                badgeLike.style.opacity = Math.min(currentX / 100, 1);
                 badgePass.style.opacity = '0';
-            } else if (curX < -30) {
-                badgePass.style.opacity = String(Math.min(Math.abs(curX) / 100, 1));
+            } else if (currentX < -30) {
+                badgePass.style.opacity = Math.min(Math.abs(currentX) / 100, 1);
                 badgeLike.style.opacity = '0';
             } else {
                 badgeLike.style.opacity = '0';
@@ -2021,839 +1741,520 @@ const SwipeModule = {
             }
         };
 
-        const onUp = (e) => {
-            if (!dragging || (e.pointerId !== undefined && e.pointerId !== pointerId)) return;
-            dragging = false;
+        const onEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
             card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
 
-            if (curX > 120) {
-                State.pendingSwipeCard = card;
-                // Тактильный отклик при лайке
+            if (currentX > 120) {
+                pendingSwipeCard = card;
                 TelegramApp.haptic('medium');
-                OfferModule.open(card._item.title);
-                card.style.transform = 'translate3d(0,0,0) rotate(0)';
+                openOfferModal(card.dataset.title);
+                card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
                 badgeLike.style.opacity = '0';
-            } else if (curX < -120) {
+            } else if (currentX < -120) {
                 TelegramApp.haptic('light');
-                this.completeSwipe(card, false);
+                completeSwipe(card, false);
             } else {
-                card.style.transform = 'translate3d(0,0,0) rotate(0)';
+                card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
                 badgeLike.style.opacity = '0';
                 badgePass.style.opacity = '0';
             }
-            curX = curY = 0;
+
+            currentX = 0; currentY = 0;
         };
 
-        card.addEventListener('pointerdown', onDown, { signal });
-        card.addEventListener('pointermove', onMove, { signal });
-        card.addEventListener('pointerup', onUp, { signal });
-        card.addEventListener('pointercancel', onUp, { signal });
-    },
+        card.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
 
-    completeSwipe(card, isLike, offeredIds = []) {
-        const item = card._item;
-        if (!item) return;
+        card.addEventListener('touchstart', onStart, { passive: true });
+        window.addEventListener('touchmove', onMove, { passive: true });
+        window.addEventListener('touchend', onEnd);
+    }
+
+    function openOfferModal(targetTitle) {
+        document.getElementById('offer-target-title').innerText = `«${targetTitle}»`;
+        const container = document.getElementById('offer-items-list');
+        const myItems = mockItems.filter(i => i.isMine);
+
+        if (myItems.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:12px; color:var(--text-sub); font-size:13px;">
+                    У вас пока нет своих лотов.<br>
+                    <span style="color:var(--accent-pink); cursor:pointer;" onclick="closeModal('offer-modal'); openCreateLotModal();">✚ Добавить лот</span>
+                </div>
+            `;
+        } else {
+            container.innerHTML = myItems.map(item => `
+                <label class="offer-item-check">
+                    <input type="checkbox" value="${item.id}" class="offer-checkbox">
+                    <img src="${item.media[0].url}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                    <div style="font-size:13px; font-weight:600;">${item.title}</div>
+                </label>
+            `).join('');
+        }
+
+        openModal('offer-modal');
+    }
+
+    function cancelOfferModal() {
+        closeModal('offer-modal');
+        if (pendingSwipeCard) {
+            const card = pendingSwipeCard;
+            pendingSwipeCard = null;
+            completeSwipe(card, false);
+        }
+    }
+
+    function confirmOfferAndSwipe() {
+        closeModal('offer-modal');
+        const checkboxes = document.querySelectorAll('.offer-checkbox:checked');
+        const selectedIds = Array.from(checkboxes).map(c => c.value);
+
+        if (pendingSwipeCard) {
+            const card = pendingSwipeCard;
+            pendingSwipeCard = null;
+            completeSwipe(card, true, selectedIds);
+        } else if (selectedMapItem) {
+            addMatchChat(selectedMapItem.title, selectedIds);
+            showToast('🔥 Взаимность отправлена!');
+            selectedMapItem = null;
+        }
+    }
+
+    function completeSwipe(card, isLike, offeredIds = []) {
+        const itemTitle = card.dataset.title || "вещь";
+        const itemId = card.dataset.itemId;
         const moveX = isLike ? window.innerWidth : -window.innerWidth;
 
         card.style.transform = `translate3d(${moveX}px, ${card.offsetHeight}px, 0) rotate(${isLike ? 30 : -30}deg)`;
         card.style.opacity = '0';
 
         if (isLike) {
-            Toast.show('🔥 Взаимность отправлена!');
-            ChatModule.addMatch(item, offeredIds);
+            showToast(`🔥 Взаимность отправлена!`);
+            addMatchChat(itemTitle, offeredIds);
         }
 
-        State.items = State.items.filter(i => i.id !== item.id);
-        State.save();
+        if (itemId) {
+            mockItems = mockItems.filter(item => String(item.id) !== String(itemId));
+        }
 
         setTimeout(() => {
             card.remove();
-            this._cards = this._cards.filter(c => c.card !== card);
-            this.render();
-            MapModule.scheduleMarkersUpdate();
-            MyLotsModule.render();
+            renderCards();
+            updateMapMarkers();
         }, 250);
-    },
+    }
 
-    triggerSwipe(isLike) {
+    function triggerBtnSwipe(isLike) {
         const cards = document.querySelectorAll('.swipe-card');
         if (!cards.length) return;
-        const top = cards[0];
-        const cardObj = this._cards.find(c => c.card === top);
         if (isLike) {
-            State.pendingSwipeCard = cardObj?.card || top;
-            OfferModule.open(cardObj?.card?._item?.title || '');
+            pendingSwipeCard = cards[0];
+            openOfferModal(cards[0].dataset.title);
         } else {
-            this.completeSwipe(cardObj?.card || top, false);
+            completeSwipe(cards[0], false);
         }
     }
-};
 
-const OfferModule = {
-    open(targetTitle) {
-        const titleEl = document.getElementById('offer-target-title');
-        if (titleEl) titleEl.textContent = `«${targetTitle}»`;
+    function changeMedia(itemId, totalMedia, direction, event) {
+        if (event) event.stopPropagation();
+        const cards = document.querySelectorAll('.swipe-card');
+        if (!cards.length) return;
+        const topCard = cards[0];
 
-        const container = document.getElementById('offer-items-list');
-        if (!container) return;
-        container.innerHTML = '';
+        let currentIndex = topCard.mediaIndex || 0;
+        let newIndex = currentIndex + direction;
 
-        const myItems = State.items.filter(i => i.isMine);
+        if (newIndex >= 0 && newIndex < totalMedia) {
+            document.getElementById(`med-${itemId}-${currentIndex}`).classList.remove('active');
+            document.getElementById(`ind-${itemId}-${currentIndex}`).classList.remove('active');
 
-        if (myItems.length === 0) {
-            const empty = document.createElement('div');
-            empty.style.cssText = 'text-align:center; padding:12px; color:var(--text-sub); font-size:13px;';
-            empty.textContent = 'У вас пока нет своих лотов.';
-            const addLink = document.createElement('div');
-            addLink.style.cssText = 'color:var(--accent-pink); cursor:pointer; margin-top:8px;';
-            addLink.textContent = '✚ Добавить лот';
-            addLink.addEventListener('click', () => {
-                Modal.close('offer-modal');
-                MyLotsModule.openCreateModal();
-            });
-            container.append(empty, addLink);
-        } else {
-            myItems.forEach(item => {
-                const label = document.createElement('label');
-                label.className = 'offer-item-check';
+            document.getElementById(`med-${itemId}-${newIndex}`).classList.add('active');
+            document.getElementById(`ind-${itemId}-${newIndex}`).classList.add('active');
 
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = String(item.id);
-                cb.className = 'offer-checkbox';
-
-                const img = document.createElement('img');
-                img.src = item.media[0]?.url || '';
-                img.alt = '';
-                img.style.cssText = 'width:40px;height:40px;border-radius:8px;object-fit:cover;';
-                img.loading = 'lazy';
-
-                const name = document.createElement('div');
-                name.style.cssText = 'font-size:13px; font-weight:600;';
-                name.textContent = item.title;
-
-                label.append(cb, img, name);
-                container.appendChild(label);
-            });
-        }
-
-        Modal.open('offer-modal');
-    },
-
-    confirm() {
-        Modal.close('offer-modal');
-        const selectedIds = Array.from(document.querySelectorAll('.offer-checkbox:checked'))
-            .map(c => c.value);
-
-        if (State.pendingSwipeCard) {
-            const card = State.pendingSwipeCard;
-            State.pendingSwipeCard = null;
-            SwipeModule.completeSwipe(card, true, selectedIds);
-        } else if (State.selectedMapItem) {
-            ChatModule.addMatch(State.selectedMapItem, selectedIds);
-            Toast.show('🔥 Взаимность отправлена!');
-            State.selectedMapItem = null;
-        }
-    },
-
-    cancel() {
-        Modal.close('offer-modal');
-        if (State.pendingSwipeCard) {
-            const card = State.pendingSwipeCard;
-            State.pendingSwipeCard = null;
-            SwipeModule.completeSwipe(card, false);
+            topCard.mediaIndex = newIndex;
         }
     }
-};
 
-const MyLotsModule = {
-    render() {
-        const container = document.getElementById('my-lots-grid-container');
-        if (!container) return;
-        container.innerHTML = '';
+    function handleFileSelect(evt) {
+        const files = evt.target.files;
+        const list = document.getElementById('preview-list');
 
-        const myItems = State.items.filter(i => i.isMine);
+        for (let file of files) {
+            const isVideo = file.type.startsWith('video');
+            const reader = new FileReader();
 
-        const countEl = document.getElementById('profile-items-count');
-        if (countEl) countEl.textContent = String(myItems.length);
+            reader.onload = function(e) {
+                const fileDataUrl = e.target.result;
+                uploadedMedia.push({ type: isVideo ? 'video' : 'image', url: fileDataUrl });
 
-        if (myItems.length === 0) {
-            const empty = document.createElement('div');
-            empty.style.cssText = 'grid-column:span 2; text-align:center; padding:40px 10px; color:var(--text-sub);';
-            empty.innerHTML = '<div style="font-size:36px;margin-bottom:8px;">📦</div><div>У вас пока нет лотов</div>';
-            container.appendChild(empty);
-            return;
+                if (isVideo) {
+                    list.innerHTML += `<video src="${fileDataUrl}" class="preview-thumb" autoplay loop muted></video>`;
+                } else {
+                    list.innerHTML += `<img src="${fileDataUrl}" class="preview-thumb">`;
+                }
+            };
+            reader.readAsDataURL(file);
         }
+    }
 
-        myItems.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'my-lot-card';
+    function openCreateLotModal() {
+        // Стартовая точка — текущее местоположение
+        newItemLat = userLat;
+        newItemLng = userLng;
 
-            const imgWrap = document.createElement('div');
-            imgWrap.className = 'my-lot-img-wrapper';
-
-            const img = document.createElement('img');
-            img.src = item.media[0]?.url || '';
-            img.className = 'my-lot-img';
-            img.alt = item.title;
-            img.loading = 'lazy';
-
-            const badge = document.createElement('span');
-            badge.className = 'my-lot-badge';
-            badge.textContent = item.condition || 'Отличное';
-
-            imgWrap.append(img, badge);
-
-            const title = document.createElement('div');
-            title.className = 'my-lot-title';
-            title.textContent = item.title;
-
-            const swap = document.createElement('div');
-            swap.className = 'my-lot-swap';
-            swap.textContent = `Ищу: ${item.swapFor}`;
-
-            const del = document.createElement('button');
-            del.className = 'btn-delete-lot';
-            del.textContent = 'Удалить лот';
-            del.addEventListener('click', () => this.delete(item.id));
-
-            card.append(imgWrap, title, swap, del);
-            container.appendChild(card);
-        });
-    },
-
-    delete(id) {
-        const item = State.items.find(i => i.id === id);
-        if (item) MediaManager.revoke(item.media);
-        State.items = State.items.filter(i => i.id !== id);
-        State.save();
-        this.render();
-        SwipeModule.scheduleRender();
-        MapModule.scheduleMarkersUpdate();
-        Toast.show('🗑️ Лот удалён');
-    },
-
-    openCreateModal() {
-        State.newItemLat = State.userLat;
-        State.newItemLng = State.userLng;
-
-        Modal.open('add-lot-modal');
+        openModal('add-lot-modal');
 
         setTimeout(() => {
-            MapModule.fitToViewport();
-
-            if (MapModule.mapAdd && MapModule.addPlacemark) {
-                MapModule.mapAdd.setCenter([State.newItemLat, State.newItemLng], 13);
-                MapModule.addPlacemark.geometry.setCoordinates([State.newItemLat, State.newItemLng]);
-                MapModule.updateCoordsLabel(State.newItemLat, State.newItemLng);
+            if (yMapAdd) {
+                yMapAdd.container.fitToViewport();
+                yMapAdd.setCenter([newItemLat, newItemLng], 13);
+                yAddItemPlacemark.geometry.setCoordinates([newItemLat, newItemLng]);
+                updateCoordsLabel(newItemLat, newItemLng);
             }
-        }, 300);
-    },
+        }, 250);
+    }
 
-    publish() {
-        const title = document.getElementById('add-title')?.value.trim();
-        const swap = document.getElementById('add-swap')?.value.trim();
-        const condition = document.getElementById('add-condition')?.value;
-        const desc = document.getElementById('add-desc')?.value.trim();
+    function publishItem() {
+        const title = document.getElementById('add-title').value.trim();
+        const swap = document.getElementById('add-swap').value.trim();
+        const condition = document.getElementById('add-condition').value;
+        const desc = document.getElementById('add-desc').value.trim();
 
         if (!title || !swap) {
-            Toast.show('⚠️ Заполните название и желаемый обмен!');
+            showToast('⚠️ Заполните название и желаемый обмен!');
             return;
         }
-        if (State.uploadedMedia.length === 0) {
-            Toast.show('📸 Загрузите хотя бы одно фото/видео!');
+
+        if (uploadedMedia.length === 0) {
+            showToast('📸 Загрузите хотя бы одно фото/видео!');
             return;
         }
 
         const newItem = {
-            id: Utils.uid('item'),
-            title,
+            id: Date.now(),
+            title: title,
             swapFor: swap,
-            desc: desc || 'Новое предложение',
-            condition,
-            media: State.uploadedMedia.map(m => ({ type: m.type, url: m.url })),
-            lat: State.newItemLat,
-            lng: State.newItemLng,
+            desc: desc || "Новое предложение",
+            condition: condition,
+            media: [...uploadedMedia],
+            lat: newItemLat,
+            lng: newItemLng,
             isMine: true,
-            ownerName: State.profile.name || 'Александр',
-            ownerRating: State.profile.rating || 5.0
+            ownerName: userProfile.name || "Александр",
+            ownerRating: userProfile.rating || 5.0
         };
 
-        State.items.unshift(newItem);
-        State.uploadedMedia = [];
+        mockItems.unshift(newItem);
+        uploadedMedia = [];
+        document.getElementById('preview-list').innerHTML = '';
+        document.getElementById('add-title').value = '';
+        document.getElementById('add-swap').value = '';
+        document.getElementById('add-desc').value = '';
 
-        const preview = document.getElementById('preview-list');
-        if (preview) preview.innerHTML = '';
-        if (document.getElementById('add-title')) document.getElementById('add-title').value = '';
-        if (document.getElementById('add-swap')) document.getElementById('add-swap').value = '';
-        if (document.getElementById('add-desc')) document.getElementById('add-desc').value = '';
-
-        State.save();
-        Modal.close('add-lot-modal');
-
-        setTimeout(() => {
-            MapModule.scheduleMarkersUpdate();
-            if (MapModule.mapFull) {
-                MapModule.mapFull.setCenter([newItem.lat, newItem.lng], 14);
-            }
-            SwipeModule.scheduleRender();
-            this.render();
-            Toast.show('🎉 Лот опубликован! Смотрите его на карте (зелёная метка)');
-        }, 200);
+        closeModal('add-lot-modal');
+        updateMapMarkers();
+        renderCards();
+        renderMyLotsGrid();
+        
+        showToast('🎉 Лот опубликован! Смотрите на карте (зелёная метка)');
     }
-};
 
-const ChatModule = {
-    renderList() {
-        const container = document.getElementById('chats-list');
-        if (!container) return;
-        container.innerHTML = '';
+    function renderMyLotsGrid() {
+        const container = document.getElementById('my-lots-grid-container');
+        const myItems = mockItems.filter(i => i.isMine);
+        
+        document.getElementById('profile-items-count').innerText = myItems.length;
 
-        const countEl = document.getElementById('profile-matches-count');
-        if (countEl) countEl.textContent = String(State.chats.length);
-
-        if (State.chats.length === 0) {
-            const empty = document.createElement('div');
-            empty.style.cssText = 'text-align:center; padding:40px 0; color:var(--text-sub);';
-            empty.textContent = 'У вас пока нет чатов';
-            container.appendChild(empty);
+        if (myItems.length === 0) {
+            container.innerHTML = `
+                <div style="grid-column: span 2; text-align:center; padding:40px 10px; color:var(--text-sub);">
+                    <div style="font-size:36px; margin-bottom:8px;">📦</div>
+                    <div>У вас пока нет добавленных лотов</div>
+                </div>
+            `;
             return;
         }
 
-        State.chats.forEach(chat => {
+        container.innerHTML = myItems.map(item => `
+            <div class="my-lot-card">
+                <div class="my-lot-img-wrapper">
+                    <img src="${item.media[0].url}" class="my-lot-img">
+                    <span class="my-lot-badge">${item.condition || 'Отличное'}</span>
+                </div>
+                <div class="my-lot-title">${item.title}</div>
+                <div class="my-lot-swap">Ищу: ${item.swapFor}</div>
+                <button class="btn-delete-lot" onclick="deleteMyItem(${item.id})">Удалить лот</button>
+            </div>
+        `).join('');
+    }
+
+    function deleteMyItem(id) {
+        mockItems = mockItems.filter(i => i.id !== id);
+        renderMyLotsGrid();
+        renderCards();
+        updateMapMarkers();
+        showToast('🗑️ Лот удалён');
+    }
+
+    function renderChatsList() {
+        const chatsList = document.getElementById('chats-list');
+        chatsList.innerHTML = '';
+
+        document.getElementById('profile-matches-count').innerText = chatData.length;
+
+        if (chatData.length === 0) {
+            chatsList.innerHTML = `<div style="text-align:center; padding:40px 0; color:var(--text-sub);">У вас пока нет чатов</div>`;
+            return;
+        }
+
+        chatData.forEach(chat => {
+            const lastMsgObj = chat.messages.length > 0 ? chat.messages[chat.messages.length - 1] : null;
+            let lastMsgText = 'Начните диалог';
+            if (lastMsgObj) {
+                if (lastMsgObj.mediaList && lastMsgObj.mediaList.length > 0) {
+                    lastMsgText = `📎 Медиафайлы (${lastMsgObj.mediaList.length})`;
+                } else if (lastMsgObj.text) {
+                    lastMsgText = lastMsgObj.text;
+                }
+            }
+
             const item = document.createElement('div');
             item.className = 'chat-item';
-
-            const inner = document.createElement('div');
-            inner.style.cssText = 'display:flex; align-items:center; gap:12px; flex:1;';
-            inner.addEventListener('click', () => this.open(chat.id));
-
-            const avatar = document.createElement('div');
-            avatar.className = 'chat-avatar';
-            avatar.textContent = chat.avatar;
-
-            const info = document.createElement('div');
-            const nameEl = document.createElement('div');
-            nameEl.style.cssText = 'font-weight:700; font-size:14px;';
-            nameEl.textContent = chat.name;
-
-            const lastEl = document.createElement('div');
-            lastEl.style.cssText = 'font-size:12px; color:var(--text-sub); margin-top:2px;';
-            lastEl.textContent = this.getPreviewText(chat);
-
-            info.append(nameEl, lastEl);
-            inner.append(avatar, info);
-
-            const del = document.createElement('button');
-            del.className = 'action-icon-btn delete-btn';
-            del.title = 'Удалить диалог';
-            del.textContent = '🗑️';
-            del.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.delete(chat.id);
-            });
-
-            item.append(inner, del);
-            container.appendChild(item);
+            item.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; flex:1;" onclick="openChat('${chat.id}')">
+                    <div class="chat-avatar">${chat.avatar}</div>
+                    <div>
+                        <div style="font-weight:700; font-size:14px;">${chat.name}</div>
+                        <div style="font-size:12px; color:var(--text-sub); margin-top:2px;">${lastMsgText}</div>
+                    </div>
+                </div>
+                <button class="action-icon-btn delete-btn" title="Удалить диалог" onclick="event.stopPropagation(); deleteChat('${chat.id}')">🗑️</button>
+            `;
+            chatsList.appendChild(item);
         });
-    },
+    }
 
-    getPreviewText(chat) {
-        if (!chat.messages.length) return 'Начните диалог';
-        const last = chat.messages[chat.messages.length - 1];
-        if (last.mediaList?.length) return `📎 Медиафайлы (${last.mediaList.length})`;
-        return last.text || 'Начните диалог';
-    },
+    function deleteChat(chatId) {
+        chatData = chatData.filter(c => c.id !== chatId);
+        renderChatsList();
+        showToast('🗑️ Диалог удалён');
+    }
 
-    addMatch(item, offeredIds = []) {
-        const id = Utils.uid('chat');
-        const offered = State.items.filter(i =>
-            offeredIds.some(oid => String(oid) === String(i.id))
-        );
+    function deleteActiveChat() {
+        if (!activeChatId) return;
+        deleteChat(activeChatId);
+        closeChat();
+    }
 
-        let body;
-        if (offered.length > 0) {
-            const names = offered.map(i => `«${i.title}»`).join(', ');
-            body = `Здравствуйте! Интересует ваш лот «${item.title}».\n\nПредложено на обмен взамен: ${names}`;
+    function addMatchChat(title, offeredIds = []) {
+        const newChatId = 'chat_' + Date.now();
+        const offeredItems = mockItems.filter(i => offeredIds.includes(String(i.id)) || offeredIds.includes(i.id));
+        
+        let offerText = "";
+        if (offeredItems.length > 0) {
+            const namesList = offeredItems.map(i => `«${i.title}»`).join(', ');
+            offerText = `\n\nПредложено на обмен взамен: ${namesList}`;
         } else {
-            body = `Здравствуйте! Интересует ваш лот «${item.title}».\n\nХочу обсудить варианты обмена!`;
+            offerText = `\n\nХочу обсудить варианты обмена!`;
         }
 
-        State.chats.unshift({
-            id,
-            name: item.title,
+        const newChat = {
+            id: newChatId,
+            name: `${title}`,
             avatar: '✨',
-            messages: [{ sender: 'them', text: body }]
-        });
-        State.save();
-        this.renderList();
-    },
+            messages: [
+                { sender: 'them', text: `Здравствуйте! Интересует ваш лот «${title}».${offerText}` }
+            ]
+        };
+        chatData.unshift(newChat);
+        renderChatsList();
+    }
 
-    open(chatId) {
-        State.activeChatId = chatId;
-        const chat = State.chats.find(c => c.id === chatId);
+    function openChat(chatId) {
+        activeChatId = chatId;
+        const chat = chatData.find(c => c.id === chatId);
         if (!chat) return;
 
-        const nameEl = document.getElementById('single-chat-name');
-        const avatarEl = document.getElementById('single-chat-avatar');
-        if (nameEl) nameEl.textContent = chat.name;
-        if (avatarEl) avatarEl.textContent = chat.avatar;
+        document.getElementById('single-chat-name').innerText = chat.name;
+        document.getElementById('single-chat-avatar').innerText = chat.avatar;
 
-        this.renderMessages(chat.messages);
+        renderMessages(chat.messages);
 
         document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
-        const view = document.getElementById('view-single-chat');
-        if (view) view.classList.add('active');
-    },
+        document.getElementById('view-single-chat').style.display = 'flex';
+        document.getElementById('view-single-chat').classList.add('active');
 
-    close() {
-        App.switchTab('chats');
-    },
+        // Показываем кнопку "Назад" в Telegram
+        TelegramApp.showBackButton(true);
+    }
 
-    renderMessages(messages) {
+    function closeChat() {
+        document.getElementById('view-single-chat').style.display = 'none';
+        TelegramApp.showBackButton(false);
+        switchTab('chats');
+    }
+
+    function renderMessages(messages) {
         const container = document.getElementById('chat-messages');
-        if (!container) return;
         container.innerHTML = '';
-
         messages.forEach(msg => {
-            const bubble = document.createElement('div');
-            bubble.className = `msg-bubble ${msg.sender === 'me' ? 'msg-sent' : 'msg-received'}`;
-
-            if (msg.text) {
-                const textEl = document.createElement('div');
-                textEl.style.whiteSpace = 'pre-line';
-                textEl.textContent = msg.text;
-                bubble.appendChild(textEl);
-            }
-
-            if (msg.mediaList?.length) {
-                const grid = document.createElement('div');
-                grid.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:6px; margin-top:6px;';
-
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg-bubble ${msg.sender === 'me' ? 'msg-sent' : 'msg-received'}`;
+            
+            let contentHtml = '';
+            if (msg.text) contentHtml += `<div style="white-space: pre-line;">${msg.text}</div>`;
+            
+            if (msg.mediaList && msg.mediaList.length > 0) {
+                contentHtml += `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:6px; margin-top:6px;">`;
                 msg.mediaList.forEach(m => {
-                    const el = document.createElement(m.type === 'video' ? 'video' : 'img');
-                    el.src = m.url;
-                    el.style.cssText = 'width:100%; height:80px; object-fit:cover; border-radius:8px; cursor:pointer;';
-                    if (m.type === 'video') el.muted = true;
-                    el.addEventListener('click', () => Lightbox.open(m.type, m.url));
-                    grid.appendChild(el);
+                    if (m.type === 'image') {
+                        contentHtml += `<img src="${m.url}" style="width:100%; height:80px; object-fit:cover; border-radius:8px; cursor:pointer;" onclick="openLightbox('image', '${m.url}')">`;
+                    } else {
+                        contentHtml += `<video src="${m.url}" style="width:100%; height:80px; object-fit:cover; border-radius:8px; cursor:pointer;" onclick="openLightbox('video', '${m.url}')"></video>`;
+                    }
                 });
-                bubble.appendChild(grid);
+                contentHtml += `</div>`;
             }
 
-            container.appendChild(bubble);
+            msgDiv.innerHTML = contentHtml;
+            container.appendChild(msgDiv);
         });
         container.scrollTop = container.scrollHeight;
-    },
+    }
 
-    sendMessage() {
+    function sendChatMessage() {
         const input = document.getElementById('chat-input');
-        if (!input) return;
         const text = input.value.trim();
-        if (!text || !State.activeChatId) return;
+        if (!text || !activeChatId) return;
 
-        const chat = State.chats.find(c => c.id === State.activeChatId);
-        if (!chat) return;
-
-        chat.messages.push({ sender: 'me', text });
-        this.renderMessages(chat.messages);
-        input.value = '';
-        State.save();
-        this.renderList();
-    },
-
-    async sendMedia(fileList) {
-        if (!fileList?.length || !State.activeChatId) return;
-        const chat = State.chats.find(c => c.id === State.activeChatId);
-        if (!chat) return;
-
-        const media = await MediaManager.loadFiles(fileList);
-        if (!media.length) return;
-
-        chat.messages.push({
-            sender: 'me',
-            text: media.length > 1 ? `📸 Прикреплено файлов: ${media.length}` : '',
-            mediaList: media.map(m => ({ type: m.type, url: m.url }))
-        });
-        this.renderMessages(chat.messages);
-        State.save();
-        this.renderList();
-    },
-
-    delete(chatId) {
-        const chat = State.chats.find(c => c.id === chatId);
+        const chat = chatData.find(c => c.id === activeChatId);
         if (chat) {
-            chat.messages?.forEach(msg => MediaManager.revoke(msg.mediaList || []));
+            chat.messages.push({ sender: 'me', text: text });
+            renderMessages(chat.messages);
+            input.value = '';
+            renderChatsList();
         }
-        State.chats = State.chats.filter(c => c.id !== chatId);
-        State.save();
-        this.renderList();
-        if (State.activeChatId === chatId) this.close();
-        Toast.show('🗑️ Диалог удалён');
-    },
-
-    deleteActive() {
-        if (!State.activeChatId) return;
-        this.delete(State.activeChatId);
     }
-};
 
-const ProfileModule = {
-    render() {
-        const set = (id, text) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-        set('profile-display-name', State.profile.name || 'Гость');
-        set('profile-display-phone', State.profile.phone || 'Телефон не указан');
-        set('profile-display-city', `📍 ${State.profile.city || 'Санкт-Петербург'}`);
-        set('profile-avatar-icon',
-            State.profile.name ? State.profile.name[0].toUpperCase() : '👤');
-        set('profile-rating-val', `${State.profile.rating.toFixed(1)} ★`);
-        this.renderReviews();
-    },
+    function sendChatMediaMultiple(evt) {
+        const files = Array.from(evt.target.files);
+        if (!files.length || !activeChatId) return;
 
-    renderReviews() {
-        const container = document.getElementById('profile-reviews-list');
-        if (!container) return;
-        container.innerHTML = '';
+        const mediaList = [];
+        let loadedCount = 0;
 
-        const reviews = State.profile.reviews || [];
-        if (!reviews.length) {
-            const empty = document.createElement('div');
-            empty.style.cssText = 'font-size:12px; color:var(--text-sub);';
-            empty.textContent = 'Пока нет отзывов';
-            container.appendChild(empty);
-            return;
-        }
+        files.forEach(file => {
+            const isVideo = file.type.startsWith('video');
+            const reader = new FileReader();
 
-        reviews.forEach(r => {
-            const card = document.createElement('div');
-            card.className = 'review-card';
+            reader.onload = function(e) {
+                mediaList.push({ type: isVideo ? 'video' : 'image', url: e.target.result });
+                loadedCount++;
 
-            const head = document.createElement('div');
-            head.style.cssText = 'display:flex; justify-content:space-between; margin-bottom:4px;';
-
-            const author = document.createElement('span');
-            author.style.cssText = 'font-weight:700; font-size:13px;';
-            author.textContent = r.author;
-
-            const stars = document.createElement('span');
-            stars.style.cssText = 'color:var(--accent-gold); font-size:12px;';
-            stars.textContent = '★'.repeat(r.stars);
-
-            head.append(author, stars);
-
-            const text = document.createElement('div');
-            text.style.cssText = 'font-size:12px; color:rgba(255,255,255,0.8);';
-            text.textContent = r.text;
-
-            card.append(head, text);
-            container.appendChild(card);
-        });
-    },
-
-    openEdit() {
-        const setVal = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.value = val;
-        };
-        setVal('reg-name', State.profile.name || '');
-        setVal('reg-phone', State.profile.phone || '');
-        setVal('reg-city', State.profile.city || 'Санкт-Петербург');
-        Modal.open('auth-modal');
-    },
-
-    save() {
-        const name = document.getElementById('reg-name')?.value.trim();
-        const phone = document.getElementById('reg-phone')?.value.trim();
-        const city = document.getElementById('reg-city')?.value.trim();
-
-        if (!name) {
-            Toast.show('⚠️ Укажите ваше имя');
-            return;
-        }
-
-        State.profile.name = name;
-        State.profile.phone = phone || '';
-        State.profile.city = city || '';
-        State.save();
-        this.render();
-        Modal.close('auth-modal');
-        Toast.show('✅ Профиль сохранён!');
-    },
-
-    submitReview() {
-        const text = document.getElementById('review-text')?.value.trim();
-        if (!text) {
-            Toast.show('⚠️ Напишите короткий отзыв');
-            return;
-        }
-
-        State.profile.reviews.unshift({
-            author: State.profile.name || 'Пользователь',
-            stars: State.selectedRating,
-            text
-        });
-
-        const total = State.profile.reviews.reduce((s, r) => s + r.stars, 0);
-        State.profile.rating = total / State.profile.reviews.length;
-
-        State.save();
-        this.render();
-        Modal.close('rate-modal');
-        Toast.show('🌟 Отзыв опубликован!');
-    }
-};
-
-const RatingModule = {
-    open() {
-        this.set(5);
-        const txt = document.getElementById('review-text');
-        if (txt) txt.value = '';
-        Modal.open('rate-modal');
-    },
-    set(val) {
-        State.selectedRating = val;
-        document.querySelectorAll('#star-rating-box .star').forEach((star, idx) => {
-            star.classList.toggle('selected', idx < val);
-        });
-    }
-};
-
-const Lightbox = {
-    open(type, url) {
-        const body = document.getElementById('lightbox-body');
-        if (!body) return;
-        body.innerHTML = '';
-
-        const el = document.createElement(type === 'video' ? 'video' : 'img');
-        el.src = url;
-        el.style.cssText = 'max-width:100%; max-height:80vh; border-radius:16px;';
-        if (type === 'video') {
-            el.controls = true;
-            el.autoplay = true;
-        }
-        body.appendChild(el);
-        Modal.open('lightbox');
-    },
-    close() {
-        Modal.close('lightbox');
-        const body = document.getElementById('lightbox-body');
-        if (body) body.innerHTML = '';
-    }
-};
-
-const Geo = {
-    getUserGPS() {
-        Toast.show('🛰️ Определение местоположения...');
-        if (!navigator.geolocation) {
-            Toast.show('⚠️ Геолокация не поддерживается');
-            return;
-        }
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                State.userLat = pos.coords.latitude;
-                State.userLng = pos.coords.longitude;
-                State.newItemLat = State.userLat;
-                State.newItemLng = State.userLng;
-                this.apply();
-                Toast.show('📍 Геолокация обновлена!');
-            },
-            err => {
-                console.warn('geolocation error:', err);
-                Toast.show('⚠️ Ошибка GPS, использовано по умолчанию');
-                this.apply();
-            },
-            { enableHighAccuracy: true, timeout: 8000 }
-        );
-    },
-
-    apply() {
-        MapModule.setCenter(State.userLat, State.userLng);
-        MapModule.setRadius(State.radiusKm);
-        MapModule.reverseGeocode(State.userLat, State.userLng);
-        MapModule.scheduleMarkersUpdate();
-        SwipeModule.scheduleRender();
-    }
-};
-
-const App = {
-    init() {
-        // 1. Инициализируем Telegram интеграцию ДО загрузки состояния
-        TelegramApp.init();
-
-        // 2. Загружаем состояние (с учётом данных Telegram)
-        State.load();
-
-        window.addEventListener('beforeunload', () => {
-            MediaManager.revokeAllInState();
-        });
-
-        this.populateRegions();
-        this.attachGlobalHandlers();
-
-        MapModule.init();
-        ProfileModule.render();
-        ChatModule.renderList();
-        SwipeModule.render();
-        MyLotsModule.render();
-
-        setTimeout(() => MapModule.fitToViewport(), 300);
-
-        window.addEventListener('resize', Utils.debounce(() => {
-            MapModule.fitToViewport();
-        }, 200));
-    },
-
-    populateRegions() {
-        const select = document.getElementById('region-select');
-        if (!select) return;
-        select.innerHTML = '';
-        REGIONS.forEach((reg, i) => {
-            const opt = document.createElement('option');
-            opt.value = String(i);
-            opt.textContent = reg.name;
-            select.appendChild(opt);
-        });
-        select.value = '1';
-    },
-
-    attachGlobalHandlers() {
-        document.body.addEventListener('click', (e) => {
-            const target = e.target.closest('[data-action], [data-tab], [data-close-modal]');
-            if (!target) return;
-
-            const { action, tab, closeModal: cm } = target.dataset;
-
-            if (cm) { Modal.close(cm); return; }
-            if (tab) { this.switchTab(tab); return; }
-
-            switch (action) {
-                case 'save-registration': ProfileModule.save(); break;
-                case 'open-auth': ProfileModule.openEdit(); break;
-                case 'confirm-offer': OfferModule.confirm(); break;
-                case 'cancel-offer': OfferModule.cancel(); break;
-                case 'submit-review': ProfileModule.submitReview(); break;
-                case 'publish-item': MyLotsModule.publish(); break;
-                case 'open-create-lot': MyLotsModule.openCreateModal(); break;
-                case 'set-gps': Geo.getUserGPS(); break;
-                case 'get-gps': Geo.getUserGPS(); break;
-                case 'offer-from-map': {
-                    Modal.close('map-item-modal');
-                    if (State.selectedMapItem) OfferModule.open(State.selectedMapItem.title);
-                    break;
+                if (loadedCount === files.length) {
+                    const chat = chatData.find(c => c.id === activeChatId);
+                    if (chat) {
+                        chat.messages.push({
+                            sender: 'me',
+                            text: files.length > 1 ? `📸 Прикреплено файлов: ${files.length}` : '',
+                            mediaList: mediaList
+                        });
+                        renderMessages(chat.messages);
+                        renderChatsList();
+                    }
                 }
-                case 'swipe-like': SwipeModule.triggerSwipe(true); break;
-                case 'swipe-pass': SwipeModule.triggerSwipe(false); break;
-                case 'send-message': ChatModule.sendMessage(); break;
-                case 'close-chat': ChatModule.close(); break;
-                case 'open-rating': RatingModule.open(); break;
-                case 'delete-active-chat': ChatModule.deleteActive(); break;
-            }
+            };
+            reader.readAsDataURL(file);
         });
 
-        document.querySelectorAll('#star-rating-box .star').forEach(star => {
-            star.addEventListener('click', () => {
-                RatingModule.set(parseInt(star.dataset.star, 10));
-            });
+        evt.target.value = '';
+    }
+
+    function openRatingModal() {
+        setRating(5);
+        document.getElementById('review-text').value = '';
+        openModal('rate-modal');
+    }
+
+    function setRating(val) {
+        selectedRating = val;
+        const stars = document.querySelectorAll('#star-rating-box .star');
+        stars.forEach((star, idx) => {
+            if (idx < val) star.classList.add('selected');
+            else star.classList.remove('selected');
+        });
+    }
+
+    function submitReview() {
+        const text = document.getElementById('review-text').value.trim();
+        if (!text) {
+            showToast('⚠️ Напишите короткий отзыв');
+            return;
+        }
+
+        userProfile.reviews.unshift({
+            author: userProfile.name || "Пользователь",
+            stars: selectedRating,
+            text: text
         });
 
-        document.getElementById('lightbox')?.addEventListener('click', (e) => {
-            if (e.target.id === 'lightbox') Lightbox.close();
-        });
+        const totalStars = userProfile.reviews.reduce((acc, r) => acc + r.stars, 0);
+        userProfile.rating = totalStars / userProfile.reviews.length;
 
-        document.getElementById('region-select')?.addEventListener('change', (e) => {
-            const reg = REGIONS[parseInt(e.target.value, 10)];
-            if (!reg) return;
-            State.userLat = reg.lat;
-            State.userLng = reg.lng;
-            const label = document.getElementById('current-region-label');
-            if (label) label.textContent = reg.name.split(' ')[0];
-            MapModule.setCenter(State.userLat, State.userLng);
-            MapModule.scheduleMarkersUpdate();
-            SwipeModule.scheduleRender();
-        });
+        updateProfileUI();
+        renderProfileReviews();
+        closeModal('rate-modal');
+        showToast('🌟 Отзыв успешно опубликован!');
+    }
 
-        const radiusSlider = document.getElementById('radius-slider');
-        const onRadiusChange = Utils.debounce((val) => {
-            State.radiusKm = val;
-            const label = document.getElementById('radius-val');
-            if (label) label.textContent = `${val} км`;
-            MapModule.setRadius(val);
-            MapModule.scheduleMarkersUpdate();
-            SwipeModule.scheduleRender();
-        }, 120);
+    function openLightbox(type, url) {
+        const modal = document.getElementById('lightbox');
+        const body = document.getElementById('lightbox-body');
+        if (type === 'image') {
+            body.innerHTML = `<img src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;">`;
+        } else {
+            body.innerHTML = `<video src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;" controls autoplay></video>`;
+        }
+        modal.classList.add('active');
+    }
 
-        radiusSlider?.addEventListener('input', (e) => {
-            onRadiusChange(parseInt(e.target.value, 10));
-        });
+    function closeLightbox() {
+        closeModal('lightbox');
+        document.getElementById('lightbox-body').innerHTML = '';
+    }
 
-        const uploadTrigger = document.getElementById('upload-trigger');
-        const fileInput = document.getElementById('file-input');
-        uploadTrigger?.addEventListener('click', () => fileInput?.click());
+    function showToast(text) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-text').innerText = text;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 
-        fileInput?.addEventListener('change', async (e) => {
-            const media = await MediaManager.loadFiles(e.target.files);
-            const preview = document.getElementById('preview-list');
-            media.forEach(m => {
-                State.uploadedMedia.push(m);
-                preview?.appendChild(MediaManager.createThumb(m));
-            });
-            e.target.value = '';
-        });
-
-        document.getElementById('chat-input')?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                ChatModule.sendMessage();
-            }
-        });
-
-        const chatAttach = document.getElementById('chat-attach-btn');
-        const chatFileInput = document.getElementById('chat-file-input');
-        chatAttach?.addEventListener('click', () => chatFileInput?.click());
-        chatFileInput?.addEventListener('change', async (e) => {
-            await ChatModule.sendMedia(e.target.files);
-            e.target.value = '';
-        });
-    },
-
-    switchTab(tabName) {
+    function switchTab(tabName) {
+        document.getElementById('view-single-chat').style.display = 'none';
         document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
         const targetView = document.getElementById(`view-${tabName}`);
-        if (targetView) targetView.classList.add('active');
-
+        if (targetView) {
+            targetView.classList.add('active');
+        }
+        
         const navMap = { 'swipe': 0, 'map': 1, 'my-lots': 2, 'chats': 3 };
         if (navMap[tabName] !== undefined) {
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems[navMap[tabName]]?.classList.add('active');
+            document.querySelectorAll('.nav-item')[navMap[tabName]].classList.add('active');
         }
 
-        if (tabName === 'map') {
-            setTimeout(() => MapModule.fitToViewport(), 200);
+        if (tabName === 'map' && yMapFull) {
+            setTimeout(() => yMapFull.container.fitToViewport(), 200);
         }
-        if (tabName === 'my-lots') {
-            MyLotsModule.render();
-        }
-        if (tabName === 'chats') {
-            ChatModule.renderList();
-        }
-        if (tabName === 'profile') {
-            ProfileModule.render();
-        }
+
+        // Управляем кнопкой "Назад" в Telegram (безопасно)
+        TelegramApp.showBackButton(tabName !== 'swipe');
     }
-};
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => App.init());
-} else {
-    App.init();
-}
-
-})();
 </script>
 </body>
 </html>

@@ -438,7 +438,7 @@
 /* ============================================================
    SUPABASE
    ============================================================ */
-const SUPABASE_URL = 'https://pqmlxnapfjzprtbkjfke.supabase.co';
+const SUPABASE_URL = 'https://pqmlxnapfjzprtbkjfke.supabase.co;
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbWx4bmFwZmp6cHJ0YmtqZmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzcyOTksImV4cCI6MjEwNDk1MzI5OX0.cRW_goFrXxjg3q209USNjkTcJpUy9yF5_ib_4DEjdaE';
 
 const { createClient } = supabase;
@@ -522,7 +522,7 @@ let currentMessages = [];
 
 let seenItemIds = new Set(JSON.parse(localStorage.getItem('dm_seen') || '[]'));
 function markItemSeen(id) {
-    seenItemIds.add(id);
+    seenItemIds.add(String(id));
     try { localStorage.setItem('dm_seen', JSON.stringify([...seenItemIds].slice(-500))); } catch (e) {}
 }
 
@@ -622,15 +622,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     sb.channel('items-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'items' }, async (payload) => {
             const newItem = payload.new;
-            console.log('🆕 Новый лот:', newItem.title);
-
             if (newItem.owner_id === userProfile.id) {
                 await loadItems();
                 renderMyLotsGrid();
                 updateMapMarkers();
                 return;
             }
-            if (seenItemIds.has(newItem.id)) {
+            if (seenItemIds.has(String(newItem.id))) {
                 await loadItems();
                 updateMapMarkers();
                 return;
@@ -642,7 +640,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             await loadItems();
-            const item = allItems.find(i => i.id === newItem.id);
+            const item = allItems.find(i => String(i.id) === String(newItem.id));
             if (item) {
                 item.currentDist = dist;
                 addNewCardToDeck(item);
@@ -657,7 +655,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             updateMapMarkers();
         })
         .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'items' }, async (payload) => {
-            allItems = allItems.filter(i => i.id !== payload.old.id);
+            allItems = allItems.filter(i => String(i.id) !== String(payload.old.id));
             updateMapMarkers();
             renderMyLotsGrid();
             renderCards();
@@ -683,7 +681,7 @@ function updateChatsBadge() {
     const unreadCount = chatList.filter(chat => {
         if (String(chat.id) === String(activeChatId)) return false;
         if (readChatIds.has(String(chat.id))) return false;
-        return chat.lastMessageSenderId && chat.lastMessageSenderId !== userProfile.id;
+        return chat.lastMessageSenderId && String(chat.lastMessageSenderId) !== String(userProfile.id);
     }).length;
 
     if (unreadCount > 0) {
@@ -868,7 +866,7 @@ async function loadItems() {
         media: item.media || [],
         lat: parseFloat(item.lat),
         lng: parseFloat(item.lng),
-        isMine: item.owner_id === userProfile.id,
+        isMine: String(item.owner_id) === String(userProfile.id),
         ownerId: item.owner_id,
         ownerName: item.profiles?.name || 'Пользователь',
         ownerRating: item.profiles?.rating || 5.0,
@@ -894,6 +892,7 @@ async function publishItem() {
     const mediaData = realMedia.map(m => ({ type: m.type, url: m.publicUrl || m.url }));
 
     if (editingItemId) {
+        console.log('✏️ Обновляем лот ID:', editingItemId);
         const { error } = await sb.from('items').update({
             title, swap_for: swap, description: desc || 'Новое предложение',
             condition, media: mediaData, lat: finalLat, lng: finalLng
@@ -901,6 +900,7 @@ async function publishItem() {
         if (error) { console.error(error); showToast('⚠️ Ошибка обновления'); return; }
         showToast('✅ Лот обновлён!');
     } else {
+        console.log('➕ Создаём новый лот');
         const newItem = {
             owner_id: userProfile.id, title, swap_for: swap,
             description: desc || 'Новое предложение', condition,
@@ -927,10 +927,19 @@ async function publishItem() {
 }
 
 function editMyItem(id) {
-    const item = allItems.find(i => i.id === id);
-    if (!item) { showToast('⚠️ Лот не найден'); return; }
+    console.log('🔍 Ищем лот с ID:', id, 'тип:', typeof id);
+    const item = allItems.find(i => String(i.id) === String(id));
 
-    editingItemId = id;
+    if (!item) {
+        console.error('❌ Лот не найден. Все ID:', allItems.map(i => i.id));
+        showToast('⚠️ Лот не найден');
+        return;
+    }
+
+    console.log('✅ Лот найден:', item.title);
+
+    editingItemId = item.id;
+
     document.getElementById('add-lot-title').innerText = 'Редактировать лот';
     document.getElementById('add-title').value = item.title || '';
     document.getElementById('add-swap').value = item.swapFor || '';
@@ -958,8 +967,13 @@ function editMyItem(id) {
 
 async function deleteMyItem(id) {
     if (!confirm('Удалить лот?')) return;
+    console.log('🗑️ Удаляем лот:', id);
     const { error } = await sb.from('items').delete().eq('id', id);
-    if (error) { showToast('⚠️ Ошибка удаления'); return; }
+    if (error) {
+        console.error('Delete error:', error);
+        showToast('⚠️ Ошибка удаления');
+        return;
+    }
     await loadItems();
     renderCards();
     renderMyLotsGrid();
@@ -980,17 +994,38 @@ function renderMyLotsGrid() {
     container.innerHTML = myItems.map(item => `
         <div class="my-lot-card">
             <div class="my-lot-img-wrapper">
-                <img src="${escapeHtml(item.media[0]?.url || '')}" class="my-lot-img" loading="lazy">
+                <img src="${escapeHtml(item.media[0]?.url || '')}" class="my-lot-img" loading="lazy" onerror="this.style.display='none'">
                 <span class="my-lot-badge">${escapeHtml(item.condition)}</span>
             </div>
             <div class="my-lot-title">${escapeHtml(item.title)}</div>
             <div class="my-lot-swap">Ищу: ${escapeHtml(item.swapFor)}</div>
             <div class="my-lot-actions">
-                <button class="btn-edit-lot" onclick="editMyItem('${item.id}')">✏️ Изменить</button>
-                <button class="btn-delete-lot" onclick="deleteMyItem('${item.id}')">🗑️</button>
+                <button class="btn-edit-lot" data-edit-id="${escapeHtml(String(item.id))}">✏️ Изменить</button>
+                <button class="btn-delete-lot" data-delete-id="${escapeHtml(String(item.id))}">🗑️</button>
             </div>
         </div>
     `).join('');
+
+    // ✅ Вешаем обработчики через addEventListener
+    container.querySelectorAll('[data-edit-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = btn.getAttribute('data-edit-id');
+            console.log('✏️ Редактирование ID:', id);
+            editMyItem(id);
+        });
+    });
+
+    container.querySelectorAll('[data-delete-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = btn.getAttribute('data-delete-id');
+            console.log('🗑️ Удаление ID:', id);
+            deleteMyItem(id);
+        });
+    });
 }
 
 /* ============================================================
@@ -1003,7 +1038,7 @@ function renderCards() {
 
     const filtered = allItems.filter(item => {
         if (item.isMine) return false;
-        if (seenItemIds.has(item.id)) return false;
+        if (seenItemIds.has(String(item.id))) return false;
         const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
         item.currentDist = dist;
         return dist <= currentRadiusKm;
@@ -1030,7 +1065,7 @@ function createCardElement(item, zIndex) {
     const card = document.createElement('div');
     card.className = 'swipe-card';
     card.style.zIndex = zIndex;
-    card.dataset.itemId = item.id;
+    card.dataset.itemId = String(item.id);
     card.dataset.title = item.title;
     card._item = item;
     card._mediaIndex = 0;
@@ -1186,7 +1221,7 @@ function completeSwipe(card, isLike, offeredIds = []) {
     const item = card._item;
     if (!item) return;
     markItemSeen(item.id);
-    allItems = allItems.filter(i => i.id !== item.id);
+    allItems = allItems.filter(i => String(i.id) !== String(item.id));
 
     const moveX = isLike ? window.innerWidth : -window.innerWidth;
     card.style.transform = `translate3d(${moveX}px, ${card.offsetHeight}px, 0) rotate(${isLike ? 30 : -30}deg)`;
@@ -1252,7 +1287,7 @@ function cancelOfferModal() {
 
 function confirmOfferAndSwipe() {
     closeModal('offer-modal');
-    const selectedIds = Array.from(document.querySelectorAll('.offer-checkbox:checked')).map(c => parseInt(c.value));
+    const selectedIds = Array.from(document.querySelectorAll('.offer-checkbox:checked')).map(c => c.value);
 
     if (pendingSwipeCard) {
         const card = pendingSwipeCard;
@@ -1269,7 +1304,7 @@ function confirmOfferAndSwipe() {
    ЧАТЫ
    ============================================================ */
 async function createChatWith(item, offeredIds = []) {
-    if (!item.ownerId || item.ownerId === userProfile.id) return;
+    if (!item.ownerId || String(item.ownerId) === String(userProfile.id)) return;
 
     const { data: existingChats, error: searchErr } = await sb.from('chats')
         .select('id, item_id')
@@ -1296,7 +1331,7 @@ async function createChatWith(item, offeredIds = []) {
         isNewChat = true;
     }
 
-    const offeredItems = allItems.filter(i => offeredIds.includes(i.id));
+    const offeredItems = allItems.filter(i => offeredIds.includes(String(i.id)));
     const names = offeredItems.map(i => `«${i.title}»`).join(', ');
 
     let text;
@@ -1332,11 +1367,11 @@ async function loadChats() {
     if (error) { console.error('Chats error:', error); throw error; }
     if (!chats || chats.length === 0) { chatList = []; return; }
 
-    const otherIds = [...new Set(chats.map(c => c.user1_id === userProfile.id ? c.user2_id : c.user1_id))];
+    const otherIds = [...new Set(chats.map(c => String(c.user1_id) === String(userProfile.id) ? c.user2_id : c.user1_id))];
 
     const { data: profiles } = await sb.from('profiles').select('id, name, username, avatar').in('id', otherIds);
     const profileMap = {};
-    (profiles || []).forEach(p => { profileMap[p.id] = p; });
+    (profiles || []).forEach(p => { profileMap[String(p.id)] = p; });
 
     const chatIds = chats.map(c => c.id);
     const { data: lastMsgs } = await sb.from('messages')
@@ -1348,8 +1383,8 @@ async function loadChats() {
     (lastMsgs || []).forEach(m => { if (!lastMsgMap[m.chat_id]) lastMsgMap[m.chat_id] = m; });
 
     chatList = chats.map(chat => {
-        const otherId = chat.user1_id === userProfile.id ? chat.user2_id : chat.user1_id;
-        const otherProfile = profileMap[otherId] || {};
+        const otherId = String(chat.user1_id) === String(userProfile.id) ? chat.user2_id : chat.user1_id;
+        const otherProfile = profileMap[String(otherId)] || {};
         const lastMsg = lastMsgMap[chat.id];
         return {
             id: chat.id,
@@ -1385,14 +1420,14 @@ function renderChatsList() {
 
         const isUnread = !readChatIds.has(String(chat.id)) &&
                          chat.lastMessageSenderId &&
-                         chat.lastMessageSenderId !== userProfile.id;
+                         String(chat.lastMessageSenderId) !== String(userProfile.id);
 
         const unreadDot = isUnread
             ? `<div style="width:10px; height:10px; border-radius:50%; background:#FF2D55; flex-shrink:0;"></div>`
             : '';
 
         el.innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;" onclick="openChat(${chat.id})">
+            <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;" onclick="openChat('${chat.id}')">
                 ${avatarHtml}
                 <div style="min-width:0; flex:1;">
                     <div style="font-weight:700; font-size:14px;">${escapeHtml(chat.otherName)}</div>
@@ -1400,7 +1435,7 @@ function renderChatsList() {
                 </div>
                 ${unreadDot}
             </div>
-            <button class="action-icon-btn delete-btn" onclick="event.stopPropagation(); deleteChat(${chat.id})">🗑️</button>
+            <button class="action-icon-btn delete-btn" onclick="event.stopPropagation(); deleteChat('${chat.id}')">🗑️</button>
         `;
         container.appendChild(el);
     });
@@ -1408,7 +1443,7 @@ function renderChatsList() {
 
 async function openChat(chatId) {
     activeChatId = chatId;
-    const chat = chatList.find(c => c.id === chatId);
+    const chat = chatList.find(c => String(c.id) === String(chatId));
     if (!chat) return;
 
     document.getElementById('single-chat-name').innerText = chat.otherName;
@@ -1442,7 +1477,7 @@ function renderMessages() {
     container.innerHTML = '';
     currentMessages.forEach(msg => {
         const div = document.createElement('div');
-        div.className = `msg-bubble ${msg.sender_id === userProfile.id ? 'msg-sent' : 'msg-received'}`;
+        div.className = `msg-bubble ${String(msg.sender_id) === String(userProfile.id) ? 'msg-sent' : 'msg-received'}`;
         div.innerHTML = `<div style="white-space: pre-line;">${escapeHtml(msg.text || '')}</div>`;
         container.appendChild(div);
     });
@@ -1472,7 +1507,7 @@ async function deleteChat(chatId) {
     await loadChats();
     renderChatsList();
     updateChatsBadge();
-    if (activeChatId === chatId) closeChat();
+    if (String(activeChatId) === String(chatId)) closeChat();
     showToast('🗑️ Диалог удалён');
 }
 
@@ -1498,7 +1533,7 @@ async function submitReview() {
     const text = document.getElementById('review-text').value.trim();
     if (!text) { showToast('⚠️ Напишите отзыв'); return; }
     if (!activeChatId) return;
-    const chat = chatList.find(c => c.id === activeChatId);
+    const chat = chatList.find(c => String(c.id) === String(activeChatId));
     if (!chat) return;
 
     const { error } = await sb.from('reviews').insert({

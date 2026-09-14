@@ -1,0 +1,2859 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ДарМаркет — P2P Обмен вещами</title>
+    
+    <!-- 1. ПОДКЛЮЧАЕМ TELEGRAM WEB APP API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Яндекс Карты API -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    
+    <style>
+        /* 2. ПЕРЕМЕННЫЕ ТЕМЫ — используются как фолбэк, если Telegram-тема недоступна */
+        :root {
+            --bg-dark: #090A0F;
+            --card-bg: rgba(22, 24, 35, 0.85);
+            --card-border: rgba(255, 255, 255, 0.08);
+            
+            --primary-grad: linear-gradient(135deg, #FF2D55 0%, #7000FF 100%);
+            --accent-purple: #7000FF;
+            --accent-pink: #FF2D55;
+            --accent-green: #30D158;
+            --accent-gold: #FFD166;
+            
+            --text-main: #FFFFFF;
+            --text-sub: #8E8E93;
+            --glass: rgba(255, 255, 255, 0.05);
+            
+            /* Telegram-тема подхватится автоматически через JS */
+            --tg-theme-bg-color: var(--bg-dark);
+            --tg-theme-text-color: var(--text-main);
+            --tg-theme-hint-color: var(--text-sub);
+            --tg-theme-button-color: var(--accent-pink);
+            --tg-theme-button-text-color: #FFFFFF;
+            --tg-theme-secondary-bg-color: #12141C;
+            --tg-theme-section-bg-color: #12141C;
+            --tg-theme-section-separator-color: var(--card-border);
+            
+            /* Safe area для iPhone с вырезом */
+            --tg-viewport-safe-area-inset-top: 0px;
+            --tg-viewport-safe-area-inset-bottom: 0px;
+            --tg-viewport-content-safe-area-inset-top: 0px;
+        }
+
+        /* 3. АДАПТАЦИЯ ПОД ТЕМНУЮ/СВЕТЛУЮ ТЕМУ TELEGRAM */
+        [data-tg-theme="light"] {
+            --bg-dark: #FFFFFF;
+            --card-bg: rgba(240, 240, 245, 0.95);
+            --card-border: rgba(0, 0, 0, 0.08);
+            --text-main: #000000;
+            --text-sub: #6D6D72;
+            --glass: rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: var(--tg-theme-bg-color, var(--bg-dark));
+            color: var(--tg-theme-text-color, var(--text-main));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 4. ВЫСОТА С УЧЁТОМ SAFE AREA */
+            min-height: calc(100dvh - var(--tg-viewport-safe-area-inset-top, 0px) - var(--tg-viewport-safe-area-inset-bottom, 0px));
+            min-height: calc(100vh - var(--tg-viewport-safe-area-inset-top, 0px) - var(--tg-viewport-safe-area-inset-bottom, 0px));
+            padding-top: var(--tg-viewport-content-safe-area-inset-top, 0px);
+            padding-bottom: var(--tg-viewport-safe-area-inset-bottom, 0px);
+        }
+
+        /* ===== КОНТЕЙНЕР ПРИЛОЖЕНИЯ ===== */
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background-color: var(--bg-dark);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+        }
+
+        /* На десктопе — рамка телефона */
+        @media (min-width: 421px) {
+            body {
+                padding: 16px;
+            }
+            .app-container {
+                border-radius: 32px;
+                height: min(92dvh, 880px);
+                height: min(92vh, 880px);
+                border: 1px solid var(--card-border);
+            }
+        }
+
+        /* Внутри Telegram — без рамки, на весь экран */
+        body.telegram-mini-app .app-container {
+            max-width: 100%;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.85));
+            backdrop-filter: blur(16px);
+            z-index: 100;
+            border-bottom: 1px solid var(--card-border);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            background: var(--primary-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .location-badge {
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(8px);
+            max-width: 180px;
+            overflow: hidden;
+        }
+
+        .location-badge span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-profile-btn {
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-profile-btn:active {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* ===== VIEWS ===== */
+        .view-content {
+            flex: 1;
+            position: relative;
+            display: none;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .view-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        /* ===== DECK & CARDS ===== */
+        .deck-container {
+            flex: 1;
+            position: relative;
+            margin: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            min-height: 0;
+        }
+
+        .swipe-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+            background: #12141C;
+            border: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            user-select: none;
+            cursor: grab;
+            will-change: transform;
+        }
+
+        .swipe-card:active {
+            cursor: grabbing;
+        }
+
+        .swipe-badge {
+            position: absolute;
+            top: 40px;
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            border: 3px solid;
+            transition: opacity 0.1s linear;
+        }
+
+        .badge-like {
+            left: 20px;
+            color: #30D158;
+            border-color: #30D158;
+            transform: rotate(-15deg);
+        }
+
+        .badge-pass {
+            right: 20px;
+            color: #FF453A;
+            border-color: #FF453A;
+            transform: rotate(15deg);
+        }
+
+        .carousel-container {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .media-item {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .media-item.active {
+            display: block;
+        }
+
+        .carousel-controls {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 2;
+            display: flex;
+        }
+
+        .carousel-btn-left, .carousel-btn-right {
+            flex: 1;
+            height: 100%;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            top: 14px;
+            left: 14px; right: 14px;
+            display: flex;
+            gap: 6px;
+            z-index: 3;
+        }
+
+        .indicator-dot {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            background: #FFFFFF;
+            box-shadow: 0 0 8px rgba(255,255,255,0.8);
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 35%, rgba(9,10,15,0.95) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .card-top-info {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            justify-content: space-between;
+            padding: 24px 16px 0 16px;
+        }
+
+        .distance-tag, .media-type-tag {
+            background: rgba(18, 20, 28, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .card-bottom-info {
+            position: relative;
+            z-index: 3;
+            padding: 22px;
+        }
+
+        .card-owner-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            pointer-events: none;
+        }
+
+        .owner-rating {
+            color: var(--accent-gold);
+            font-weight: 700;
+            background: rgba(255, 209, 102, 0.15);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            border: 1px solid rgba(255, 209, 102, 0.3);
+        }
+
+        .item-title {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .item-swap-for {
+            font-size: 14px;
+            color: #FFD166;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .item-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.45;
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls {
+            padding: 12px 20px 18px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .btn-circle {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn-circle:active {
+            transform: scale(0.88);
+        }
+
+        .btn-pass {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--card-border);
+            color: #FF453A;
+        }
+
+        .btn-like {
+            background: var(--primary-grad);
+            color: white;
+            box-shadow: 0 10px 25px rgba(255, 45, 85, 0.4);
+        }
+
+        /* ===== MAP ===== */
+        .map-view-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            min-height: 0;
+        }
+
+        .map-header-tools {
+            padding: 12px 16px;
+            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.95));
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .map-box-full {
+            flex: 1;
+            width: 100%;
+            z-index: 1;
+            min-height: 0;
+        }
+
+        select, input[type="text"], input[type="tel"], textarea, input[type="range"] {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+        }
+
+        select option {
+            background: #12141C;
+            color: white;
+        }
+
+        .radius-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .btn-gps {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* ===== MY LOTS ===== */
+        .my-lots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .my-lot-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .my-lot-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .my-lot-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .my-lot-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(18, 20, 28, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #FFF;
+        }
+
+        .my-lot-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .my-lot-swap {
+            font-size: 10px;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 10px;
+        }
+
+        .btn-delete-lot {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #FF2D55;
+            padding: 8px 0;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .btn-delete-lot:active {
+            background: rgba(255, 45, 85, 0.2);
+        }
+
+        /* ===== PROFILE ===== */
+        .profile-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: var(--glass);
+            border-radius: 24px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar-big {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: var(--primary-grad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4);
+        }
+
+        .profile-stats {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .stat-item {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .stat-val {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        /* ===== UPLOAD ===== */
+        .upload-box {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255,255,255,0.03);
+            margin-bottom: 12px;
+            transition: border-color 0.2s ease;
+        }
+
+        .upload-box:hover {
+            border-color: var(--accent-pink);
+        }
+
+        .media-preview-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+        }
+
+        .preview-thumb {
+            width: 75px;
+            height: 75px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--card-border);
+            background: #000;
+            flex-shrink: 0;
+        }
+
+        /* ===== CHAT ===== */
+        .chat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .chat-item:active {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-grad);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .action-icon-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .action-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .delete-btn {
+            background: rgba(255, 69, 58, 0.15);
+            border: 1px solid rgba(255, 69, 58, 0.3);
+            color: #FF453A;
+        }
+
+        .single-chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.9));
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            flex-shrink: 0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+        }
+
+        .msg-bubble {
+            max-width: 82%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.45;
+            word-wrap: break-word;
+        }
+
+        .msg-received {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--card-border);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-sent {
+            background: var(--primary-grad);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.3);
+        }
+
+        .chat-input-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--tg-theme-secondary-bg-color, rgba(9, 10, 15, 0.95));
+            border-top: 1px solid var(--card-border);
+            flex-shrink: 0;
+        }
+
+        .attach-btn, .send-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .send-btn {
+            background: var(--primary-grad);
+            border: none;
+            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.4);
+        }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            z-index: 5000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--tg-theme-section-bg-color, #12141C);
+            border: 1px solid var(--card-border);
+            width: 100%;
+            max-width: 380px;
+            border-radius: 28px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            max-height: 90dvh;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .offer-item-check {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+        }
+
+        .offer-item-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-pink);
+            cursor: pointer;
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            font-size: 32px;
+            cursor: pointer;
+            margin: 6px 0;
+        }
+
+        .star-rating .star {
+            color: rgba(255,255,255,0.2);
+            transition: color 0.2s;
+        }
+
+        .star-rating .star.selected {
+            color: var(--accent-gold);
+        }
+
+        .review-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            height: 64px;
+            background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95));
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--card-border);
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--tg-theme-hint-color, var(--text-sub));
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: var(--tg-theme-button-color, var(--accent-pink));
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* ===== TOAST ===== */
+        .match-toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--primary-grad);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(255, 45, 85, 0.5);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 90%;
+        }
+
+        .match-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Плавный скролл для тача */
+        #view-chats, #view-my-lots, #view-profile, .chat-messages, .modal-box {
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="toast" class="match-toast">
+        <span id="toast-text">❤️ Взаимность отправлена!</span>
+    </div>
+
+    <!-- MODAL 1: Registration / Profile Edit -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="text-align:center; font-weight:900; background:var(--primary-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Профиль</h2>
+            <p style="text-align:center; font-size:12px; color:var(--text-sub);">Ваши данные для обмена</p>
+            <input type="text" id="reg-name" placeholder="Ваше имя" maxlength="40">
+            <input type="tel" id="reg-phone" placeholder="+7 (999) 000-00-00" maxlength="20">
+            <input type="text" id="reg-city" placeholder="Ваш город" value="Санкт-Петербург" maxlength="50">
+            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; margin-top:8px;" data-action="save-registration">Сохранить</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-close-modal="auth-modal">Отмена</button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Offer Items Selection -->
+    <div id="offer-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="text-align:center; font-weight:800;">Что вы предлагаете взамен?</h3>
+            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Выберите свои лоты, которые готовы обменять на <b id="offer-target-title" style="color:var(--text-main);">вещь</b></p>
+            <div id="offer-items-list" style="display:flex; flex-direction:column; gap:8px; margin:10px 0; max-height:220px; overflow-y:auto;"></div>
+            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" data-action="confirm-offer">Предложить обмен 🔄</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-action="cancel-offer">Пропустить предложение</button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Rate Deal -->
+    <div id="rate-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="text-align:center; font-weight:800;">Завершение сделки</h3>
+            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Оцените обменяющегося пользователя и оставьте отзыв</p>
+            <div class="star-rating" id="star-rating-box">
+                <span class="star" data-star="1">★</span>
+                <span class="star" data-star="2">★</span>
+                <span class="star" data-star="3">★</span>
+                <span class="star" data-star="4">★</span>
+                <span class="star" data-star="5">★</span>
+            </div>
+            <textarea id="review-text" placeholder="Напишите пару слов об обмене..." rows="3" maxlength="500"></textarea>
+            <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" data-action="submit-review">Отправить отзыв 🌟</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-close-modal="rate-modal">Отмена</button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Create Lot -->
+    <div id="add-lot-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
+            <h2 style="text-align:center; font-weight:800;">Выложить лот на обмен</h2>
+            <input type="text" id="add-title" placeholder="Название вещи" maxlength="80">
+            <input type="text" id="add-swap" placeholder="Что вы хотите взамен?" maxlength="120">
+            <div>
+                <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">Состояние предмета:</label>
+                <select id="add-condition">
+                    <option value="Новое с биркой">Новое с биркой</option>
+                    <option value="Отличное" selected>Отличное</option>
+                    <option value="Хорошее">Хорошее</option>
+                    <option value="Среднее">Среднее</option>
+                </select>
+            </div>
+            <textarea id="add-desc" placeholder="Описание состояния вещи..." rows="3" maxlength="500"></textarea>
+            <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы (фото / видео):</label>
+            <div class="upload-box" id="upload-trigger">
+                📸 Нажмите, чтобы загрузить файлы
+                <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;">
+            </div>
+            <div class="media-preview-list" id="preview-list"></div>
+            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение — кликните по карте:</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button class="btn-gps" style="font-size:12px; padding:8px 12px;" data-action="set-gps">🎯 Моё гео</button>
+                <span id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); flex:1; line-height:1.3;">
+                    Кликните по карте или перетащите метку
+                </span>
+            </div>
+            <div id="map-add" style="height:190px; border-radius:16px; margin-top:6px; overflow:hidden; border:1px solid var(--card-border);"></div>
+            <div style="font-size:11px; color:var(--text-sub); text-align:center;">
+                💡 Нажмите на карту, чтобы поставить метку туда, где находится вещь
+            </div>
+            <button class="btn-gps" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px;" data-action="publish-item">Опубликовать лот</button>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" data-close-modal="add-lot-modal">Отмена</button>
+        </div>
+    </div>
+
+    <!-- MODAL 5: DETAIL CARD FROM MAP -->
+    <div id="map-item-modal" class="modal-overlay">
+        <div class="modal-box" style="padding:0; overflow:hidden; border-radius:24px;">
+            <div style="position:relative; width:100%; height:220px; background:#000;">
+                <img id="map-modal-img" src="" alt="" style="width:100%; height:100%; object-fit:cover;">
+                <span id="map-modal-condition" class="my-lot-badge" style="top:12px; right:12px; font-size:12px; padding:4px 10px;"></span>
+                <span id="map-modal-dist" class="distance-tag" style="position:absolute; bottom:12px; left:12px; z-index:2;"></span>
+            </div>
+            <div style="padding:18px;">
+                <div class="card-owner-info" style="margin-bottom:8px;">
+                    <span id="map-modal-owner"></span>
+                    <span id="map-modal-rating" class="owner-rating">★ 5.0</span>
+                </div>
+                <h2 id="map-modal-title" style="font-size:20px; font-weight:800; margin-bottom:4px;"></h2>
+                <div id="map-modal-swap" style="font-size:13px; color:var(--accent-gold); font-weight:600; margin-bottom:10px;"></div>
+                <div id="map-modal-desc" style="font-size:12px; color:var(--text-sub); line-height:1.4; margin-bottom:16px;"></div>
+                <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; font-size:14px;" data-action="offer-from-map">Предложить обмен 🔄</button>
+                <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px; margin-top:8px;" data-close-modal="map-item-modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="modal-overlay">
+        <span style="position:absolute; top:20px; right:20px; font-size:32px; color:#fff; cursor:pointer; z-index:2;" data-close-modal="lightbox">&times;</span>
+        <div id="lightbox-body"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="app-header">
+        <div class="logo" data-tab="swipe">ДарМаркет</div>
+        <div class="header-actions">
+            <div class="location-badge" data-action="get-gps" title="Определить моё местоположение">
+                📍 <span id="current-region-label">Определение...</span>
+            </div>
+            <div class="header-profile-btn" data-tab="profile" title="Мой профиль">👤</div>
+        </div>
+    </div>
+
+    <!-- VIEW 1: SWIPER -->
+    <div id="view-swipe" class="view-content active">
+        <div class="deck-container" id="deck"></div>
+        <div class="controls" id="controls-bar">
+            <button class="btn-circle btn-pass" data-action="swipe-pass">✕</button>
+            <button class="btn-circle btn-like" data-action="swipe-like">♥</button>
+        </div>
+    </div>
+
+    <!-- VIEW 2: MAP -->
+    <div id="view-map" class="view-content">
+        <div class="map-view-container">
+            <div class="map-header-tools">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <select id="region-select" style="flex:1;"></select>
+                    <button class="btn-gps" data-action="get-gps">📍 Моё гео</button>
+                </div>
+                <div class="radius-info">
+                    <span>Радиус обмена:</span>
+                    <span id="radius-val" style="color:white; font-weight:bold;">15 км</span>
+                </div>
+                <input type="range" id="radius-slider" min="1" max="100" value="15">
+            </div>
+            <div id="map-full" class="map-box-full"></div>
+        </div>
+    </div>
+
+    <!-- VIEW 3: CHATS LIST -->
+    <div id="view-chats" class="view-content" style="padding: 18px; overflow-y:auto;">
+        <h2 style="margin-bottom:18px; font-weight:800; letter-spacing:-0.5px;">Чаты и совпадения</h2>
+        <div id="chats-list"></div>
+    </div>
+
+    <!-- VIEW 3.1: SINGLE CHAT -->
+    <div id="view-single-chat" class="view-content" style="flex-direction:column; height:100%;">
+        <div class="single-chat-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button style="background:none; border:none; color:var(--text-main); font-size:20px; cursor:pointer;" data-action="close-chat">←</button>
+                <div class="chat-avatar" id="single-chat-avatar" style="width:40px; height:40px; font-size:18px;">💬</div>
+                <div>
+                    <div id="single-chat-name" style="font-weight:700; font-size:14px;">Имя</div>
+                    <div style="font-size:10px; color:#30D158;">● В сети</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button class="action-icon-btn" title="Завершить сделку" data-action="open-rating">🤝</button>
+                <button class="action-icon-btn delete-btn" title="Удалить" data-action="delete-active-chat">🗑️</button>
+            </div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-bar">
+            <button class="attach-btn" id="chat-attach-btn">📎</button>
+            <input type="file" id="chat-file-input" accept="image/*,video/*" multiple style="display:none;">
+            <input type="text" id="chat-input" placeholder="Напишите сообщение..." maxlength="1000">
+            <button class="send-btn" data-action="send-message">➔</button>
+        </div>
+    </div>
+
+    <!-- VIEW 4: MY LOTS -->
+    <div id="view-my-lots" class="view-content" style="padding: 20px; overflow-y:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+            <div>
+                <h2 style="font-weight:900; font-size:22px;">Мои Лоты</h2>
+                <div style="font-size:12px; color:var(--text-sub);">Вещи, которые вы готовы обменять</div>
+            </div>
+            <button class="btn-gps" style="background:var(--accent-pink); padding:8px 14px; border-radius:18px; font-size:12px;" data-action="open-create-lot">+ Добавить лот</button>
+        </div>
+        <div class="my-lots-grid" id="my-lots-grid-container"></div>
+    </div>
+
+    <!-- VIEW 5: PROFILE -->
+    <div id="view-profile" class="view-content" style="padding: 20px; overflow-y:auto;">
+        <div class="profile-header">
+            <div class="profile-avatar-big" id="profile-avatar-icon">👤</div>
+            <h2 id="profile-display-name" style="font-size:20px; font-weight:800;">Пользователь</h2>
+            <div id="profile-display-phone" style="font-size:12px; color:var(--text-sub); margin-top:2px;"></div>
+            <div id="profile-display-city" style="font-size:12px; color:var(--accent-pink); margin-top:4px;"></div>
+            <div class="profile-stats">
+                <div class="stat-item" data-tab="my-lots">
+                    <div class="stat-val" id="profile-items-count">0</div>
+                    <div class="stat-lbl">Мои лоты</div>
+                </div>
+                <div class="stat-item" data-tab="chats">
+                    <div class="stat-val" id="profile-matches-count">0</div>
+                    <div class="stat-lbl">Совпадения</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val" id="profile-rating-val" style="color:var(--accent-gold);">5.0 ★</div>
+                    <div class="stat-lbl">Рейтинг</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-gps" style="width:100%; background:var(--glass); border:1px solid var(--card-border); color:var(--text-main); margin-bottom:18px; padding:14px; display:flex; justify-content:space-between; align-items:center;" data-tab="my-lots">
+            <span>📦 Управление моими лотами</span><span>➔</span>
+        </button>
+        <h3 style="margin-bottom:12px; font-size:16px;">Отзывы об обменах:</h3>
+        <div id="profile-reviews-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:var(--text-main); margin-top:20px; padding:12px;" data-action="open-auth">✏️ Редактировать профиль</button>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" data-tab="swipe"><span class="nav-icon">🔥</span><span>Обмен</span></div>
+        <div class="nav-item" data-tab="map"><span class="nav-icon">🗺️</span><span>Карта</span></div>
+        <div class="nav-item" data-tab="my-lots"><span class="nav-icon">📦</span><span>Мои лоты</span></div>
+        <div class="nav-item" data-tab="chats"><span class="nav-icon">💬</span><span>Чаты</span></div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   TELEGRAM MINI APP INTEGRATION MODULE
+   Работает и внутри Telegram, и как обычное веб-приложение
+   ============================================================ */
+const TelegramApp = {
+    webApp: null,
+    isInTelegram: false,
+    user: null,
+
+    init() {
+        // Проверяем, запущены ли мы внутри Telegram
+        this.webApp = window.Telegram?.WebApp;
+        
+        if (this.webApp && this.webApp.initData !== undefined) {
+            this.isInTelegram = true;
+            document.body.classList.add('telegram-mini-app');
+            
+            // Сообщаем Telegram, что приложение готово
+            this.webApp.ready();
+            
+            // Разворачиваем на весь экран
+            this.webApp.expand();
+            
+            // Получаем данные пользователя
+            this.user = this.webApp.initDataUnsafe?.user || null;
+            
+            // Применяем тему Telegram
+            this.applyTheme();
+            
+            // Применяем safe area (для iPhone с вырезом)
+            this.applySafeArea();
+            
+            // Следим за сменой темы
+            this.webApp.onEvent('themeChanged', () => {
+                this.applyTheme();
+            });
+            
+            // Следим за изменением viewport (клавиатура, поворот)
+            this.webApp.onEvent('viewportChanged', () => {
+                this.applySafeArea();
+            });
+            
+            // Настраиваем кнопку "Назад" в Telegram
+            this.setupBackButton();
+            
+            // Применяем цвет header
+            this.webApp.setHeaderColor('bg_color');
+            
+            console.log('✅ Работаем внутри Telegram Mini App');
+        } else {
+            console.log('🌐 Работаем как обычное веб-приложение');
+        }
+    },
+
+    /** Применяет тему Telegram к CSS-переменным */
+    applyTheme() {
+        if (!this.webApp) return;
+        
+        const theme = this.webApp.themeParams;
+        if (!theme) return;
+        
+        const root = document.documentElement;
+        
+        // Основные цвета
+        if (theme.bg_color) {
+            root.style.setProperty('--tg-theme-bg-color', theme.bg_color);
+            root.style.setProperty('--bg-dark', theme.bg_color);
+        }
+        if (theme.text_color) {
+            root.style.setProperty('--tg-theme-text-color', theme.text_color);
+            root.style.setProperty('--text-main', theme.text_color);
+        }
+        if (theme.hint_color) {
+            root.style.setProperty('--tg-theme-hint-color', theme.hint_color);
+            root.style.setProperty('--text-sub', theme.hint_color);
+        }
+        if (theme.button_color) {
+            root.style.setProperty('--tg-theme-button-color', theme.button_color);
+        }
+        if (theme.button_text_color) {
+            root.style.setProperty('--tg-theme-button-text-color', theme.button_text_color);
+        }
+        if (theme.secondary_bg_color) {
+            root.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color);
+        }
+        if (theme.section_bg_color) {
+            root.style.setProperty('--tg-theme-section-bg-color', theme.section_bg_color);
+        }
+        if (theme.section_separator_color) {
+            root.style.setProperty('--tg-theme-section-separator-color', theme.section_separator_color);
+            root.style.setProperty('--card-border', theme.section_separator_color);
+        }
+        
+        // Определяем светлая/тёмная тема
+        const isDark = this.webApp.colorScheme === 'dark';
+        document.body.dataset.tgTheme = isDark ? 'dark' : 'light';
+    },
+
+    /** Применяет safe area (вырез iPhone, системные панели) */
+    applySafeArea() {
+        if (!this.webApp) return;
+        
+        const root = document.documentElement;
+        const safeArea = this.webApp.safeAreaInset;
+        const contentSafeArea = this.webApp.contentSafeAreaInset;
+        
+        if (safeArea) {
+            root.style.setProperty('--tg-viewport-safe-area-inset-top', `${safeArea.top}px`);
+            root.style.setProperty('--tg-viewport-safe-area-inset-bottom', `${safeArea.bottom}px`);
+        }
+        if (contentSafeArea) {
+            root.style.setProperty('--tg-viewport-content-safe-area-inset-top', `${contentSafeArea.top}px`);
+        }
+    },
+
+    /** Настраивает кнопку "Назад" в Telegram */
+    setupBackButton() {
+        const backButton = this.webApp.BackButton;
+        if (!backButton) return;
+        
+        // Следим за переключением вкладок, чтобы показывать/скрывать кнопку "Назад"
+        const originalSwitchTab = App.switchTab.bind(App);
+        App.switchTab = (tabName) => {
+            originalSwitchTab(tabName);
+            
+            // Показываем кнопку "Назад" когда не на главном экране
+            if (tabName === 'swipe') {
+                backButton.hide();
+            } else {
+                backButton.show();
+            }
+        };
+        
+        // Обработчик кнопки "Назад"
+        backButton.onClick(() => {
+            App.switchTab('swipe');
+        });
+    },
+
+    /** Тактильный отклик (вибрация) */
+    haptic(type = 'light') {
+        if (!this.webApp?.HapticFeedback) return;
+        try {
+            this.webApp.HapticFeedback.impactOccurred(type);
+        } catch (e) {}
+    },
+
+    /** Показать главную кнопку Telegram */
+    showMainButton(text, onClick) {
+        if (!this.webApp?.MainButton) return;
+        this.webApp.MainButton.setText(text);
+        this.webApp.MainButton.show();
+        this.webApp.MainButton.onClick(onClick);
+    },
+
+    /** Скрыть главную кнопку */
+    hideMainButton() {
+        if (this.webApp?.MainButton) {
+            this.webApp.MainButton.hide();
+        }
+    },
+
+    /** Закрыть приложение */
+    close() {
+        if (this.webApp) {
+            this.webApp.close();
+        }
+    }
+};
+
+/* ============================================================
+   ОСНОВНОЙ КОД ПРИЛОЖЕНИЯ (без изменений в логике)
+   ============================================================ */
+
+const Utils = {
+    escape(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    },
+
+    distanceKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon / 2) ** 2;
+        return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    },
+
+    debounce(fn, ms = 150) {
+        let t;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...args), ms);
+        };
+    },
+
+    uid(prefix = 'id') {
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    },
+
+    storage: {
+        get(key, fallback = null) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                console.warn('storage.get error:', e);
+                return fallback;
+            }
+        },
+        set(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (e) {
+                console.warn('storage.set error:', e);
+                Toast.show('⚠️ Не удалось сохранить (переполнено)');
+                return false;
+            }
+        },
+        remove(key) {
+            try { localStorage.removeItem(key); } catch (e) {}
+        }
+    }
+};
+
+const Toast = {
+    _timer: null,
+    show(text) {
+        const toast = document.getElementById('toast');
+        const textEl = document.getElementById('toast-text');
+        if (!toast || !textEl) return;
+        textEl.textContent = text;
+        toast.classList.add('show');
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+};
+
+const Modal = {
+    open(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+    },
+    close(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    },
+    closeAll() {
+        document.querySelectorAll('.modal-overlay.active')
+            .forEach(el => el.classList.remove('active'));
+    }
+};
+
+const State = {
+    userLat: 59.9342,
+    userLng: 30.3351,
+    newItemLat: 59.9342,
+    newItemLng: 30.3351,
+    radiusKm: 15,
+    activeChatId: null,
+    pendingSwipeCard: null,
+    selectedRating: 5,
+    selectedMapItem: null,
+    uploadedMedia: [],
+
+    profile: {
+        name: 'Александр',
+        phone: '+7 (921) 123-45-67',
+        city: 'Санкт-Петербург',
+        rating: 5.0,
+        reviews: [
+            { author: 'Елена', stars: 5, text: 'Отличный обмен! Вещь в прекрасном состоянии.' }
+        ]
+    },
+
+    items: [],
+    chats: [],
+
+    load() {
+        // 1. Загружаем сохранённый профиль
+        const savedProfile = Utils.storage.get('dm_profile');
+        if (savedProfile) Object.assign(this.profile, savedProfile);
+
+        // 2. Если мы в Telegram и у нас нет сохранённого имени — берём из Telegram
+        if (TelegramApp.isInTelegram && TelegramApp.user) {
+            const tgUser = TelegramApp.user;
+            // Подставляем имя из Telegram, если пользователь ещё не менял его
+            if (!savedProfile?.name || savedProfile.name === 'Александр') {
+                this.profile.name = tgUser.first_name || this.profile.name;
+            }
+            // Если есть username — можно использовать как контакт
+            if (tgUser.username && !savedProfile?.phone) {
+                this.profile.phone = `@${tgUser.username}`;
+            }
+        }
+
+        const savedItems = Utils.storage.get('dm_items');
+        this.items = savedItems || this.defaultItems();
+
+        const savedChats = Utils.storage.get('dm_chats');
+        this.chats = savedChats || this.defaultChats();
+    },
+
+    save() {
+        Utils.storage.set('dm_profile', this.profile);
+        Utils.storage.set('dm_items', this.items.map(i => ({
+            ...i,
+            media: i.media.map(m => ({
+                type: m.type,
+                url: m.url.startsWith('blob:') || m.url.startsWith('data:')
+                    ? (m.url.length < 500000 ? m.url : '')
+                    : m.url
+            })).filter(m => m.url)
+        })));
+        Utils.storage.set('dm_chats', this.chats);
+    },
+
+    defaultItems() {
+        return [
+            {
+                id: 101, title: 'Наушники Sony WH-CH700N', swapFor: 'Клавиатура или Настолки',
+                desc: 'Санкт-Петербург, Невский проспект. Идеальное состояние.',
+                condition: 'Отличное',
+                media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600' }],
+                lat: 59.9350, lng: 30.3250, isMine: true,
+                ownerName: 'Александр', ownerRating: 5.0
+            },
+            {
+                id: 102, title: 'Набор настольных игр (Catan)', swapFor: 'Книги по дизайну',
+                desc: 'СПб, полный комплект компонентов.', condition: 'Хорошее',
+                media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=600' }],
+                lat: 59.9660, lng: 30.3110, isMine: true,
+                ownerName: 'Александр', ownerRating: 5.0
+            },
+            {
+                id: 103, title: 'Игровая консоль PS4 Slim', swapFor: 'Электросамокат или велик',
+                desc: 'СПб, ст.м. Петроградская. 2 геймпада.', condition: 'Отличное',
+                media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600' }],
+                lat: 59.9400, lng: 30.2780, isMine: false,
+                ownerName: 'Дмитрий', ownerRating: 4.8
+            }
+        ];
+    },
+
+    defaultChats() {
+        return [{
+            id: 'chat_1',
+            name: 'Алексей (PS4 Slim)',
+            avatar: '🎮',
+            messages: [{ sender: 'them', text: 'Привет! Готов обсудить обмен.' }]
+        }];
+    }
+};
+
+const REGIONS = [
+    { name: 'Москва и МО', lat: 55.7558, lng: 37.6173 },
+    { name: 'Санкт-Петербург и ЛО', lat: 59.9342, lng: 30.3351 },
+    { name: 'Краснодарский край', lat: 45.0355, lng: 38.9753 },
+    { name: 'Свердловская обл.', lat: 56.8389, lng: 60.6057 },
+    { name: 'Татарстан (Казань)', lat: 55.7961, lng: 49.1064 }
+];
+
+const MapModule = {
+    mapFull: null,
+    mapAdd: null,
+    userPlacemark: null,
+    addPlacemark: null,
+    circle: null,
+    markersGroup: null,
+    _markersUpdateScheduled: false,
+
+    init() {
+        if (typeof ymaps === 'undefined') {
+            console.warn('Яндекс.Карты не загружены');
+            return;
+        }
+        ymaps.ready(() => {
+            this.initFull();
+            this.initAdd();
+            this.updateMarkers();
+        });
+    },
+
+    initFull() {
+        this.mapFull = new ymaps.Map('map-full', {
+            center: [State.userLat, State.userLng],
+            zoom: 11,
+            controls: ['zoomControl']
+        });
+
+        this.userPlacemark = new ymaps.Placemark(
+            [State.userLat, State.userLng],
+            {},
+            { draggable: true, preset: 'islands#violetDotIcon' }
+        );
+
+        this.circle = new ymaps.Circle(
+            [[State.userLat, State.userLng], State.radiusKm * 1000],
+            {},
+            { fillColor: '#7000FF22', strokeColor: '#7000FF', strokeWidth: 2 }
+        );
+
+        this.markersGroup = new ymaps.GeoObjectCollection();
+
+        this.mapFull.geoObjects.add(this.userPlacemark);
+        this.mapFull.geoObjects.add(this.circle);
+        this.mapFull.geoObjects.add(this.markersGroup);
+
+        this.userPlacemark.events.add('dragend', () => {
+            const [lat, lng] = this.userPlacemark.geometry.getCoordinates();
+            State.userLat = lat;
+            State.userLng = lng;
+            this.circle.geometry.setCoordinates([lat, lng]);
+            this.scheduleMarkersUpdate();
+            SwipeModule.scheduleRender();
+        });
+    },
+
+    initAdd() {
+        this.mapAdd = new ymaps.Map('map-add', {
+            center: [State.newItemLat, State.newItemLng],
+            zoom: 13,
+            controls: ['zoomControl']
+        });
+
+        this.addPlacemark = new ymaps.Placemark(
+            [State.newItemLat, State.newItemLng],
+            { hintContent: 'Перетащите или кликните по карте' },
+            { draggable: true, preset: 'islands#redIcon' }
+        );
+        this.mapAdd.geoObjects.add(this.addPlacemark);
+
+        this.addPlacemark.events.add('dragend', () => {
+            const [lat, lng] = this.addPlacemark.geometry.getCoordinates();
+            State.newItemLat = lat;
+            State.newItemLng = lng;
+            this.updateCoordsLabel(lat, lng);
+        });
+
+        this.mapAdd.events.add('click', (e) => {
+            const coords = e.get('coords');
+            State.newItemLat = coords[0];
+            State.newItemLng = coords[1];
+            this.addPlacemark.geometry.setCoordinates(coords);
+            this.updateCoordsLabel(coords[0], coords[1]);
+            Toast.show('📍 Метка установлена');
+        });
+    },
+
+    updateCoordsLabel(lat, lng) {
+        const label = document.getElementById('add-item-coords-label');
+        if (label) {
+            label.textContent = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            label.style.color = 'var(--accent-green)';
+        }
+    },
+
+    scheduleMarkersUpdate() {
+        if (this._markersUpdateScheduled) return;
+        this._markersUpdateScheduled = true;
+        setTimeout(() => {
+            this._markersUpdateScheduled = false;
+            this.updateMarkers();
+        }, 150);
+    },
+
+    updateMarkers() {
+        if (!this.markersGroup) return;
+        this.markersGroup.removeAll();
+
+        State.items.forEach(item => {
+            const dist = Utils.distanceKm(State.userLat, State.userLng, item.lat, item.lng);
+
+            if (!item.isMine && dist > State.radiusKm) return;
+
+            const preset = item.isMine
+                ? 'islands#greenDotIcon'
+                : 'islands#pinkCircleDotIcon';
+
+            const hint = item.isMine
+                ? `🟢 Ваш лот: ${item.title}`
+                : item.title;
+
+            const placemark = new ymaps.Placemark(
+                [item.lat, item.lng],
+                { hintContent: hint },
+                { preset }
+            );
+
+            placemark.events.add('click', () => {
+                if (item.isMine) {
+                    Toast.show(`🟢 Ваш лот: ${item.title}`);
+                } else {
+                    this.openItemModal(item, dist);
+                }
+            });
+
+            this.markersGroup.add(placemark);
+        });
+    },
+
+    openItemModal(item, dist) {
+        State.selectedMapItem = item;
+
+        const setText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        setText('map-modal-title', item.title);
+        setText('map-modal-swap', `🔄 Взамен: ${item.swapFor}`);
+        setText('map-modal-desc', item.desc || 'Описание отсутствует');
+        setText('map-modal-condition', item.condition || 'Отличное');
+        setText('map-modal-dist', `📍 ~${dist} км`);
+        setText('map-modal-owner', `👤 ${item.ownerName || 'Пользователь'}`);
+        setText('map-modal-rating', `★ ${item.ownerRating ? item.ownerRating.toFixed(1) : '5.0'}`);
+
+        const img = document.getElementById('map-modal-img');
+        img.src = item.media[0]?.url || '';
+        img.alt = item.title;
+
+        Modal.open('map-item-modal');
+    },
+
+    setCenter(lat, lng, zoom = 11) {
+        if (this.mapFull) {
+            this.mapFull.setCenter([lat, lng], zoom);
+            this.userPlacemark.geometry.setCoordinates([lat, lng]);
+            this.circle.geometry.setCoordinates([lat, lng]);
+        }
+    },
+
+    setRadius(km) {
+        if (this.circle) this.circle.geometry.setRadius(km * 1000);
+    },
+
+    fitToViewport() {
+        if (this.mapFull && this.mapFull.container) {
+            this.mapFull.container.fitToViewport();
+        }
+        if (this.mapAdd && this.mapAdd.container) {
+            this.mapAdd.container.fitToViewport();
+        }
+    },
+
+    reverseGeocode(lat, lng) {
+        if (typeof ymaps === 'undefined' || !ymaps.geocode) return;
+        ymaps.geocode([lat, lng]).then(res => {
+            const obj = res.geoObjects.get(0);
+            if (!obj) return;
+            const city = obj.getLocalities()[0]
+                || obj.getAdministrativeAreas()[0]
+                || 'Санкт-Петербург';
+
+            const label = document.getElementById('current-region-label');
+            if (label) label.textContent = city;
+            State.profile.city = city;
+            ProfileModule.render();
+            State.save();
+        }).catch(err => console.warn('geocode error:', err));
+    }
+};
+
+const MediaManager = {
+    async loadFiles(fileList) {
+        const result = [];
+        for (const file of fileList) {
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
+            if (file.size > 20 * 1024 * 1024) {
+                Toast.show(`⚠️ Файл "${file.name}" слишком большой (макс 20 МБ)`);
+                continue;
+            }
+            const url = URL.createObjectURL(file);
+            result.push({
+                type: file.type.startsWith('video/') ? 'video' : 'image',
+                url,
+                file
+            });
+        }
+        return result;
+    },
+
+    revoke(media) {
+        if (!Array.isArray(media)) media = [media];
+        media.forEach(m => {
+            if (m && m.url && m.url.startsWith('blob:')) {
+                try { URL.revokeObjectURL(m.url); } catch (e) {}
+            }
+        });
+    },
+
+    revokeAllInState() {
+        State.uploadedMedia.forEach(m => this.revoke(m));
+        State.items.forEach(item => {
+            item.media?.forEach(m => {
+                if (m.url?.startsWith('blob:')) this.revoke(m);
+            });
+        });
+        State.chats.forEach(chat => {
+            chat.messages?.forEach(msg => {
+                msg.mediaList?.forEach(m => this.revoke(m));
+            });
+        });
+    },
+
+    createThumb(media) {
+        const el = document.createElement(media.type === 'video' ? 'video' : 'img');
+        el.src = media.url;
+        el.className = 'preview-thumb';
+        if (media.type === 'video') {
+            el.autoplay = true;
+            el.loop = true;
+            el.muted = true;
+            el.playsInline = true;
+        }
+        return el;
+    }
+};
+
+const SwipeModule = {
+    _cards: [],
+    _renderScheduled: false,
+
+    scheduleRender() {
+        if (this._renderScheduled) return;
+        this._renderScheduled = true;
+        requestAnimationFrame(() => {
+            this._renderScheduled = false;
+            this.render();
+        });
+    },
+
+    cleanup() {
+        this._cards.forEach(({ card, controller }) => {
+            if (controller) controller.abort();
+        });
+        this._cards = [];
+    },
+
+    render() {
+        const deck = document.getElementById('deck');
+        const controls = document.getElementById('controls-bar');
+        if (!deck || !controls) return;
+
+        this.cleanup();
+        deck.innerHTML = '';
+
+        const filtered = State.items
+            .filter(item => !item.isMine)
+            .map(item => {
+                item.currentDist = Utils.distanceKm(
+                    State.userLat, State.userLng, item.lat, item.lng
+                );
+                return item;
+            })
+            .filter(item => item.currentDist <= State.radiusKm);
+
+        if (filtered.length === 0) {
+            deck.innerHTML = `
+                <div style="text-align:center; padding:32px 20px; background:var(--card-bg); border-radius:24px; border:1px solid var(--card-border); max-width:320px;">
+                    <div style="font-size:48px; margin-bottom:12px;">🎉</div>
+                    <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">На сегодня лоты закончились</h3>
+                    <p style="color:var(--text-sub); font-size:13px; line-height:1.4;">Вы всё просмотрели в этом радиусе. Попробуйте увеличить радиус поиска на Карте или зайдите позже!</p>
+                </div>
+            `;
+            controls.style.display = 'none';
+            return;
+        }
+        controls.style.display = 'flex';
+
+        const renderCount = Math.min(filtered.length, 3);
+        for (let i = renderCount - 1; i >= 0; i--) {
+            const item = filtered[i];
+            const card = this.createCard(item, filtered.length - i);
+            deck.appendChild(card);
+        }
+    },
+
+    createCard(item, zIndex) {
+        const card = document.createElement('div');
+        card.className = 'swipe-card';
+        card.style.zIndex = zIndex;
+        card.dataset.itemId = item.id;
+        card._item = item;
+        card._mediaIndex = 0;
+
+        const mediaContainer = document.createElement('div');
+        mediaContainer.className = 'carousel-container';
+
+        const indicators = document.createElement('div');
+        indicators.className = 'carousel-indicators';
+
+        item.media.forEach((med, idx) => {
+            const active = idx === 0 ? 'active' : '';
+
+            const mediaEl = document.createElement(med.type === 'video' ? 'video' : 'img');
+            mediaEl.src = med.url;
+            mediaEl.className = `media-item ${active}`;
+            if (med.type === 'video') {
+                mediaEl.autoplay = true;
+                mediaEl.loop = true;
+                mediaEl.muted = true;
+                mediaEl.playsInline = true;
+            }
+            mediaContainer.appendChild(mediaEl);
+
+            const dot = document.createElement('div');
+            dot.className = `indicator-dot ${active}`;
+            indicators.appendChild(dot);
+        });
+
+        const topInfo = document.createElement('div');
+        topInfo.className = 'card-top-info';
+        const distTag = document.createElement('span');
+        distTag.className = 'distance-tag';
+        distTag.textContent = `📍 ~${item.currentDist} км`;
+        const mediaTypeTag = document.createElement('span');
+        mediaTypeTag.className = 'media-type-tag';
+        mediaTypeTag.textContent = item.media[0]?.type === 'video' ? '🎥 Видео' : '📷 Фото';
+        topInfo.append(distTag, mediaTypeTag);
+
+        const bottomInfo = document.createElement('div');
+        bottomInfo.className = 'card-bottom-info';
+
+        const ownerInfo = document.createElement('div');
+        ownerInfo.className = 'card-owner-info';
+        const ownerName = document.createElement('span');
+        ownerName.textContent = `👤 ${item.ownerName || 'Пользователь'}`;
+        const ownerRating = document.createElement('span');
+        ownerRating.className = 'owner-rating';
+        ownerRating.textContent = `★ ${(item.ownerRating ?? 5).toFixed(1)}`;
+        ownerInfo.append(ownerName, ownerRating);
+
+        const title = document.createElement('div');
+        title.className = 'item-title';
+        title.textContent = item.title;
+
+        const swapFor = document.createElement('div');
+        swapFor.className = 'item-swap-for';
+        swapFor.textContent = `🔄 ${item.swapFor}`;
+
+        const desc = document.createElement('div');
+        desc.className = 'item-desc';
+        desc.textContent = item.desc || '';
+
+        bottomInfo.append(ownerInfo, title, swapFor, desc);
+
+        const badgeLike = document.createElement('div');
+        badgeLike.className = 'swipe-badge badge-like';
+        badgeLike.textContent = 'ОБМЕН';
+        const badgePass = document.createElement('div');
+        badgePass.className = 'swipe-badge badge-pass';
+        badgePass.textContent = 'ПРОПУСК';
+
+        const overlay = document.createElement('div');
+        overlay.className = 'card-overlay';
+
+        const controls = document.createElement('div');
+        controls.className = 'carousel-controls';
+        const leftBtn = document.createElement('div');
+        leftBtn.className = 'carousel-btn-left';
+        const rightBtn = document.createElement('div');
+        rightBtn.className = 'carousel-btn-right';
+        controls.append(leftBtn, rightBtn);
+
+        card.append(
+            badgeLike, badgePass,
+            mediaContainer, indicators, controls,
+            overlay, topInfo, bottomInfo
+        );
+
+        const onChangeMedia = (dir) => (e) => {
+            e.stopPropagation();
+            this.changeMedia(card, dir);
+        };
+        leftBtn.addEventListener('click', onChangeMedia(-1));
+        rightBtn.addEventListener('click', onChangeMedia(1));
+
+        this.attachSwipe(card, badgeLike, badgePass);
+
+        this._cards.push({ card, controller: card._controller });
+        return card;
+    },
+
+    changeMedia(card, direction) {
+        const mediaEls = card.querySelectorAll('.media-item');
+        const dots = card.querySelectorAll('.indicator-dot');
+        const total = mediaEls.length;
+        if (total <= 1) return;
+
+        let newIndex = card._mediaIndex + direction;
+        if (newIndex < 0 || newIndex >= total) return;
+
+        mediaEls[card._mediaIndex].classList.remove('active');
+        dots[card._mediaIndex].classList.remove('active');
+        mediaEls[newIndex].classList.add('active');
+        dots[newIndex].classList.add('active');
+        card._mediaIndex = newIndex;
+    },
+
+    attachSwipe(card, badgeLike, badgePass) {
+        const controller = new AbortController();
+        card._controller = controller;
+        const { signal } = controller;
+
+        let dragging = false;
+        let startX = 0, startY = 0;
+        let curX = 0, curY = 0;
+        let pointerId = null;
+
+        const onDown = (e) => {
+            if (e.target.closest('.carousel-controls')) return;
+            dragging = true;
+            pointerId = e.pointerId;
+            startX = e.clientX;
+            startY = e.clientY;
+            curX = curY = 0;
+            card.style.transition = 'none';
+            card.setPointerCapture?.(e.pointerId);
+        };
+
+        const onMove = (e) => {
+            if (!dragging || e.pointerId !== pointerId) return;
+            curX = e.clientX - startX;
+            curY = e.clientY - startY;
+
+            const rotate = curX * 0.08;
+            card.style.transform = `translate3d(${curX}px, ${curY}px, 0) rotate(${rotate}deg)`;
+
+            if (curX > 30) {
+                badgeLike.style.opacity = String(Math.min(curX / 100, 1));
+                badgePass.style.opacity = '0';
+            } else if (curX < -30) {
+                badgePass.style.opacity = String(Math.min(Math.abs(curX) / 100, 1));
+                badgeLike.style.opacity = '0';
+            } else {
+                badgeLike.style.opacity = '0';
+                badgePass.style.opacity = '0';
+            }
+        };
+
+        const onUp = (e) => {
+            if (!dragging || (e.pointerId !== undefined && e.pointerId !== pointerId)) return;
+            dragging = false;
+            card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+
+            if (curX > 120) {
+                State.pendingSwipeCard = card;
+                // Тактильный отклик при лайке
+                TelegramApp.haptic('medium');
+                OfferModule.open(card._item.title);
+                card.style.transform = 'translate3d(0,0,0) rotate(0)';
+                badgeLike.style.opacity = '0';
+            } else if (curX < -120) {
+                TelegramApp.haptic('light');
+                this.completeSwipe(card, false);
+            } else {
+                card.style.transform = 'translate3d(0,0,0) rotate(0)';
+                badgeLike.style.opacity = '0';
+                badgePass.style.opacity = '0';
+            }
+            curX = curY = 0;
+        };
+
+        card.addEventListener('pointerdown', onDown, { signal });
+        card.addEventListener('pointermove', onMove, { signal });
+        card.addEventListener('pointerup', onUp, { signal });
+        card.addEventListener('pointercancel', onUp, { signal });
+    },
+
+    completeSwipe(card, isLike, offeredIds = []) {
+        const item = card._item;
+        if (!item) return;
+        const moveX = isLike ? window.innerWidth : -window.innerWidth;
+
+        card.style.transform = `translate3d(${moveX}px, ${card.offsetHeight}px, 0) rotate(${isLike ? 30 : -30}deg)`;
+        card.style.opacity = '0';
+
+        if (isLike) {
+            Toast.show('🔥 Взаимность отправлена!');
+            ChatModule.addMatch(item, offeredIds);
+        }
+
+        State.items = State.items.filter(i => i.id !== item.id);
+        State.save();
+
+        setTimeout(() => {
+            card.remove();
+            this._cards = this._cards.filter(c => c.card !== card);
+            this.render();
+            MapModule.scheduleMarkersUpdate();
+            MyLotsModule.render();
+        }, 250);
+    },
+
+    triggerSwipe(isLike) {
+        const cards = document.querySelectorAll('.swipe-card');
+        if (!cards.length) return;
+        const top = cards[0];
+        const cardObj = this._cards.find(c => c.card === top);
+        if (isLike) {
+            State.pendingSwipeCard = cardObj?.card || top;
+            OfferModule.open(cardObj?.card?._item?.title || '');
+        } else {
+            this.completeSwipe(cardObj?.card || top, false);
+        }
+    }
+};
+
+const OfferModule = {
+    open(targetTitle) {
+        const titleEl = document.getElementById('offer-target-title');
+        if (titleEl) titleEl.textContent = `«${targetTitle}»`;
+
+        const container = document.getElementById('offer-items-list');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const myItems = State.items.filter(i => i.isMine);
+
+        if (myItems.length === 0) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'text-align:center; padding:12px; color:var(--text-sub); font-size:13px;';
+            empty.textContent = 'У вас пока нет своих лотов.';
+            const addLink = document.createElement('div');
+            addLink.style.cssText = 'color:var(--accent-pink); cursor:pointer; margin-top:8px;';
+            addLink.textContent = '✚ Добавить лот';
+            addLink.addEventListener('click', () => {
+                Modal.close('offer-modal');
+                MyLotsModule.openCreateModal();
+            });
+            container.append(empty, addLink);
+        } else {
+            myItems.forEach(item => {
+                const label = document.createElement('label');
+                label.className = 'offer-item-check';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = String(item.id);
+                cb.className = 'offer-checkbox';
+
+                const img = document.createElement('img');
+                img.src = item.media[0]?.url || '';
+                img.alt = '';
+                img.style.cssText = 'width:40px;height:40px;border-radius:8px;object-fit:cover;';
+                img.loading = 'lazy';
+
+                const name = document.createElement('div');
+                name.style.cssText = 'font-size:13px; font-weight:600;';
+                name.textContent = item.title;
+
+                label.append(cb, img, name);
+                container.appendChild(label);
+            });
+        }
+
+        Modal.open('offer-modal');
+    },
+
+    confirm() {
+        Modal.close('offer-modal');
+        const selectedIds = Array.from(document.querySelectorAll('.offer-checkbox:checked'))
+            .map(c => c.value);
+
+        if (State.pendingSwipeCard) {
+            const card = State.pendingSwipeCard;
+            State.pendingSwipeCard = null;
+            SwipeModule.completeSwipe(card, true, selectedIds);
+        } else if (State.selectedMapItem) {
+            ChatModule.addMatch(State.selectedMapItem, selectedIds);
+            Toast.show('🔥 Взаимность отправлена!');
+            State.selectedMapItem = null;
+        }
+    },
+
+    cancel() {
+        Modal.close('offer-modal');
+        if (State.pendingSwipeCard) {
+            const card = State.pendingSwipeCard;
+            State.pendingSwipeCard = null;
+            SwipeModule.completeSwipe(card, false);
+        }
+    }
+};
+
+const MyLotsModule = {
+    render() {
+        const container = document.getElementById('my-lots-grid-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const myItems = State.items.filter(i => i.isMine);
+
+        const countEl = document.getElementById('profile-items-count');
+        if (countEl) countEl.textContent = String(myItems.length);
+
+        if (myItems.length === 0) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'grid-column:span 2; text-align:center; padding:40px 10px; color:var(--text-sub);';
+            empty.innerHTML = '<div style="font-size:36px;margin-bottom:8px;">📦</div><div>У вас пока нет лотов</div>';
+            container.appendChild(empty);
+            return;
+        }
+
+        myItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'my-lot-card';
+
+            const imgWrap = document.createElement('div');
+            imgWrap.className = 'my-lot-img-wrapper';
+
+            const img = document.createElement('img');
+            img.src = item.media[0]?.url || '';
+            img.className = 'my-lot-img';
+            img.alt = item.title;
+            img.loading = 'lazy';
+
+            const badge = document.createElement('span');
+            badge.className = 'my-lot-badge';
+            badge.textContent = item.condition || 'Отличное';
+
+            imgWrap.append(img, badge);
+
+            const title = document.createElement('div');
+            title.className = 'my-lot-title';
+            title.textContent = item.title;
+
+            const swap = document.createElement('div');
+            swap.className = 'my-lot-swap';
+            swap.textContent = `Ищу: ${item.swapFor}`;
+
+            const del = document.createElement('button');
+            del.className = 'btn-delete-lot';
+            del.textContent = 'Удалить лот';
+            del.addEventListener('click', () => this.delete(item.id));
+
+            card.append(imgWrap, title, swap, del);
+            container.appendChild(card);
+        });
+    },
+
+    delete(id) {
+        const item = State.items.find(i => i.id === id);
+        if (item) MediaManager.revoke(item.media);
+        State.items = State.items.filter(i => i.id !== id);
+        State.save();
+        this.render();
+        SwipeModule.scheduleRender();
+        MapModule.scheduleMarkersUpdate();
+        Toast.show('🗑️ Лот удалён');
+    },
+
+    openCreateModal() {
+        State.newItemLat = State.userLat;
+        State.newItemLng = State.userLng;
+
+        Modal.open('add-lot-modal');
+
+        setTimeout(() => {
+            MapModule.fitToViewport();
+
+            if (MapModule.mapAdd && MapModule.addPlacemark) {
+                MapModule.mapAdd.setCenter([State.newItemLat, State.newItemLng], 13);
+                MapModule.addPlacemark.geometry.setCoordinates([State.newItemLat, State.newItemLng]);
+                MapModule.updateCoordsLabel(State.newItemLat, State.newItemLng);
+            }
+        }, 300);
+    },
+
+    publish() {
+        const title = document.getElementById('add-title')?.value.trim();
+        const swap = document.getElementById('add-swap')?.value.trim();
+        const condition = document.getElementById('add-condition')?.value;
+        const desc = document.getElementById('add-desc')?.value.trim();
+
+        if (!title || !swap) {
+            Toast.show('⚠️ Заполните название и желаемый обмен!');
+            return;
+        }
+        if (State.uploadedMedia.length === 0) {
+            Toast.show('📸 Загрузите хотя бы одно фото/видео!');
+            return;
+        }
+
+        const newItem = {
+            id: Utils.uid('item'),
+            title,
+            swapFor: swap,
+            desc: desc || 'Новое предложение',
+            condition,
+            media: State.uploadedMedia.map(m => ({ type: m.type, url: m.url })),
+            lat: State.newItemLat,
+            lng: State.newItemLng,
+            isMine: true,
+            ownerName: State.profile.name || 'Александр',
+            ownerRating: State.profile.rating || 5.0
+        };
+
+        State.items.unshift(newItem);
+        State.uploadedMedia = [];
+
+        const preview = document.getElementById('preview-list');
+        if (preview) preview.innerHTML = '';
+        if (document.getElementById('add-title')) document.getElementById('add-title').value = '';
+        if (document.getElementById('add-swap')) document.getElementById('add-swap').value = '';
+        if (document.getElementById('add-desc')) document.getElementById('add-desc').value = '';
+
+        State.save();
+        Modal.close('add-lot-modal');
+
+        setTimeout(() => {
+            MapModule.scheduleMarkersUpdate();
+            if (MapModule.mapFull) {
+                MapModule.mapFull.setCenter([newItem.lat, newItem.lng], 14);
+            }
+            SwipeModule.scheduleRender();
+            this.render();
+            Toast.show('🎉 Лот опубликован! Смотрите его на карте (зелёная метка)');
+        }, 200);
+    }
+};
+
+const ChatModule = {
+    renderList() {
+        const container = document.getElementById('chats-list');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const countEl = document.getElementById('profile-matches-count');
+        if (countEl) countEl.textContent = String(State.chats.length);
+
+        if (State.chats.length === 0) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'text-align:center; padding:40px 0; color:var(--text-sub);';
+            empty.textContent = 'У вас пока нет чатов';
+            container.appendChild(empty);
+            return;
+        }
+
+        State.chats.forEach(chat => {
+            const item = document.createElement('div');
+            item.className = 'chat-item';
+
+            const inner = document.createElement('div');
+            inner.style.cssText = 'display:flex; align-items:center; gap:12px; flex:1;';
+            inner.addEventListener('click', () => this.open(chat.id));
+
+            const avatar = document.createElement('div');
+            avatar.className = 'chat-avatar';
+            avatar.textContent = chat.avatar;
+
+            const info = document.createElement('div');
+            const nameEl = document.createElement('div');
+            nameEl.style.cssText = 'font-weight:700; font-size:14px;';
+            nameEl.textContent = chat.name;
+
+            const lastEl = document.createElement('div');
+            lastEl.style.cssText = 'font-size:12px; color:var(--text-sub); margin-top:2px;';
+            lastEl.textContent = this.getPreviewText(chat);
+
+            info.append(nameEl, lastEl);
+            inner.append(avatar, info);
+
+            const del = document.createElement('button');
+            del.className = 'action-icon-btn delete-btn';
+            del.title = 'Удалить диалог';
+            del.textContent = '🗑️';
+            del.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.delete(chat.id);
+            });
+
+            item.append(inner, del);
+            container.appendChild(item);
+        });
+    },
+
+    getPreviewText(chat) {
+        if (!chat.messages.length) return 'Начните диалог';
+        const last = chat.messages[chat.messages.length - 1];
+        if (last.mediaList?.length) return `📎 Медиафайлы (${last.mediaList.length})`;
+        return last.text || 'Начните диалог';
+    },
+
+    addMatch(item, offeredIds = []) {
+        const id = Utils.uid('chat');
+        const offered = State.items.filter(i =>
+            offeredIds.some(oid => String(oid) === String(i.id))
+        );
+
+        let body;
+        if (offered.length > 0) {
+            const names = offered.map(i => `«${i.title}»`).join(', ');
+            body = `Здравствуйте! Интересует ваш лот «${item.title}».\n\nПредложено на обмен взамен: ${names}`;
+        } else {
+            body = `Здравствуйте! Интересует ваш лот «${item.title}».\n\nХочу обсудить варианты обмена!`;
+        }
+
+        State.chats.unshift({
+            id,
+            name: item.title,
+            avatar: '✨',
+            messages: [{ sender: 'them', text: body }]
+        });
+        State.save();
+        this.renderList();
+    },
+
+    open(chatId) {
+        State.activeChatId = chatId;
+        const chat = State.chats.find(c => c.id === chatId);
+        if (!chat) return;
+
+        const nameEl = document.getElementById('single-chat-name');
+        const avatarEl = document.getElementById('single-chat-avatar');
+        if (nameEl) nameEl.textContent = chat.name;
+        if (avatarEl) avatarEl.textContent = chat.avatar;
+
+        this.renderMessages(chat.messages);
+
+        document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+        const view = document.getElementById('view-single-chat');
+        if (view) view.classList.add('active');
+    },
+
+    close() {
+        App.switchTab('chats');
+    },
+
+    renderMessages(messages) {
+        const container = document.getElementById('chat-messages');
+        if (!container) return;
+        container.innerHTML = '';
+
+        messages.forEach(msg => {
+            const bubble = document.createElement('div');
+            bubble.className = `msg-bubble ${msg.sender === 'me' ? 'msg-sent' : 'msg-received'}`;
+
+            if (msg.text) {
+                const textEl = document.createElement('div');
+                textEl.style.whiteSpace = 'pre-line';
+                textEl.textContent = msg.text;
+                bubble.appendChild(textEl);
+            }
+
+            if (msg.mediaList?.length) {
+                const grid = document.createElement('div');
+                grid.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:6px; margin-top:6px;';
+
+                msg.mediaList.forEach(m => {
+                    const el = document.createElement(m.type === 'video' ? 'video' : 'img');
+                    el.src = m.url;
+                    el.style.cssText = 'width:100%; height:80px; object-fit:cover; border-radius:8px; cursor:pointer;';
+                    if (m.type === 'video') el.muted = true;
+                    el.addEventListener('click', () => Lightbox.open(m.type, m.url));
+                    grid.appendChild(el);
+                });
+                bubble.appendChild(grid);
+            }
+
+            container.appendChild(bubble);
+        });
+        container.scrollTop = container.scrollHeight;
+    },
+
+    sendMessage() {
+        const input = document.getElementById('chat-input');
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text || !State.activeChatId) return;
+
+        const chat = State.chats.find(c => c.id === State.activeChatId);
+        if (!chat) return;
+
+        chat.messages.push({ sender: 'me', text });
+        this.renderMessages(chat.messages);
+        input.value = '';
+        State.save();
+        this.renderList();
+    },
+
+    async sendMedia(fileList) {
+        if (!fileList?.length || !State.activeChatId) return;
+        const chat = State.chats.find(c => c.id === State.activeChatId);
+        if (!chat) return;
+
+        const media = await MediaManager.loadFiles(fileList);
+        if (!media.length) return;
+
+        chat.messages.push({
+            sender: 'me',
+            text: media.length > 1 ? `📸 Прикреплено файлов: ${media.length}` : '',
+            mediaList: media.map(m => ({ type: m.type, url: m.url }))
+        });
+        this.renderMessages(chat.messages);
+        State.save();
+        this.renderList();
+    },
+
+    delete(chatId) {
+        const chat = State.chats.find(c => c.id === chatId);
+        if (chat) {
+            chat.messages?.forEach(msg => MediaManager.revoke(msg.mediaList || []));
+        }
+        State.chats = State.chats.filter(c => c.id !== chatId);
+        State.save();
+        this.renderList();
+        if (State.activeChatId === chatId) this.close();
+        Toast.show('🗑️ Диалог удалён');
+    },
+
+    deleteActive() {
+        if (!State.activeChatId) return;
+        this.delete(State.activeChatId);
+    }
+};
+
+const ProfileModule = {
+    render() {
+        const set = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+        set('profile-display-name', State.profile.name || 'Гость');
+        set('profile-display-phone', State.profile.phone || 'Телефон не указан');
+        set('profile-display-city', `📍 ${State.profile.city || 'Санкт-Петербург'}`);
+        set('profile-avatar-icon',
+            State.profile.name ? State.profile.name[0].toUpperCase() : '👤');
+        set('profile-rating-val', `${State.profile.rating.toFixed(1)} ★`);
+        this.renderReviews();
+    },
+
+    renderReviews() {
+        const container = document.getElementById('profile-reviews-list');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const reviews = State.profile.reviews || [];
+        if (!reviews.length) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'font-size:12px; color:var(--text-sub);';
+            empty.textContent = 'Пока нет отзывов';
+            container.appendChild(empty);
+            return;
+        }
+
+        reviews.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+
+            const head = document.createElement('div');
+            head.style.cssText = 'display:flex; justify-content:space-between; margin-bottom:4px;';
+
+            const author = document.createElement('span');
+            author.style.cssText = 'font-weight:700; font-size:13px;';
+            author.textContent = r.author;
+
+            const stars = document.createElement('span');
+            stars.style.cssText = 'color:var(--accent-gold); font-size:12px;';
+            stars.textContent = '★'.repeat(r.stars);
+
+            head.append(author, stars);
+
+            const text = document.createElement('div');
+            text.style.cssText = 'font-size:12px; color:rgba(255,255,255,0.8);';
+            text.textContent = r.text;
+
+            card.append(head, text);
+            container.appendChild(card);
+        });
+    },
+
+    openEdit() {
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        };
+        setVal('reg-name', State.profile.name || '');
+        setVal('reg-phone', State.profile.phone || '');
+        setVal('reg-city', State.profile.city || 'Санкт-Петербург');
+        Modal.open('auth-modal');
+    },
+
+    save() {
+        const name = document.getElementById('reg-name')?.value.trim();
+        const phone = document.getElementById('reg-phone')?.value.trim();
+        const city = document.getElementById('reg-city')?.value.trim();
+
+        if (!name) {
+            Toast.show('⚠️ Укажите ваше имя');
+            return;
+        }
+
+        State.profile.name = name;
+        State.profile.phone = phone || '';
+        State.profile.city = city || '';
+        State.save();
+        this.render();
+        Modal.close('auth-modal');
+        Toast.show('✅ Профиль сохранён!');
+    },
+
+    submitReview() {
+        const text = document.getElementById('review-text')?.value.trim();
+        if (!text) {
+            Toast.show('⚠️ Напишите короткий отзыв');
+            return;
+        }
+
+        State.profile.reviews.unshift({
+            author: State.profile.name || 'Пользователь',
+            stars: State.selectedRating,
+            text
+        });
+
+        const total = State.profile.reviews.reduce((s, r) => s + r.stars, 0);
+        State.profile.rating = total / State.profile.reviews.length;
+
+        State.save();
+        this.render();
+        Modal.close('rate-modal');
+        Toast.show('🌟 Отзыв опубликован!');
+    }
+};
+
+const RatingModule = {
+    open() {
+        this.set(5);
+        const txt = document.getElementById('review-text');
+        if (txt) txt.value = '';
+        Modal.open('rate-modal');
+    },
+    set(val) {
+        State.selectedRating = val;
+        document.querySelectorAll('#star-rating-box .star').forEach((star, idx) => {
+            star.classList.toggle('selected', idx < val);
+        });
+    }
+};
+
+const Lightbox = {
+    open(type, url) {
+        const body = document.getElementById('lightbox-body');
+        if (!body) return;
+        body.innerHTML = '';
+
+        const el = document.createElement(type === 'video' ? 'video' : 'img');
+        el.src = url;
+        el.style.cssText = 'max-width:100%; max-height:80vh; border-radius:16px;';
+        if (type === 'video') {
+            el.controls = true;
+            el.autoplay = true;
+        }
+        body.appendChild(el);
+        Modal.open('lightbox');
+    },
+    close() {
+        Modal.close('lightbox');
+        const body = document.getElementById('lightbox-body');
+        if (body) body.innerHTML = '';
+    }
+};
+
+const Geo = {
+    getUserGPS() {
+        Toast.show('🛰️ Определение местоположения...');
+        if (!navigator.geolocation) {
+            Toast.show('⚠️ Геолокация не поддерживается');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                State.userLat = pos.coords.latitude;
+                State.userLng = pos.coords.longitude;
+                State.newItemLat = State.userLat;
+                State.newItemLng = State.userLng;
+                this.apply();
+                Toast.show('📍 Геолокация обновлена!');
+            },
+            err => {
+                console.warn('geolocation error:', err);
+                Toast.show('⚠️ Ошибка GPS, использовано по умолчанию');
+                this.apply();
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    },
+
+    apply() {
+        MapModule.setCenter(State.userLat, State.userLng);
+        MapModule.setRadius(State.radiusKm);
+        MapModule.reverseGeocode(State.userLat, State.userLng);
+        MapModule.scheduleMarkersUpdate();
+        SwipeModule.scheduleRender();
+    }
+};
+
+const App = {
+    init() {
+        // 1. Инициализируем Telegram интеграцию ДО загрузки состояния
+        TelegramApp.init();
+
+        // 2. Загружаем состояние (с учётом данных Telegram)
+        State.load();
+
+        window.addEventListener('beforeunload', () => {
+            MediaManager.revokeAllInState();
+        });
+
+        this.populateRegions();
+        this.attachGlobalHandlers();
+
+        MapModule.init();
+        ProfileModule.render();
+        ChatModule.renderList();
+        SwipeModule.render();
+        MyLotsModule.render();
+
+        setTimeout(() => MapModule.fitToViewport(), 300);
+
+        window.addEventListener('resize', Utils.debounce(() => {
+            MapModule.fitToViewport();
+        }, 200));
+    },
+
+    populateRegions() {
+        const select = document.getElementById('region-select');
+        if (!select) return;
+        select.innerHTML = '';
+        REGIONS.forEach((reg, i) => {
+            const opt = document.createElement('option');
+            opt.value = String(i);
+            opt.textContent = reg.name;
+            select.appendChild(opt);
+        });
+        select.value = '1';
+    },
+
+    attachGlobalHandlers() {
+        document.body.addEventListener('click', (e) => {
+            const target = e.target.closest('[data-action], [data-tab], [data-close-modal]');
+            if (!target) return;
+
+            const { action, tab, closeModal: cm } = target.dataset;
+
+            if (cm) { Modal.close(cm); return; }
+            if (tab) { this.switchTab(tab); return; }
+
+            switch (action) {
+                case 'save-registration': ProfileModule.save(); break;
+                case 'open-auth': ProfileModule.openEdit(); break;
+                case 'confirm-offer': OfferModule.confirm(); break;
+                case 'cancel-offer': OfferModule.cancel(); break;
+                case 'submit-review': ProfileModule.submitReview(); break;
+                case 'publish-item': MyLotsModule.publish(); break;
+                case 'open-create-lot': MyLotsModule.openCreateModal(); break;
+                case 'set-gps': Geo.getUserGPS(); break;
+                case 'get-gps': Geo.getUserGPS(); break;
+                case 'offer-from-map': {
+                    Modal.close('map-item-modal');
+                    if (State.selectedMapItem) OfferModule.open(State.selectedMapItem.title);
+                    break;
+                }
+                case 'swipe-like': SwipeModule.triggerSwipe(true); break;
+                case 'swipe-pass': SwipeModule.triggerSwipe(false); break;
+                case 'send-message': ChatModule.sendMessage(); break;
+                case 'close-chat': ChatModule.close(); break;
+                case 'open-rating': RatingModule.open(); break;
+                case 'delete-active-chat': ChatModule.deleteActive(); break;
+            }
+        });
+
+        document.querySelectorAll('#star-rating-box .star').forEach(star => {
+            star.addEventListener('click', () => {
+                RatingModule.set(parseInt(star.dataset.star, 10));
+            });
+        });
+
+        document.getElementById('lightbox')?.addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') Lightbox.close();
+        });
+
+        document.getElementById('region-select')?.addEventListener('change', (e) => {
+            const reg = REGIONS[parseInt(e.target.value, 10)];
+            if (!reg) return;
+            State.userLat = reg.lat;
+            State.userLng = reg.lng;
+            const label = document.getElementById('current-region-label');
+            if (label) label.textContent = reg.name.split(' ')[0];
+            MapModule.setCenter(State.userLat, State.userLng);
+            MapModule.scheduleMarkersUpdate();
+            SwipeModule.scheduleRender();
+        });
+
+        const radiusSlider = document.getElementById('radius-slider');
+        const onRadiusChange = Utils.debounce((val) => {
+            State.radiusKm = val;
+            const label = document.getElementById('radius-val');
+            if (label) label.textContent = `${val} км`;
+            MapModule.setRadius(val);
+            MapModule.scheduleMarkersUpdate();
+            SwipeModule.scheduleRender();
+        }, 120);
+
+        radiusSlider?.addEventListener('input', (e) => {
+            onRadiusChange(parseInt(e.target.value, 10));
+        });
+
+        const uploadTrigger = document.getElementById('upload-trigger');
+        const fileInput = document.getElementById('file-input');
+        uploadTrigger?.addEventListener('click', () => fileInput?.click());
+
+        fileInput?.addEventListener('change', async (e) => {
+            const media = await MediaManager.loadFiles(e.target.files);
+            const preview = document.getElementById('preview-list');
+            media.forEach(m => {
+                State.uploadedMedia.push(m);
+                preview?.appendChild(MediaManager.createThumb(m));
+            });
+            e.target.value = '';
+        });
+
+        document.getElementById('chat-input')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                ChatModule.sendMessage();
+            }
+        });
+
+        const chatAttach = document.getElementById('chat-attach-btn');
+        const chatFileInput = document.getElementById('chat-file-input');
+        chatAttach?.addEventListener('click', () => chatFileInput?.click());
+        chatFileInput?.addEventListener('change', async (e) => {
+            await ChatModule.sendMedia(e.target.files);
+            e.target.value = '';
+        });
+    },
+
+    switchTab(tabName) {
+        document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+        const targetView = document.getElementById(`view-${tabName}`);
+        if (targetView) targetView.classList.add('active');
+
+        const navMap = { 'swipe': 0, 'map': 1, 'my-lots': 2, 'chats': 3 };
+        if (navMap[tabName] !== undefined) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems[navMap[tabName]]?.classList.add('active');
+        }
+
+        if (tabName === 'map') {
+            setTimeout(() => MapModule.fitToViewport(), 200);
+        }
+        if (tabName === 'my-lots') {
+            MyLotsModule.render();
+        }
+        if (tabName === 'chats') {
+            ChatModule.renderList();
+        }
+        if (tabName === 'profile') {
+            ProfileModule.render();
+        }
+    }
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => App.init());
+} else {
+    App.init();
+}
+
+})();
+</script>
+</body>
+</html>

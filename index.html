@@ -6,20 +6,19 @@
     <title>ДарМаркет — P2P Обмен вещами</title>
     <!-- Telegram WebApp API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Яндекс Карты API 2.1 -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <!-- Leaflet + Esri Dark Gray Canvas (без API-ключей) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         :root {
             --bg-dark: #090A0F;
             --card-bg: rgba(22, 24, 35, 0.85);
             --card-border: rgba(255, 255, 255, 0.08);
-            
             --primary-grad: linear-gradient(135deg, #FF2D55 0%, #7000FF 100%);
             --accent-purple: #7000FF;
             --accent-pink: #FF2D55;
             --accent-green: #30D158;
             --accent-gold: #FFD166;
-            
             --text-main: #FFFFFF;
             --text-sub: #8E8E93;
             --glass: rgba(255, 255, 255, 0.05);
@@ -68,7 +67,6 @@
             }
         }
 
-        /* Внутри Telegram — на весь экран, без рамки */
         body.telegram-mini-app .app-container {
             max-width: 100%;
             max-height: 100%;
@@ -455,99 +453,99 @@
             white-space: nowrap;
         }
 
-        /* ===== MY LOTS ===== */
-.my-lots-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 14px;
-    padding-bottom: 20px;
-    width: 100%;
-    box-sizing: border-box;
-}
+        /* MY LOTS */
+        .my-lots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+            padding-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-.my-lot-card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--card-border);
-    border-radius: 18px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    min-width: 0; /* ВАЖНО: не даёт элементу вылезать за границы grid-ячейки */
-    overflow: hidden;
-}
+        .my-lot-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+        }
 
-.my-lot-img-wrapper {
-    position: relative;
-    width: 100%;
-    height: 110px;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 8px;
-    background: #1a1c24;
-}
+        .my-lot-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            background: #1a1c24;
+        }
 
-.my-lot-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
+        .my-lot-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
 
-.my-lot-badge {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    background: rgba(18, 20, 28, 0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--card-border);
-    padding: 3px 8px;
-    border-radius: 10px;
-    font-size: 10px;
-    font-weight: 600;
-    color: #FFF;
-    max-width: calc(100% - 12px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        .my-lot-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(18, 20, 28, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #FFF;
+            max-width: calc(100% - 12px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
-.my-lot-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 4px;
-    width: 100%;
-}
+        .my-lot-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+            width: 100%;
+        }
 
-.my-lot-swap {
-    font-size: 10px;
-    color: var(--text-sub);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 10px;
-    width: 100%;
-}
+        .my-lot-swap {
+            font-size: 10px;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 10px;
+            width: 100%;
+        }
 
-.btn-delete-lot {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #FF2D55;
-    padding: 8px 0;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    width: 100%;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.2s;
-}
+        .btn-delete-lot {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #FF2D55;
+            padding: 8px 0;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
 
         .btn-delete-lot:active {
             background: rgba(255, 45, 85, 0.2);
@@ -844,58 +842,58 @@
         }
 
         /* Bottom Nav */
-.bottom-nav {
-    height: 68px;
-    background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95));
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid var(--card-border);
-    z-index: 100;
-    flex-shrink: 0;
-    padding: 6px 0;
-}
+        .bottom-nav {
+            height: 68px;
+            background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--card-border);
+            z-index: 100;
+            flex-shrink: 0;
+            padding: 6px 0;
+        }
 
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    color: var(--tg-theme-hint-color, var(--text-sub));
-    font-size: 10px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.2s ease;
-    padding: 4px 12px;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--tg-theme-hint-color, var(--text-sub));
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            padding: 4px 12px;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-.nav-item:active {
-    opacity: 0.6;
-}
+        .nav-item:active {
+            opacity: 0.6;
+        }
 
-.nav-item.active {
-    color: var(--tg-theme-button-color, var(--accent-pink));
-}
+        .nav-item.active {
+            color: var(--tg-theme-button-color, var(--accent-pink));
+        }
 
-.nav-icon {
-    width: 24px;
-    height: 24px;
-    display: block;
-    flex-shrink: 0;
-    fill: currentColor;
-    color: inherit;
-    transition: transform 0.2s ease;
-}
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: block;
+            flex-shrink: 0;
+            fill: currentColor;
+            color: inherit;
+            transition: transform 0.2s ease;
+        }
 
-.nav-item.active .nav-icon {
-    transform: scale(1.05);
-}
+        .nav-item.active .nav-icon {
+            transform: scale(1.05);
+        }
 
         /* Toast */
         .match-toast {
@@ -924,12 +922,51 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+
+        /* Leaflet: тёмные контролы, подсказки */
+        .leaflet-container {
+            background: #1a1c24;
+            font-family: inherit;
+        }
+        .leaflet-control-attribution {
+            font-size: 9px !important;
+            background: rgba(0,0,0,0.6) !important;
+            color: #aaa !important;
+        }
+        .leaflet-control-attribution a {
+            color: #ccc !important;
+        }
+        .leaflet-tooltip {
+            background: rgba(18, 20, 28, 0.95);
+            color: #fff;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 12px;
+            padding: 4px 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .leaflet-tooltip-top:before {
+            border-top-color: var(--card-border);
+        }
+        .leaflet-control-zoom a {
+            background: rgba(18, 20, 28, 0.9) !important;
+            color: #fff !important;
+            border: 1px solid var(--card-border) !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background: rgba(30, 33, 45, 0.95) !important;
+        }
+
+        /* Кастомные SVG-маркеры (не требуют загрузки картинок из интернета) */
+        .custom-marker-icon {
+            background: transparent !important;
+            border: none !important;
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <!-- Toast notification -->
     <div id="toast" class="match-toast">
         <span id="toast-text">❤️ Взаимность отправлена!</span>
     </div>
@@ -939,11 +976,9 @@
         <div class="modal-box">
             <h2 style="text-align:center; font-weight:900; background:var(--primary-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Профиль</h2>
             <p style="text-align:center; font-size:12px; color:var(--text-sub);">Ваши данные для обмена</p>
-            
             <input type="text" id="reg-name" placeholder="Ваше имя">
             <input type="tel" id="reg-phone" placeholder="+7 (999) 000-00-00">
             <input type="text" id="reg-city" placeholder="Ваш город" value="Санкт-Петербург">
-            
             <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; margin-top:8px;" onclick="saveRegistration()">Сохранить</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('auth-modal')">Отмена</button>
         </div>
@@ -954,9 +989,7 @@
         <div class="modal-box">
             <h3 style="text-align:center; font-weight:800;">Что вы предлагаете взамен?</h3>
             <p style="font-size:12px; color:var(--text-sub); text-align:center;">Выберите свои лоты, которые готовы обменять на <b id="offer-target-title" style="color:#FFF;">вещь</b></p>
-            
             <div id="offer-items-list" style="display:flex; flex-direction:column; gap:8px; margin:10px 0; max-height:220px; overflow-y:auto;"></div>
-
             <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" onclick="confirmOfferAndSwipe()">Предложить обмен 🔄</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="cancelOfferModal()">Пропустить предложение</button>
         </div>
@@ -967,7 +1000,6 @@
         <div class="modal-box">
             <h3 style="text-align:center; font-weight:800;">Завершение сделки</h3>
             <p style="font-size:12px; color:var(--text-sub); text-align:center;">Оцените обменяющегося пользователя и оставьте отзыв</p>
-            
             <div class="star-rating" id="star-rating-box">
                 <span class="star" onclick="setRating(1)">★</span>
                 <span class="star" onclick="setRating(2)">★</span>
@@ -975,9 +1007,7 @@
                 <span class="star" onclick="setRating(4)">★</span>
                 <span class="star" onclick="setRating(5)">★</span>
             </div>
-
             <textarea id="review-text" placeholder="Напишите пару слов об обмене..." rows="3"></textarea>
-
             <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px;" onclick="submitReview()">Отправить отзыв 🌟</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('rate-modal')">Отмена</button>
         </div>
@@ -987,10 +1017,8 @@
     <div id="add-lot-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
             <h2 style="text-align:center; font-weight:800;">Выложить лот на обмен</h2>
-            
             <input type="text" id="add-title" placeholder="Название вещи">
             <input type="text" id="add-swap" placeholder="Что вы хотите взамен?">
-            
             <div>
                 <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">Состояние предмета:</label>
                 <select id="add-condition">
@@ -1000,24 +1028,22 @@
                     <option value="Среднее">Среднее</option>
                 </select>
             </div>
-
             <textarea id="add-desc" placeholder="Описание состояния вещи..." rows="3"></textarea>
-
             <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы (фото / видео):</label>
             <div class="upload-box" onclick="document.getElementById('file-input').click()">
                 📸 Нажмите, чтобы загрузить файлы
                 <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleFileSelect(event)">
             </div>
-
             <div class="media-preview-list" id="preview-list"></div>
-
-            <label style="font-size:12px; color:var(--text-sub); display:block;">Местонахождение на карте:</label>
+            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение — кликните по карте:</label>
             <div style="display:flex; gap:8px;">
-                <button class="btn-gps" style="font-size:12px; padding:8px 12px;" onclick="setNewItemToCurrentGPS()">📍 Моё гео</button>
-                <span id="add-item-coords-label" style="font-size:12px; color:var(--accent-pink); align-self:center;">Метка установлена</span>
+                <button class="btn-gps" style="font-size:12px; padding:8px 12px;" onclick="setNewItemToCurrentGPS()">🎯 Моё гео</button>
+                <span id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); align-self:center;">Кликните по карте или перетащите метку</span>
             </div>
-            <div id="map-add" class="map-box-full" style="height:150px; border-radius:16px; margin-top:6px;"></div>
-
+            <div id="map-add" style="height:190px; border-radius:16px; margin-top:6px; overflow:hidden; border:1px solid var(--card-border);"></div>
+            <div style="font-size:11px; color:var(--text-sub); text-align:center;">
+                💡 Нажмите на карту, чтобы поставить метку туда, где находится вещь
+            </div>
             <button class="btn-gps" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px;" onclick="publishItem()">Опубликовать лот</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('add-lot-modal')">Отмена</button>
         </div>
@@ -1039,7 +1065,6 @@
                 <h2 id="map-modal-title" style="font-size:20px; font-weight:800; margin-bottom:4px;"></h2>
                 <div id="map-modal-swap" style="font-size:13px; color:var(--accent-gold); font-weight:600; margin-bottom:10px;"></div>
                 <div id="map-modal-desc" style="font-size:12px; color:var(--text-sub); line-height:1.4; margin-bottom:16px;"></div>
-
                 <button class="btn-gps" style="background:var(--primary-grad); width:100%; padding:14px; font-size:14px;" onclick="triggerOfferFromMap()">Предложить обмен 🔄</button>
                 <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px; margin-top:8px;" onclick="closeModal('map-item-modal')">Закрыть</button>
             </div>
@@ -1055,7 +1080,6 @@
     <!-- Header -->
     <div class="app-header">
         <div class="logo" onclick="switchTab('swipe')">ДарМаркет</div>
-        
         <div class="header-actions">
             <div class="location-badge" onclick="getUserGPS()" title="Определить моё местоположение">
                 📍 <span id="current-region-label">Определение...</span>
@@ -1089,7 +1113,6 @@
                 </div>
                 <input type="range" id="radius-slider" min="1" max="100" value="15" oninput="updateRadius(this.value)">
             </div>
-            
             <div id="map-full" class="map-box-full"></div>
         </div>
     </div>
@@ -1116,9 +1139,7 @@
                 <button class="action-icon-btn delete-btn" title="Удалить диалог" onclick="deleteActiveChat()">🗑️</button>
             </div>
         </div>
-        
         <div class="chat-messages" id="chat-messages"></div>
-
         <div class="chat-input-bar">
             <button class="attach-btn" onclick="document.getElementById('chat-file-input').click()">📎</button>
             <input type="file" id="chat-file-input" accept="image/*,video/*" multiple style="display:none;" onchange="sendChatMediaMultiple(event)">
@@ -1136,7 +1157,6 @@
             </div>
             <button class="btn-gps" style="background:var(--accent-pink); padding:8px 14px; border-radius:18px; font-size:12px;" onclick="openCreateLotModal()">+ Добавить лот</button>
         </div>
-
         <div class="my-lots-grid" id="my-lots-grid-container"></div>
     </div>
 
@@ -1147,7 +1167,6 @@
             <h2 id="profile-display-name" style="font-size:20px; font-weight:800;">Пользователь</h2>
             <div id="profile-display-phone" style="font-size:12px; color:var(--text-sub); margin-top:2px;">+7 (___) ___-__-__</div>
             <div id="profile-display-city" style="font-size:12px; color:var(--accent-pink); margin-top:4px;">📍 г. Санкт-Петербург</div>
-
             <div class="profile-stats">
                 <div class="stat-item" onclick="switchTab('my-lots')">
                     <div class="stat-val" id="profile-items-count">0</div>
@@ -1163,15 +1182,12 @@
                 </div>
             </div>
         </div>
-
         <button class="btn-gps" style="width:100%; background:var(--glass); border:1px solid var(--card-border); color:white; margin-bottom:18px; padding:14px; display:flex; justify-content:space-between; align-items:center;" onclick="switchTab('my-lots')">
             <span>📦 Управление моими лотами</span>
             <span>➔</span>
         </button>
-
         <h3 style="margin-bottom:12px; font-size:16px;">Отзывы об обменах:</h3>
         <div id="profile-reviews-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
     </div>
 
@@ -1206,7 +1222,6 @@
 <script>
     /* ============================================================
        TELEGRAM MINI APP ИНТЕГРАЦИЯ
-       Работает безопасно: если Telegram нет — приложение работает как обычно
        ============================================================ */
     const TelegramApp = {
         webApp: null,
@@ -1216,25 +1231,18 @@
         init() {
             try {
                 this.webApp = (window.Telegram && window.Telegram.WebApp) || null;
-
                 if (this.webApp && this.webApp.initData !== undefined) {
                     this.isInTelegram = true;
                     document.body.classList.add('telegram-mini-app');
-
                     this.webApp.ready();
                     this.webApp.expand();
-
                     this.user = (this.webApp.initDataUnsafe && this.webApp.initDataUnsafe.user) || null;
-
                     this.applyTheme();
                     this.applySafeArea();
-
-                    // Следим за сменой темы
                     if (this.webApp.onEvent) {
                         this.webApp.onEvent('themeChanged', () => this.applyTheme());
                         this.webApp.onEvent('viewportChanged', () => this.applySafeArea());
                     }
-
                     console.log('✅ Работаем внутри Telegram Mini App', this.user);
                 } else {
                     console.log('🌐 Работаем как обычное веб-приложение');
@@ -1248,9 +1256,7 @@
             try {
                 const theme = this.webApp && this.webApp.themeParams;
                 if (!theme) return;
-
                 const root = document.documentElement;
-
                 if (theme.bg_color) root.style.setProperty('--tg-theme-bg-color', theme.bg_color);
                 if (theme.text_color) root.style.setProperty('--tg-theme-text-color', theme.text_color);
                 if (theme.hint_color) root.style.setProperty('--tg-theme-hint-color', theme.hint_color);
@@ -1265,7 +1271,6 @@
                 const safeArea = this.webApp && this.webApp.safeAreaInset;
                 const contentSafeArea = this.webApp && this.webApp.contentSafeAreaInset;
                 const root = document.documentElement;
-
                 if (safeArea) {
                     root.style.setProperty('--tg-viewport-safe-area-inset-top', safeArea.top + 'px');
                     root.style.setProperty('--tg-viewport-safe-area-inset-bottom', safeArea.bottom + 'px');
@@ -1298,99 +1303,99 @@
     };
 
     /* ============================================================
-       ОСНОВНАЯ ЛОГИКА ПРИЛОЖЕНИЯ (как в рабочем файле)
+       РЕГИОНЫ РОССИИ
        ============================================================ */
-   const regionsRF = [
-    { name: 'Республика Адыгея', lat: 44.6068, lng: 40.1024 },
-    { name: 'Республика Алтай', lat: 51.9583, lng: 85.9603 },
-    { name: 'Республика Башкортостан', lat: 54.7348, lng: 55.9579 },
-    { name: 'Республика Бурятия', lat: 51.8272, lng: 107.6064 },
-    { name: 'Республика Дагестан', lat: 42.9764, lng: 47.5022 },
-    { name: 'Донецкая Народная Республика', lat: 48.0159, lng: 37.8028 },
-    { name: 'Республика Ингушетия', lat: 43.1687, lng: 44.8133 },
-    { name: 'Кабардино-Балкарская Республика', lat: 43.4981, lng: 43.6189 },
-    { name: 'Республика Калмыкия', lat: 46.3078, lng: 44.2558 },
-    { name: 'Карачаево-Черкесская Республика', lat: 44.2270, lng: 42.0469 },
-    { name: 'Республика Карелия', lat: 61.7850, lng: 34.3469 },
-    { name: 'Республика Коми', lat: 61.6688, lng: 50.8364 },
-    { name: 'Республика Крым', lat: 44.9521, lng: 34.1024 },
-    { name: 'Луганская Народная Республика', lat: 48.5670, lng: 39.3170 },
-    { name: 'Республика Марий Эл', lat: 56.6388, lng: 47.8908 },
-    { name: 'Республика Мордовия', lat: 54.1838, lng: 45.1749 },
-    { name: 'Республика Саха (Якутия)', lat: 62.0281, lng: 129.7326 },
-    { name: 'Республика Северная Осетия — Алания', lat: 43.0367, lng: 44.6678 },
-    { name: 'Республика Татарстан', lat: 55.7961, lng: 49.1064 },
-    { name: 'Республика Тыва', lat: 51.7191, lng: 94.4378 },
-    { name: 'Удмуртская Республика', lat: 56.8527, lng: 53.2115 },
-    { name: 'Республика Хакасия', lat: 53.7156, lng: 91.4292 },
-    { name: 'Чеченская Республика', lat: 43.3188, lng: 45.6981 },
-    { name: 'Чувашская Республика', lat: 56.1462, lng: 47.2519 },
-    { name: 'Алтайский край', lat: 53.3548, lng: 83.7698 },
-    { name: 'Забайкальский край', lat: 52.0340, lng: 113.4994 },
-    { name: 'Камчатский край', lat: 53.0452, lng: 158.6483 },
-    { name: 'Краснодарский край', lat: 45.0355, lng: 38.9753 },
-    { name: 'Красноярский край', lat: 56.0090, lng: 92.8526 },
-    { name: 'Пермский край', lat: 58.0105, lng: 56.2502 },
-    { name: 'Приморский край', lat: 43.1155, lng: 131.8855 },
-    { name: 'Ставропольский край', lat: 45.0428, lng: 41.9734 },
-    { name: 'Хабаровский край', lat: 48.4827, lng: 135.0838 },
-    { name: 'Амурская область', lat: 50.2907, lng: 127.5272 },
-    { name: 'Архангельская область', lat: 64.5393, lng: 40.5180 },
-    { name: 'Астраханская область', lat: 46.3497, lng: 48.0408 },
-    { name: 'Белгородская область', lat: 50.5952, lng: 36.5873 },
-    { name: 'Брянская область', lat: 53.2434, lng: 34.3639 },
-    { name: 'Владимирская область', lat: 56.1290, lng: 40.4075 },
-    { name: 'Волгоградская область', lat: 48.7080, lng: 44.5133 },
-    { name: 'Вологодская область', lat: 59.2205, lng: 39.8915 },
-    { name: 'Воронежская область', lat: 51.6720, lng: 39.1843 },
-    { name: 'Запорожская область', lat: 46.8380, lng: 35.3675 },
-    { name: 'Ивановская область', lat: 56.9995, lng: 40.9739 },
-    { name: 'Иркутская область', lat: 52.2864, lng: 104.2807 },
-    { name: 'Калининградская область', lat: 54.7104, lng: 20.4522 },
-    { name: 'Калужская область', lat: 54.5138, lng: 36.2612 },
-    { name: 'Кемеровская область', lat: 55.3547, lng: 86.0873 },
-    { name: 'Кировская область', lat: 58.6035, lng: 49.6679 },
-    { name: 'Костромская область', lat: 57.7679, lng: 40.9269 },
-    { name: 'Курганская область', lat: 55.4408, lng: 65.3411 },
-    { name: 'Курская область', lat: 51.7373, lng: 36.1874 },
-    { name: 'Ленинградская область', lat: 59.9342, lng: 30.3351 },
-    { name: 'Липецкая область', lat: 52.6088, lng: 39.5992 },
-    { name: 'Магаданская область', lat: 59.5638, lng: 150.8035 },
-    { name: 'Московская область', lat: 55.7558, lng: 37.6173 },
-    { name: 'Мурманская область', lat: 68.9585, lng: 33.0827 },
-    { name: 'Нижегородская область', lat: 56.3269, lng: 44.0059 },
-    { name: 'Новгородская область', lat: 58.5215, lng: 31.2755 },
-    { name: 'Новосибирская область', lat: 55.0084, lng: 82.9357 },
-    { name: 'Омская область', lat: 54.9885, lng: 73.3242 },
-    { name: 'Оренбургская область', lat: 51.7682, lng: 55.0969 },
-    { name: 'Орловская область', lat: 52.9651, lng: 36.0785 },
-    { name: 'Пензенская область', lat: 53.2007, lng: 45.0046 },
-    { name: 'Псковская область', lat: 57.8194, lng: 28.3318 },
-    { name: 'Ростовская область', lat: 47.2225, lng: 39.7188 },
-    { name: 'Рязанская область', lat: 54.6269, lng: 39.6916 },
-    { name: 'Самарская область', lat: 53.1959, lng: 50.1002 },
-    { name: 'Саратовская область', lat: 51.5336, lng: 46.0343 },
-    { name: 'Сахалинская область', lat: 46.9591, lng: 142.7380 },
-    { name: 'Свердловская область', lat: 56.8389, lng: 60.6057 },
-    { name: 'Смоленская область', lat: 54.7814, lng: 32.0401 },
-    { name: 'Тамбовская область', lat: 52.7212, lng: 41.4523 },
-    { name: 'Тверская область', lat: 56.8587, lng: 35.9176 },
-    { name: 'Томская область', lat: 56.4846, lng: 84.9476 },
-    { name: 'Тульская область', lat: 54.1961, lng: 37.6182 },
-    { name: 'Тюменская область', lat: 57.1522, lng: 65.5272 },
-    { name: 'Ульяновская область', lat: 54.3142, lng: 48.4031 },
-    { name: 'Херсонская область', lat: 46.6354, lng: 32.6169 },
-    { name: 'Челябинская область', lat: 55.1644, lng: 61.4368 },
-    { name: 'Ярославская область', lat: 57.6261, lng: 39.8845 },
-    { name: 'Москва', lat: 55.7558, lng: 37.6173 },
-    { name: 'Санкт-Петербург', lat: 59.9342, lng: 30.3351 },
-    { name: 'Севастополь', lat: 44.6166, lng: 33.5254 },
-    { name: 'Еврейская автономная область', lat: 48.7947, lng: 132.9217 },
-    { name: 'Ненецкий автономный округ', lat: 67.6380, lng: 53.0069 },
-    { name: 'Ханты-Мансийский автономный округ — Югра', lat: 61.0042, lng: 69.0019 },
-    { name: 'Чукотский автономный округ', lat: 64.7337, lng: 177.5168 },
-    { name: 'Ямало-Ненецкий автономный округ', lat: 66.5299, lng: 66.6135 }
-];
+    const regionsRF = [
+        { name: 'Республика Адыгея', lat: 44.6068, lng: 40.1024 },
+        { name: 'Республика Алтай', lat: 51.9583, lng: 85.9603 },
+        { name: 'Республика Башкортостан', lat: 54.7348, lng: 55.9579 },
+        { name: 'Республика Бурятия', lat: 51.8272, lng: 107.6064 },
+        { name: 'Республика Дагестан', lat: 42.9764, lng: 47.5022 },
+        { name: 'Донецкая Народная Республика', lat: 48.0159, lng: 37.8028 },
+        { name: 'Республика Ингушетия', lat: 43.1687, lng: 44.8133 },
+        { name: 'Кабардино-Балкарская Республика', lat: 43.4981, lng: 43.6189 },
+        { name: 'Республика Калмыкия', lat: 46.3078, lng: 44.2558 },
+        { name: 'Карачаево-Черкесская Республика', lat: 44.2270, lng: 42.0469 },
+        { name: 'Республика Карелия', lat: 61.7850, lng: 34.3469 },
+        { name: 'Республика Коми', lat: 61.6688, lng: 50.8364 },
+        { name: 'Республика Крым', lat: 44.9521, lng: 34.1024 },
+        { name: 'Луганская Народная Республика', lat: 48.5670, lng: 39.3170 },
+        { name: 'Республика Марий Эл', lat: 56.6388, lng: 47.8908 },
+        { name: 'Республика Мордовия', lat: 54.1838, lng: 45.1749 },
+        { name: 'Республика Саха (Якутия)', lat: 62.0281, lng: 129.7326 },
+        { name: 'Республика Северная Осетия — Алания', lat: 43.0367, lng: 44.6678 },
+        { name: 'Республика Татарстан', lat: 55.7961, lng: 49.1064 },
+        { name: 'Республика Тыва', lat: 51.7191, lng: 94.4378 },
+        { name: 'Удмуртская Республика', lat: 56.8527, lng: 53.2115 },
+        { name: 'Республика Хакасия', lat: 53.7156, lng: 91.4292 },
+        { name: 'Чеченская Республика', lat: 43.3188, lng: 45.6981 },
+        { name: 'Чувашская Республика', lat: 56.1462, lng: 47.2519 },
+        { name: 'Алтайский край', lat: 53.3548, lng: 83.7698 },
+        { name: 'Забайкальский край', lat: 52.0340, lng: 113.4994 },
+        { name: 'Камчатский край', lat: 53.0452, lng: 158.6483 },
+        { name: 'Краснодарский край', lat: 45.0355, lng: 38.9753 },
+        { name: 'Красноярский край', lat: 56.0090, lng: 92.8526 },
+        { name: 'Пермский край', lat: 58.0105, lng: 56.2502 },
+        { name: 'Приморский край', lat: 43.1155, lng: 131.8855 },
+        { name: 'Ставропольский край', lat: 45.0428, lng: 41.9734 },
+        { name: 'Хабаровский край', lat: 48.4827, lng: 135.0838 },
+        { name: 'Амурская область', lat: 50.2907, lng: 127.5272 },
+        { name: 'Архангельская область', lat: 64.5393, lng: 40.5180 },
+        { name: 'Астраханская область', lat: 46.3497, lng: 48.0408 },
+        { name: 'Белгородская область', lat: 50.5952, lng: 36.5873 },
+        { name: 'Брянская область', lat: 53.2434, lng: 34.3639 },
+        { name: 'Владимирская область', lat: 56.1290, lng: 40.4075 },
+        { name: 'Волгоградская область', lat: 48.7080, lng: 44.5133 },
+        { name: 'Вологодская область', lat: 59.2205, lng: 39.8915 },
+        { name: 'Воронежская область', lat: 51.6720, lng: 39.1843 },
+        { name: 'Запорожская область', lat: 46.8380, lng: 35.3675 },
+        { name: 'Ивановская область', lat: 56.9995, lng: 40.9739 },
+        { name: 'Иркутская область', lat: 52.2864, lng: 104.2807 },
+        { name: 'Калининградская область', lat: 54.7104, lng: 20.4522 },
+        { name: 'Калужская область', lat: 54.5138, lng: 36.2612 },
+        { name: 'Кемеровская область', lat: 55.3547, lng: 86.0873 },
+        { name: 'Кировская область', lat: 58.6035, lng: 49.6679 },
+        { name: 'Костромская область', lat: 57.7679, lng: 40.9269 },
+        { name: 'Курганская область', lat: 55.4408, lng: 65.3411 },
+        { name: 'Курская область', lat: 51.7373, lng: 36.1874 },
+        { name: 'Ленинградская область', lat: 59.9342, lng: 30.3351 },
+        { name: 'Липецкая область', lat: 52.6088, lng: 39.5992 },
+        { name: 'Магаданская область', lat: 59.5638, lng: 150.8035 },
+        { name: 'Московская область', lat: 55.7558, lng: 37.6173 },
+        { name: 'Мурманская область', lat: 68.9585, lng: 33.0827 },
+        { name: 'Нижегородская область', lat: 56.3269, lng: 44.0059 },
+        { name: 'Новгородская область', lat: 58.5215, lng: 31.2755 },
+        { name: 'Новосибирская область', lat: 55.0084, lng: 82.9357 },
+        { name: 'Омская область', lat: 54.9885, lng: 73.3242 },
+        { name: 'Оренбургская область', lat: 51.7682, lng: 55.0969 },
+        { name: 'Орловская область', lat: 52.9651, lng: 36.0785 },
+        { name: 'Пензенская область', lat: 53.2007, lng: 45.0046 },
+        { name: 'Псковская область', lat: 57.8194, lng: 28.3318 },
+        { name: 'Ростовская область', lat: 47.2225, lng: 39.7188 },
+        { name: 'Рязанская область', lat: 54.6269, lng: 39.6916 },
+        { name: 'Самарская область', lat: 53.1959, lng: 50.1002 },
+        { name: 'Саратовская область', lat: 51.5336, lng: 46.0343 },
+        { name: 'Сахалинская область', lat: 46.9591, lng: 142.7380 },
+        { name: 'Свердловская область', lat: 56.8389, lng: 60.6057 },
+        { name: 'Смоленская область', lat: 54.7814, lng: 32.0401 },
+        { name: 'Тамбовская область', lat: 52.7212, lng: 41.4523 },
+        { name: 'Тверская область', lat: 56.8587, lng: 35.9176 },
+        { name: 'Томская область', lat: 56.4846, lng: 84.9476 },
+        { name: 'Тульская область', lat: 54.1961, lng: 37.6182 },
+        { name: 'Тюменская область', lat: 57.1522, lng: 65.5272 },
+        { name: 'Ульяновская область', lat: 54.3142, lng: 48.4031 },
+        { name: 'Херсонская область', lat: 46.6354, lng: 32.6169 },
+        { name: 'Челябинская область', lat: 55.1644, lng: 61.4368 },
+        { name: 'Ярославская область', lat: 57.6261, lng: 39.8845 },
+        { name: 'Москва', lat: 55.7558, lng: 37.6173 },
+        { name: 'Санкт-Петербург', lat: 59.9342, lng: 30.3351 },
+        { name: 'Севастополь', lat: 44.6166, lng: 33.5254 },
+        { name: 'Еврейская автономная область', lat: 48.7947, lng: 132.9217 },
+        { name: 'Ненецкий автономный округ', lat: 67.6380, lng: 53.0069 },
+        { name: 'Ханты-Мансийский автономный округ — Югра', lat: 61.0042, lng: 69.0019 },
+        { name: 'Чукотский автономный округ', lat: 64.7337, lng: 177.5168 },
+        { name: 'Ямало-Ненецкий автономный округ', lat: 66.5299, lng: 66.6135 }
+    ];
 
     let userLat = 59.9342;
     let userLng = 30.3351;
@@ -1398,9 +1403,16 @@
     let newItemLng = 30.3351;
 
     let currentRadiusKm = 15;
-    let yMapFull = null, yMapAdd = null;
-    let yUserPlacemark = null, yAddItemPlacemark = null, yCircle = null, itemMarkersGroup = null;
-    
+
+    /* Leaflet */
+    let mapFull = null;
+    let mapAdd = null;
+    let userMarker = null;
+    let addMarker = null;
+    let userCircle = null;
+    let markersLayer = null;
+    let myMarkersLayer = null;
+
     let uploadedMedia = [];
     let activeChatId = null;
     let pendingSwipeCard = null;
@@ -1418,17 +1430,17 @@
     };
 
     let mockItems = [
-        { 
+        {
             id: 101, title: "Наушники Sony WH-CH700N", swapFor: "Клавиатура или Настолки", desc: "Санкт-Петербург, Невский проспект. Идеальное состояние.", condition: "Отличное",
             media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600' }],
             lat: 59.9350, lng: 30.3250, isMine: true, ownerName: "Александр", ownerRating: 5.0
         },
-        { 
+        {
             id: 102, title: "Набор настольных игр (Catan)", swapFor: "Книги по дизайну", desc: "СПб, полный комплект компонентов.", condition: "Хорошее",
             media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=600' }],
             lat: 59.9660, lng: 30.3110, isMine: true, ownerName: "Александр", ownerRating: 5.0
         },
-        { 
+        {
             id: 103, title: "Игровая консоль PS4 Slim", swapFor: "Электросамокат или велик", desc: "СПб, ст.м. Петроградская. 2 геймпада.", condition: "Отличное",
             media: [{ type: 'image', url: 'https://images.unsplash.com/photo-1507457379470-08b800bebc67?w=600' }],
             lat: 59.9400, lng: 30.2780, isMine: false, ownerName: "Дмитрий", ownerRating: 4.8
@@ -1447,10 +1459,8 @@
     ];
 
     window.onload = function() {
-        // 1. Инициализируем Telegram (безопасно — если его нет, ничего не сломается)
         TelegramApp.init();
 
-        // 2. Подставляем имя из Telegram, если профиль ещё не сохранён
         const savedProfile = localStorage.getItem('darmarket_user');
         if (!savedProfile && TelegramApp.isInTelegram && TelegramApp.user) {
             userProfile.name = TelegramApp.user.first_name || userProfile.name;
@@ -1459,7 +1469,6 @@
             }
         }
 
-        // 3. Загружаем всё остальное
         populateRegions();
         loadStoredProfile();
         renderChatsList();
@@ -1467,9 +1476,10 @@
         renderMyLotsGrid();
         renderProfileReviews();
 
-        // 4. Инициализируем карты
-        if (typeof ymaps !== 'undefined') {
-            ymaps.ready(initYandexMaps);
+        if (typeof L !== 'undefined') {
+            initLeafletMaps();
+        } else {
+            console.warn('Leaflet не загружен');
         }
     };
 
@@ -1495,7 +1505,7 @@
         userProfile.phone = phone;
         userProfile.city = city;
         localStorage.setItem('darmarket_user', JSON.stringify(userProfile));
-        
+
         updateProfileUI();
         closeModal('auth-modal');
         showToast('✅ Профиль сохранён!');
@@ -1550,50 +1560,120 @@
             opt.innerText = reg.name;
             select.appendChild(opt);
         });
-        select.value = 81;
+        const spbIndex = regionsRF.findIndex(r => r.name === 'Санкт-Петербург');
+        select.value = spbIndex >= 0 ? spbIndex : 0;
     }
 
-    /* ИНИЦИАЛИЗАЦИЯ КАРТЫ */
-    function initYandexMaps() {
-        yMapFull = new ymaps.Map("map-full", { center: [userLat, userLng], zoom: 11, controls: ['zoomControl'] });
-        yUserPlacemark = new ymaps.Placemark([userLat, userLng], {}, { draggable: true, preset: 'islands#violetDotIcon' });
-        yCircle = new ymaps.Circle([[userLat, userLng], currentRadiusKm * 1000], {}, { fillColor: "#7000FF22", strokeColor: "#7000FF", strokeWidth: 2 });
-        itemMarkersGroup = new ymaps.GeoObjectCollection();
+    /* ============================================================
+       LEAFLET + ESRI DARK GRAY CANVAS
+       ============================================================ */
+    function initLeafletMaps() {
+        initFullMap();
+        initAddMap();
+        updateMapMarkers();
+        getUserGPS();
+    }
 
-        yMapFull.geoObjects.add(yUserPlacemark);
-        yMapFull.geoObjects.add(yCircle);
-        yMapFull.geoObjects.add(itemMarkersGroup);
+    /* SVG-маркеры: не требуют загрузки картинок из интернета */
+    function makeMarkerIcon(color) {
+        const colors = {
+            violet: '#7000FF',
+            green:  '#30D158',
+            pink:   '#FF2D55',
+            red:    '#FF453A'
+        };
+        const fill = colors[color] || '#7000FF';
 
-        yUserPlacemark.events.add('dragend', function () {
-            const coords = yUserPlacemark.geometry.getCoordinates();
-            userLat = coords[0]; userLng = coords[1];
-            yCircle.geometry.setCoordinates(coords);
+        const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44">
+                <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z"
+                      fill="${fill}" stroke="#FFFFFF" stroke-width="2"/>
+                <circle cx="16" cy="16" r="6" fill="#FFFFFF"/>
+            </svg>
+        `;
+
+        return L.divIcon({
+            html: svg,
+            className: 'custom-marker-icon',
+            iconSize: [32, 44],
+            iconAnchor: [16, 44],
+            popupAnchor: [0, -44],
+            tooltipAnchor: [16, -44]
+        });
+    }
+
+    /* Esri Dark Gray Canvas — надёжный, без ключа, без флагов */
+    const TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+    const TILE_ATTR = 'Tiles © <a href="https://www.esri.com/">Esri</a> — Esri, DeLorme, HERE';
+
+    function initFullMap() {
+        mapFull = L.map('map-full', {
+            zoomControl: true,
+            attributionControl: true
+        }).setView([userLat, userLng], 11);
+
+        L.tileLayer(TILE_URL, {
+            maxZoom: 16,
+            attribution: TILE_ATTR
+        }).addTo(mapFull);
+
+        markersLayer = L.layerGroup().addTo(mapFull);
+        myMarkersLayer = L.layerGroup().addTo(mapFull);
+
+        userMarker = L.marker([userLat, userLng], {
+            draggable: true,
+            icon: makeMarkerIcon('violet')
+        }).addTo(mapFull);
+
+        userCircle = L.circle([userLat, userLng], {
+            radius: currentRadiusKm * 1000,
+            color: '#7000FF',
+            fillColor: '#7000FF',
+            fillOpacity: 0.12,
+            weight: 2
+        }).addTo(mapFull);
+
+        userMarker.on('dragend', function() {
+            const pos = userMarker.getLatLng();
+            userLat = pos.lat;
+            userLng = pos.lng;
+            userCircle.setLatLng([userLat, userLng]);
             reverseGeocode(userLat, userLng);
             renderCards();
             updateMapMarkers();
         });
+    }
 
-        yMapAdd = new ymaps.Map("map-add", { center: [newItemLat, newItemLng], zoom: 12, controls: ['zoomControl'] });
-        yAddItemPlacemark = new ymaps.Placemark([newItemLat, newItemLng], {}, { draggable: true, preset: 'islands#redIcon' });
-        yMapAdd.geoObjects.add(yAddItemPlacemark);
+    function initAddMap() {
+        mapAdd = L.map('map-add', {
+            zoomControl: true,
+            attributionControl: true
+        }).setView([newItemLat, newItemLng], 13);
 
-        yAddItemPlacemark.events.add('dragend', function () {
-            const coords = yAddItemPlacemark.geometry.getCoordinates();
-            newItemLat = coords[0]; newItemLng = coords[1];
+        L.tileLayer(TILE_URL, {
+            maxZoom: 16,
+            attribution: TILE_ATTR
+        }).addTo(mapAdd);
+
+        addMarker = L.marker([newItemLat, newItemLng], {
+            draggable: true,
+            icon: makeMarkerIcon('red')
+        }).addTo(mapAdd);
+
+        addMarker.on('dragend', function() {
+            const pos = addMarker.getLatLng();
+            newItemLat = pos.lat;
+            newItemLng = pos.lng;
             updateCoordsLabel(newItemLat, newItemLng);
         });
 
-        // Клик по карте — ставим метку
-        yMapAdd.events.add('click', function (e) {
-            const coords = e.get('coords');
-            newItemLat = coords[0]; newItemLng = coords[1];
-            yAddItemPlacemark.geometry.setCoordinates(coords);
+        mapAdd.on('click', function(e) {
+            newItemLat = e.latlng.lat;
+            newItemLng = e.latlng.lng;
+            addMarker.setLatLng(e.latlng);
             updateCoordsLabel(newItemLat, newItemLng);
             showToast('📍 Метка установлена');
         });
-
-        getUserGPS();
-        updateMapMarkers();
     }
 
     function updateCoordsLabel(lat, lng) {
@@ -1632,42 +1712,71 @@
     }
 
     function updateMapAndAddress(lat, lng) {
-        if (yMapFull) {
-            yMapFull.setCenter([lat, lng], 11);
-            yUserPlacemark.geometry.setCoordinates([lat, lng]);
-            yCircle.geometry.setCoordinates([lat, lng]);
+        if (mapFull) {
+            mapFull.setView([lat, lng], 11);
+            userMarker.setLatLng([lat, lng]);
+            userCircle.setLatLng([lat, lng]);
         }
-        if (yMapAdd) {
-            yMapAdd.setCenter([lat, lng], 12);
-            yAddItemPlacemark.geometry.setCoordinates([lat, lng]);
+        if (mapAdd) {
+            mapAdd.setView([lat, lng], 13);
+            addMarker.setLatLng([lat, lng]);
         }
         reverseGeocode(lat, lng);
         renderCards();
         updateMapMarkers();
     }
 
+    /* Геокодер: сначала Photon, если не отвечает — BigDataCloud */
     function reverseGeocode(lat, lng) {
-        if (!ymaps || !ymaps.geocode) return;
-        ymaps.geocode([lat, lng]).then(res => {
-            const firstGeoObject = res.geoObjects.get(0);
-            if (firstGeoObject) {
-                const city = firstGeoObject.getLocalities()[0] || firstGeoObject.getAdministrativeAreas()[0] || "Санкт-Петербург";
-                document.getElementById('current-region-label').innerText = city;
-                userProfile.city = city;
-                updateProfileUI();
-            }
-        });
+        const label = document.getElementById('current-region-label');
+
+        // Попытка 1: Photon (Komoot)
+        fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=ru`)
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.features && data.features.length > 0) {
+                    const p = data.features[0].properties || {};
+                    const city = p.city || p.town || p.village || p.county || p.state;
+                    if (city) {
+                        if (label) label.innerText = city;
+                        userProfile.city = city;
+                        updateProfileUI();
+                        return;
+                    }
+                }
+                throw new Error('Photon: empty');
+            })
+            .catch(() => {
+                // Попытка 2: BigDataCloud (бесплатно, без ключа)
+                fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ru`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const city = data.city || data.locality || data.principalSubdivision;
+                        if (city && label) {
+                            label.innerText = city;
+                            userProfile.city = city;
+                            updateProfileUI();
+                        } else if (label) {
+                            label.innerText = 'Ваш город';
+                        }
+                    })
+                    .catch(() => {
+                        if (label) label.innerText = 'Ваш город';
+                    });
+            });
     }
 
     function onRegionChange() {
         const regIndex = document.getElementById('region-select').value;
         const reg = regionsRF[regIndex];
-        userLat = reg.lat; userLng = reg.lng;
+        if (!reg) return;
+        userLat = reg.lat;
+        userLng = reg.lng;
         document.getElementById('current-region-label').innerText = reg.name.split(" ")[0];
-        if (yMapFull) {
-            yMapFull.setCenter([userLat, userLng], 11);
-            yUserPlacemark.geometry.setCoordinates([userLat, userLng]);
-            yCircle.geometry.setCoordinates([userLat, userLng]);
+        if (mapFull) {
+            mapFull.setView([userLat, userLng], 11);
+            userMarker.setLatLng([userLat, userLng]);
+            userCircle.setLatLng([userLat, userLng]);
         }
         renderCards();
         updateMapMarkers();
@@ -1676,29 +1785,35 @@
     function updateRadius(val) {
         currentRadiusKm = parseInt(val);
         document.getElementById('radius-val').innerText = val + " км";
-        if (yCircle) yCircle.geometry.setRadius(currentRadiusKm * 1000);
+        if (userCircle) userCircle.setRadius(currentRadiusKm * 1000);
         renderCards();
         updateMapMarkers();
     }
 
     function updateMapMarkers() {
-        if (!itemMarkersGroup) return;
-        itemMarkersGroup.removeAll();
+        if (!markersLayer || !myMarkersLayer) return;
+        markersLayer.clearLayers();
+        myMarkersLayer.clearLayers();
 
         mockItems.forEach(item => {
             const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
 
-            // Свои лоты показываем ВСЕГДА (зелёные), чужие — только в радиусе (розовые)
             if (!item.isMine && dist > currentRadiusKm) return;
 
-            const preset = item.isMine ? 'islands#greenDotIcon' : 'islands#pinkCircleDotIcon';
+            const color = item.isMine ? 'green' : 'pink';
             const hint = item.isMine ? `🟢 Ваш лот: ${item.title}` : item.title;
 
-            const itemPlacemark = new ymaps.Placemark([item.lat, item.lng], {
-                hintContent: hint
-            }, { preset });
+            const marker = L.marker([item.lat, item.lng], {
+                icon: makeMarkerIcon(color)
+            });
 
-            itemPlacemark.events.add('click', function () {
+            marker.bindTooltip(hint, {
+                direction: 'top',
+                offset: [0, -35],
+                opacity: 0.95
+            });
+
+            marker.on('click', function() {
                 if (item.isMine) {
                     showToast(`🟢 Ваш лот: ${item.title}`);
                 } else {
@@ -1706,7 +1821,11 @@
                 }
             });
 
-            itemMarkersGroup.add(itemPlacemark);
+            if (item.isMine) {
+                marker.addTo(myMarkersLayer);
+            } else {
+                marker.addTo(markersLayer);
+            }
         });
     }
 
@@ -1774,7 +1893,7 @@
             card.style.zIndex = filtered.length - i;
             card.dataset.title = item.title;
             card.dataset.itemId = item.id;
-            
+
             let mediaElements = '';
             let indicators = '';
             item.media.forEach((med, mIdx) => {
@@ -1818,7 +1937,7 @@
         });
     }
 
-    /* СВАЙП КАРТОЧЕК — используют touch + mouse, чтобы работало и в Telegram WebView, и на ПК */
+    /* СВАЙП КАРТОЧЕК */
     function initSwipeEvents(card) {
         let isDragging = false;
         let startX = 0, startY = 0;
@@ -2026,17 +2145,16 @@
     }
 
     function openCreateLotModal() {
-        // Стартовая точка — текущее местоположение
         newItemLat = userLat;
         newItemLng = userLng;
 
         openModal('add-lot-modal');
 
         setTimeout(() => {
-            if (yMapAdd) {
-                yMapAdd.container.fitToViewport();
-                yMapAdd.setCenter([newItemLat, newItemLng], 13);
-                yAddItemPlacemark.geometry.setCoordinates([newItemLat, newItemLng]);
+            if (mapAdd) {
+                mapAdd.invalidateSize();
+                mapAdd.setView([newItemLat, newItemLng], 13);
+                addMarker.setLatLng([newItemLat, newItemLng]);
                 updateCoordsLabel(newItemLat, newItemLng);
             }
         }, 250);
@@ -2083,14 +2201,14 @@
         updateMapMarkers();
         renderCards();
         renderMyLotsGrid();
-        
+
         showToast('🎉 Лот опубликован! Смотрите на карте (зелёная метка)');
     }
 
     function renderMyLotsGrid() {
         const container = document.getElementById('my-lots-grid-container');
         const myItems = mockItems.filter(i => i.isMine);
-        
+
         document.getElementById('profile-items-count').innerText = myItems.length;
 
         if (myItems.length === 0) {
@@ -2177,7 +2295,7 @@
     function addMatchChat(title, offeredIds = []) {
         const newChatId = 'chat_' + Date.now();
         const offeredItems = mockItems.filter(i => offeredIds.includes(String(i.id)) || offeredIds.includes(i.id));
-        
+
         let offerText = "";
         if (offeredItems.length > 0) {
             const namesList = offeredItems.map(i => `«${i.title}»`).join(', ');
@@ -2212,7 +2330,6 @@
         document.getElementById('view-single-chat').style.display = 'flex';
         document.getElementById('view-single-chat').classList.add('active');
 
-        // Показываем кнопку "Назад" в Telegram
         TelegramApp.showBackButton(true);
     }
 
@@ -2228,10 +2345,10 @@
         messages.forEach(msg => {
             const msgDiv = document.createElement('div');
             msgDiv.className = `msg-bubble ${msg.sender === 'me' ? 'msg-sent' : 'msg-received'}`;
-            
+
             let contentHtml = '';
             if (msg.text) contentHtml += `<div style="white-space: pre-line;">${msg.text}</div>`;
-            
+
             if (msg.mediaList && msg.mediaList.length > 0) {
                 contentHtml += `<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:6px; margin-top:6px;">`;
                 msg.mediaList.forEach(m => {
@@ -2367,17 +2484,16 @@
         if (targetView) {
             targetView.classList.add('active');
         }
-        
+
         const navMap = { 'swipe': 0, 'map': 1, 'my-lots': 2, 'chats': 3 };
         if (navMap[tabName] !== undefined) {
             document.querySelectorAll('.nav-item')[navMap[tabName]].classList.add('active');
         }
 
-        if (tabName === 'map' && yMapFull) {
-            setTimeout(() => yMapFull.container.fitToViewport(), 200);
+        if (tabName === 'map' && mapFull) {
+            setTimeout(() => mapFull.invalidateSize(), 200);
         }
 
-        // Управляем кнопкой "Назад" в Telegram (безопасно)
         TelegramApp.showBackButton(tabName !== 'swipe');
     }
 </script>

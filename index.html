@@ -102,7 +102,6 @@
         .upload-box { border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 18px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.03); margin-bottom: 8px; transition: border-color 0.2s ease; }
         .upload-box:hover, .upload-box:active { border-color: var(--accent-pink); }
 
-        /* ✅ ОБНОВЛЕНО: превью с крестиками */
         .media-preview-list { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; margin: 8px 0 12px 0; padding: 4px 2px; min-height: 0; scrollbar-width: thin; }
         .media-preview-list::-webkit-scrollbar { height: 4px; }
         .media-preview-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
@@ -139,9 +138,32 @@
         .review-card { background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
 
         .bottom-nav { height: 68px; background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95)); backdrop-filter: blur(16px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--card-border); z-index: 100; flex-shrink: 0; padding: 6px 0; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tg-theme-hint-color, var(--text-sub)); font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.2s ease; padding: 4px 12px; user-select: none; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tg-theme-hint-color, var(--text-sub)); font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.2s ease; padding: 4px 12px; user-select: none; position: relative; }
         .nav-item.active { color: var(--tg-theme-button-color, var(--accent-pink)); }
         .nav-icon { width: 24px; height: 24px; display: block; flex-shrink: 0; fill: currentColor; }
+
+        /* ✅ НОВОЕ: Badge для непрочитанных сообщений */
+        .nav-badge {
+            position: absolute;
+            top: 0;
+            right: 8px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 9px;
+            background: #FF2D55;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg-dark);
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(255, 45, 85, 0.5);
+            z-index: 1;
+        }
+        .nav-badge.hidden { display: none; }
 
         .match-toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary-grad); color: white; padding: 12px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 25px rgba(255, 45, 85, 0.5); z-index: 9999; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90%; }
         .match-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -160,7 +182,6 @@
         .leaflet-control-zoom a { background: rgba(18, 20, 28, 0.9) !important; color: #fff !important; border: 1px solid var(--card-border) !important; }
         .custom-marker-icon { background: transparent !important; border: none !important; }
 
-        /* ✅ Кластеры меток */
         .cluster-icon {
             background: var(--primary-grad);
             color: white;
@@ -176,11 +197,14 @@
             height: 44px;
         }
 
-        /* ✅ MAP PICKER — отдельный полноэкранный экран */
+        /* ✅ ОБНОВЛЕНО: Map picker теперь модалка поверх всего */
         #map-picker-view {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-dark); z-index: 4000;
-            display: none; flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-dark);
+            z-index: 6000;
+            display: none;
+            flex-direction: column;
         }
         #map-picker-view.active { display: flex; }
         #map-picker-map { flex: 1; width: 100%; min-height: 0; }
@@ -235,7 +259,6 @@
         </div>
     </div>
 
-    <!-- ✅ ОБНОВЛЕНО: модалка создания лота с кнопкой "Указать на карте" -->
     <div id="add-lot-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
             <h2 style="text-align:center; font-weight:800;">Выложить лот</h2>
@@ -295,7 +318,6 @@
         </div>
     </div>
 
-    <!-- ✅ НОВОЕ: модалка со списком лотов в одной точке -->
     <div id="items-list-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="text-align:center; font-weight:800;">Лоты в этой точке</h3>
@@ -310,7 +332,6 @@
         <div id="lightbox-body"></div>
     </div>
 
-    <!-- ✅ НОВОЕ: скрытый input для загрузки аватара -->
     <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" onchange="handleProfilePhoto(event)">
 
     <div class="app-header">
@@ -406,7 +427,6 @@
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
     </div>
 
-    <!-- ✅ НОВОЕ: полноэкранный экран выбора точки на карте -->
     <div id="map-picker-view">
         <div style="padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--card-border); background:rgba(9,10,15,0.95);">
             <button type="button" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;" onclick="closeMapPicker()">←</button>
@@ -427,17 +447,21 @@
     </div>
 
 <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('swipe')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z"/></svg><span>Обмен</span></div>
-    <div class="nav-item" onclick="switchTab('map')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg><span>Карта</span></div>
-    <div class="nav-item" onclick="switchTab('my-lots')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg><span>Мои лоты</span></div>
-    <div class="nav-item" onclick="switchTab('chats')"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>Чаты</span></div>
+    <div class="nav-item active" onclick="switchTab('swipe')" id="nav-swipe"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z"/></svg><span>Обмен</span></div>
+    <div class="nav-item" onclick="switchTab('map')" id="nav-map"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg><span>Карта</span></div>
+    <div class="nav-item" onclick="switchTab('my-lots')" id="nav-my-lots"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg><span>Мои лоты</span></div>
+    <div class="nav-item" onclick="switchTab('chats')" id="nav-chats">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        <span>Чаты</span>
+        <div class="nav-badge hidden" id="chats-badge">0</div>
+    </div>
 </div>
 
 <script>
 /* ============================================================
    SUPABASE
    ============================================================ */
-const SUPABASE_URL = 'https://pqmlxnapfjzprtbkjfke.supabase.co';
+const SUPABASE_URL = 'https://pqmxnapfzprtbkjfke.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbWx4bmFwZmp6cHJ0YmtqZmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzcyOTksImV4cCI6MjEwNDk1MzI5OX0.cRW_goFrXxjg3q209USNjkTcJpUy9yF5_ib_4DEjdaE';
 
 const { createClient } = supabase;
@@ -518,11 +542,19 @@ let allItems = [];
 let chatList = [];
 let currentMessages = [];
 
-// ✅ Хранит ID лотов, которые уже просмотрены (не показывать в ленте)
+// ✅ Хранилище просмотренных лотов
 let seenItemIds = new Set(JSON.parse(localStorage.getItem('dm_seen') || '[]'));
 function markItemSeen(id) {
     seenItemIds.add(id);
     try { localStorage.setItem('dm_seen', JSON.stringify([...seenItemIds].slice(-500))); } catch (e) {}
+}
+
+// ✅ Хранилище прочитанных чатов (для badge)
+let readChatIds = new Set(JSON.parse(localStorage.getItem('dm_read_chats') || '[]'));
+function markChatRead(id) {
+    readChatIds.add(String(id));
+    try { localStorage.setItem('dm_read_chats', JSON.stringify([...readChatIds].slice(-200))); } catch (e) {}
+    updateChatsBadge();
 }
 
 const regionsRF = [
@@ -586,6 +618,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             renderCards();
             renderMyLotsGrid();
             updateMapMarkers();
+            updateChatsBadge();
 
             console.log('🎉 Всё загружено');
         } catch (e) {
@@ -598,11 +631,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     sb.channel('messages-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             const msg = payload.new;
+            // ✅ Если сообщение в активном чате — сразу читаем
             if (String(msg.chat_id) === String(activeChatId)) {
                 currentMessages.push(msg);
                 renderMessages();
+                markChatRead(msg.chat_id);
+            } else if (msg.sender_id !== userProfile.id) {
+                // ✅ Иначе — не читаем, badge обновится
+                showToast('💬 Новое сообщение');
             }
-            loadChats().then(() => { if (!activeChatId) renderChatsList(); });
+            loadChats().then(() => {
+                if (!activeChatId) renderChatsList();
+                updateChatsBadge();
+            });
         })
         .subscribe();
 
@@ -615,7 +656,40 @@ window.addEventListener('DOMContentLoaded', async () => {
             });
         })
         .subscribe();
+
+    // ✅ Realtime для чатов (новые чаты после матчей)
+    sb.channel('chats-realtime')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, () => {
+            loadChats().then(() => {
+                renderChatsList();
+                updateChatsBadge();
+            });
+        })
+        .subscribe();
 });
+
+/* ============================================================
+   BADGE НЕПРОЧИТАННЫХ
+   ============================================================ */
+function updateChatsBadge() {
+    const badge = document.getElementById('chats-badge');
+    if (!badge) return;
+
+    // Считаем чаты, где последнее сообщение НЕ от меня и чат не прочитан
+    const unreadCount = chatList.filter(chat => {
+        if (String(chat.id) === String(activeChatId)) return false;
+        if (readChatIds.has(String(chat.id))) return false;
+        // Если последнее сообщение НЕ от меня — значит непрочитанное
+        return chat.lastMessageSenderId && chat.lastMessageSenderId !== userProfile.id;
+    }).length;
+
+    if (unreadCount > 0) {
+        badge.innerText = unreadCount > 99 ? '99+' : String(unreadCount);
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
 
 /* ============================================================
    АВТОРИЗАЦИЯ
@@ -666,67 +740,48 @@ function updateProfileUI() {
     renderProfileReviews();
 }
 
-// ✅ ОБНОВЛЕНО: рендер аватара профиля в шапке и в профиле
 function renderProfileAvatar() {
     const avatar = userProfile.avatar;
-
-    // Шапка
     const headerBtn = document.getElementById('header-avatar-btn');
     if (headerBtn) {
-        if (avatar) {
-            headerBtn.innerHTML = `<img src="${escapeHtml(avatar)}" alt="avatar">`;
-        } else {
-            headerBtn.innerHTML = `<span id="header-avatar-icon">👤</span>`;
-        }
+        if (avatar) headerBtn.innerHTML = `<img src="${escapeHtml(avatar)}" alt="avatar">`;
+        else headerBtn.innerHTML = `<span id="header-avatar-icon">👤</span>`;
     }
 
-    // Большой аватар в профиле
     const bigAvatar = document.getElementById('profile-avatar-big');
     if (bigAvatar) {
         const firstLetter = userProfile.name ? userProfile.name[0].toUpperCase() : '👤';
         bigAvatar.innerHTML = `
-            ${avatar
-                ? `<img src="${escapeHtml(avatar)}" alt="avatar">`
-                : `<span id="profile-avatar-icon">${firstLetter}</span>`}
+            ${avatar ? `<img src="${escapeHtml(avatar)}" alt="avatar">` : `<span id="profile-avatar-icon">${firstLetter}</span>`}
             <div class="profile-avatar-edit">📷</div>
         `;
     }
 }
 
-// ✅ НОВОЕ: обработка загрузки фото профиля
 async function handleProfilePhoto(evt) {
     const file = evt.target.files[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) { showToast('⚠️ Только изображения'); return; }
     if (file.size > 3 * 1024 * 1024) { showToast('⚠️ Файл больше 3 МБ'); return; }
 
-    showToast('📤 Загрузка фото профиля...');
-
+    showToast('📤 Загрузка фото...');
     const ext = file.name.split('.').pop() || 'jpg';
     const fileName = `${userProfile.id}/${Date.now()}.${ext}`;
 
     const { error } = await sb.storage.from('avatars').upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: true,
-        contentType: file.type
+        cacheControl: '3600', upsert: true, contentType: file.type
     });
-
-    if (error) {
-        console.error('Avatar upload error:', error);
-        showToast('⚠️ Ошибка загрузки (создайте bucket "avatars")');
-        return;
-    }
+    if (error) { console.error(error); showToast('⚠️ Ошибка загрузки'); return; }
 
     const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
     const publicUrl = urlData.publicUrl;
 
     const { error: updateErr } = await sb.from('profiles').update({ avatar: publicUrl }).eq('id', userProfile.id);
-    if (updateErr) { console.error(updateErr); showToast('⚠️ Ошибка сохранения'); return; }
+    if (updateErr) { showToast('⚠️ Ошибка сохранения'); return; }
 
     userProfile.avatar = publicUrl;
     renderProfileAvatar();
-    showToast('✅ Фото профиля обновлено');
+    showToast('✅ Фото обновлено');
     evt.target.value = '';
 }
 
@@ -796,13 +851,13 @@ async function loadItems() {
         desc: item.description || '',
         condition: item.condition,
         media: item.media || [],
-        lat: item.lat,
-        lng: item.lng,
+        lat: parseFloat(item.lat),   // ✅ гарантируем число
+        lng: parseFloat(item.lng),   // ✅ гарантируем число
         isMine: item.owner_id === userProfile.id,
         ownerId: item.owner_id,
         ownerName: item.profiles?.name || 'Пользователь',
         ownerRating: item.profiles?.rating || 5.0,
-        ownerAvatar: item.profiles?.avatar || null  // ✅ аватар владельца
+        ownerAvatar: item.profiles?.avatar || null
     }));
 }
 
@@ -813,19 +868,35 @@ async function publishItem() {
     const desc = document.getElementById('add-desc').value.trim();
 
     if (!title || !swap) { showToast('⚠️ Заполните название и обмен'); return; }
-    if (uploadedMedia.length === 0) { showToast('📸 Загрузите фото'); return; }
+
+    const realMedia = uploadedMedia.filter(m => m !== null);
+    if (realMedia.length === 0) { showToast('📸 Загрузите фото'); return; }
+
+    // ✅ Гарантируем, что координаты — числа из выбранной точки
+    const finalLat = parseFloat(newItemLat);
+    const finalLng = parseFloat(newItemLng);
+
+    if (isNaN(finalLat) || isNaN(finalLng)) {
+        showToast('⚠️ Укажите место на карте');
+        return;
+    }
 
     const newItem = {
         owner_id: userProfile.id,
         title, swap_for: swap,
         description: desc || 'Новое предложение',
         condition,
-        media: uploadedMedia.map(m => ({ type: m.type, url: m.url })),
-        lat: newItemLat, lng: newItemLng
+        media: realMedia.map(m => ({ type: m.type, url: m.publicUrl || m.url })),
+        lat: finalLat,
+        lng: finalLng
     };
 
-    const { error } = await sb.from('items').insert(newItem).select().single();
+    console.log('📤 Публикация лота:', newItem);
+
+    const { data: inserted, error } = await sb.from('items').insert(newItem).select().single();
     if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
+
+    console.log('✅ Лот создан:', inserted);
 
     uploadedMedia = [];
     document.getElementById('preview-list').innerHTML = '';
@@ -885,7 +956,7 @@ function renderCards() {
 
     const filtered = allItems.filter(item => {
         if (item.isMine) return false;
-        if (seenItemIds.has(item.id)) return false;  // ✅ не показывать просмотренные
+        if (seenItemIds.has(item.id)) return false;
         const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
         item.currentDist = dist;
         return dist <= currentRadiusKm;
@@ -922,7 +993,6 @@ function renderCards() {
             }
         });
 
-        // ✅ мини-аватар владельца
         const ownerAvatarHtml = item.ownerAvatar
             ? `<img class="owner-avatar-mini" src="${escapeHtml(item.ownerAvatar)}" alt="">`
             : '';
@@ -1032,15 +1102,10 @@ function initSwipeEvents(card) {
     window.addEventListener('touchend', onEnd);
 }
 
-// ✅ ОБНОВЛЕНО: полностью удаляем лот из ленты
 function completeSwipe(card, isLike, offeredIds = []) {
     const item = card._item;
     if (!item) return;
-
-    // ✅ Помечаем как просмотренный — не вернётся в ленту даже после перезагрузки
     markItemSeen(item.id);
-
-    // ✅ Удаляем из локального массива
     allItems = allItems.filter(i => i.id !== item.id);
 
     const moveX = isLike ? window.innerWidth : -window.innerWidth;
@@ -1153,10 +1218,15 @@ async function createChatWith(item, offeredIds = []) {
             : `Здравствуйте! Интересует ваш лот «${item.title}».`;
 
         await sb.from('messages').insert({ chat_id: chatId, sender_id: userProfile.id, text });
+
+        // ✅ Уведомление о матче
+        TelegramApp.haptic('success');
+        showToast('🔥 Взаимный лайк! Открыт чат');
     }
 
     await loadChats();
     renderChatsList();
+    updateChatsBadge();
 }
 
 async function loadChats() {
@@ -1173,14 +1243,13 @@ async function loadChats() {
 
     const otherIds = [...new Set(chats.map(c => c.user1_id === userProfile.id ? c.user2_id : c.user1_id))];
 
-    // ✅ Подтягиваем аватары собеседников
     const { data: profiles } = await sb.from('profiles').select('id, name, username, avatar').in('id', otherIds);
     const profileMap = {};
     (profiles || []).forEach(p => { profileMap[p.id] = p; });
 
     const chatIds = chats.map(c => c.id);
     const { data: lastMsgs } = await sb.from('messages')
-        .select('chat_id, text, created_at')
+        .select('chat_id, text, created_at, sender_id')
         .in('chat_id', chatIds)
         .order('created_at', { ascending: false });
 
@@ -1195,10 +1264,11 @@ async function loadChats() {
             id: chat.id,
             otherUserId: otherId,
             otherName: otherProfile.name || 'Пользователь',
-            otherAvatar: otherProfile.avatar || null,  // ✅ аватар собеседника
+            otherAvatar: otherProfile.avatar || null,
             itemTitle: chat.items?.title || 'Обмен',
             itemMedia: chat.items?.media?.[0]?.url || '',
             lastMessage: lastMsg?.text || 'Начните диалог',
+            lastMessageSenderId: lastMsg?.sender_id || null,   // ✅ нужно для badge
             createdAt: chat.created_at
         };
     });
@@ -1218,18 +1288,27 @@ function renderChatsList() {
         const el = document.createElement('div');
         el.className = 'chat-item';
 
-        // ✅ Аватар собеседника
         const avatarHtml = chat.otherAvatar
             ? `<div class="chat-avatar"><img src="${escapeHtml(chat.otherAvatar)}" alt=""></div>`
             : `<div class="chat-avatar">💬</div>`;
 
+        // ✅ Индикатор непрочитанного
+        const isUnread = !readChatIds.has(String(chat.id)) &&
+                         chat.lastMessageSenderId &&
+                         chat.lastMessageSenderId !== userProfile.id;
+
+        const unreadDot = isUnread
+            ? `<div style="width:10px; height:10px; border-radius:50%; background:#FF2D55; flex-shrink:0;"></div>`
+            : '';
+
         el.innerHTML = `
             <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;" onclick="openChat(${chat.id})">
                 ${avatarHtml}
-                <div style="min-width:0;">
+                <div style="min-width:0; flex:1;">
                     <div style="font-weight:700; font-size:14px;">${escapeHtml(chat.otherName)}</div>
                     <div style="font-size:12px; color:var(--text-sub); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(chat.lastMessage)}</div>
                 </div>
+                ${unreadDot}
             </div>
             <button class="action-icon-btn delete-btn" onclick="event.stopPropagation(); deleteChat(${chat.id})">🗑️</button>
         `;
@@ -1244,16 +1323,16 @@ async function openChat(chatId) {
 
     document.getElementById('single-chat-name').innerText = chat.otherName;
 
-    // ✅ Аватар собеседника в шапке чата
     const avatarEl = document.getElementById('single-chat-avatar');
-    if (chat.otherAvatar) {
-        avatarEl.innerHTML = `<img src="${escapeHtml(chat.otherAvatar)}" alt="">`;
-    } else {
-        avatarEl.innerText = '💬';
-    }
+    if (chat.otherAvatar) avatarEl.innerHTML = `<img src="${escapeHtml(chat.otherAvatar)}" alt="">`;
+    else avatarEl.innerText = '💬';
 
     await loadMessages(chatId);
     renderMessages();
+
+    // ✅ Помечаем как прочитанный
+    markChatRead(chatId);
+    renderChatsList();
 
     document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
     const view = document.getElementById('view-single-chat');
@@ -1300,8 +1379,11 @@ function closeChat() {
 async function deleteChat(chatId) {
     const { error } = await sb.from('chats').delete().eq('id', chatId);
     if (error) { showToast('⚠️ Ошибка удаления'); return; }
+    readChatIds.delete(String(chatId));
+    try { localStorage.setItem('dm_read_chats', JSON.stringify([...readChatIds])); } catch (e) {}
     await loadChats();
     renderChatsList();
+    updateChatsBadge();
     if (activeChatId === chatId) closeChat();
     showToast('🗑️ Диалог удалён');
 }
@@ -1395,19 +1477,21 @@ function initFullMap() {
     });
 }
 
-// ✅ ОБНОВЛЕНО: группировка лотов в одной точке
+/* ✅ ОБНОВЛЕНО: точная группировка — округление до 5 знаков (~1 м)
+   Теперь лоты в разных точках показываются отдельно */
 function updateMapMarkers() {
     if (!markersLayer || !myMarkersLayer) return;
     markersLayer.clearLayers();
     myMarkersLayer.clearLayers();
 
-    // Группируем по округлённым координатам (~11 м)
+    // Группировка с точностью ~1 метр (5 знаков после запятой)
     const groups = {};
     allItems.forEach(item => {
         const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
         if (!item.isMine && dist > currentRadiusKm) return;
 
-        const key = `${item.lat.toFixed(4)}_${item.lng.toFixed(4)}`;
+        // ✅ Округление до 5 знаков — точнее чем 4, разные точки не сливаются
+        const key = `${item.lat.toFixed(5)}_${item.lng.toFixed(5)}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(item);
     });
@@ -1416,7 +1500,6 @@ function updateMapMarkers() {
         const items = groups[key];
         const first = items[0];
 
-        // Если в группе несколько лотов от одного владельца — рисуем кластер
         if (items.length > 1) {
             const marker = L.marker([first.lat, first.lng], { icon: makeClusterIcon(items.length) });
             marker.bindTooltip(`${items.length} лотов`, { direction: 'top', offset: [0, -20] });
@@ -1435,7 +1518,6 @@ function updateMapMarkers() {
     });
 }
 
-// ✅ НОВОЕ: список лотов в одной точке
 function openItemsListModal(items) {
     const container = document.getElementById('items-list-container');
     container.innerHTML = '';
@@ -1574,7 +1656,7 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 /* ============================================================
-   MAP PICKER (отдельный экран выбора точки)
+   MAP PICKER — теперь модалка поверх всего
    ============================================================ */
 let pickerTempLat = null, pickerTempLng = null;
 
@@ -1612,7 +1694,6 @@ function openMapPicker() {
         });
 
         updatePickerCoords();
-
         setTimeout(() => { if (mapPicker) mapPicker.invalidateSize(); }, 200);
     }, 100);
 }
@@ -1653,9 +1734,12 @@ function mapPickerMyGPS() {
     );
 }
 
+// ✅ СОХРАНЕНИЕ ТОЧКИ — теперь newItemLat/newItemLng точно обновляются
 function saveMapPicker() {
-    newItemLat = pickerTempLat;
-    newItemLng = pickerTempLng;
+    newItemLat = parseFloat(pickerTempLat);
+    newItemLng = parseFloat(pickerTempLng);
+
+    console.log('📍 Точка сохранена:', newItemLat, newItemLng);
 
     const label = document.getElementById('add-item-coords-label');
     if (label) {
@@ -1668,15 +1752,15 @@ function saveMapPicker() {
 }
 
 /* ============================================================
-   ЗАГРУЗКА ФОТО В SUPABASE STORAGE
+   ЗАГРУЗКА ФОТО
    ============================================================ */
-// ✅ ОБНОВЛЕНО: превью с крестиками + счётчик
 async function handleFileSelect(evt) {
     const files = evt.target.files;
     const list = document.getElementById('preview-list');
     if (!files.length) return;
 
-    if (uploadedMedia.length + files.length > 10) {
+    const realCount = uploadedMedia.filter(m => m !== null).length;
+    if (realCount + files.length > 10) {
         showToast('⚠️ Максимум 10 файлов');
         evt.target.value = '';
         return;
@@ -1690,11 +1774,8 @@ async function handleFileSelect(evt) {
             continue;
         }
         const isVideo = file.type.startsWith('video');
-
-        // Локальное превью
         const localUrl = URL.createObjectURL(file);
 
-        // ✅ Обёртка с крестиком
         const wrapper = document.createElement('div');
         wrapper.className = 'preview-thumb-wrapper';
 
@@ -1716,12 +1797,10 @@ async function handleFileSelect(evt) {
 
         list.appendChild(wrapper);
 
-        // Индекс в uploadedMedia (для удаления)
         const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: file, publicUrl: null };
         uploadedMedia.push(mediaObj);
         const mediaIndex = uploadedMedia.length - 1;
 
-        // ✅ Обработчик удаления
         removeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -1730,14 +1809,11 @@ async function handleFileSelect(evt) {
 
         updatePreviewCounter();
 
-        // Загружаем в Storage
         const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
         const fileName = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
         const { error } = await sb.storage.from('item-media').upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: file.type
+            cacheControl: '3600', upsert: false, contentType: file.type
         });
 
         if (error) {
@@ -1750,7 +1826,6 @@ async function handleFileSelect(evt) {
         const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
         const publicUrl = urlData.publicUrl;
 
-        // ✅ Обновляем URL на публичный
         mediaObj.publicUrl = publicUrl;
         mediaObj.url = publicUrl;
         thumbEl.src = publicUrl;
@@ -1758,26 +1833,15 @@ async function handleFileSelect(evt) {
     }
 
     evt.target.value = '';
-    showToast(`✅ Загружено: ${uploadedMedia.length}`);
+    showToast(`✅ Загружено: ${uploadedMedia.filter(m => m !== null).length}`);
 }
 
-// ✅ Удаление файла из превью
 function removeUploadedMedia(index, wrapperEl) {
     const media = uploadedMedia[index];
     if (!media) return;
-
-    // Освобождаем blob URL
-    if (media.url?.startsWith('blob:')) {
-        try { URL.revokeObjectURL(media.url); } catch (e) {}
-    }
-
-    // Удаляем из массива — но мы не можем просто splice, т.к. индексы сбиваются
-    // Поэтому помечаем как null и фильтруем при публикации
+    if (media.url?.startsWith('blob:')) { try { URL.revokeObjectURL(media.url); } catch (e) {} }
     uploadedMedia[index] = null;
-
-    // Убираем DOM
     if (wrapperEl && wrapperEl.parentNode) wrapperEl.parentNode.removeChild(wrapperEl);
-
     updatePreviewCounter();
     showToast('🗑️ Файл удалён');
 }

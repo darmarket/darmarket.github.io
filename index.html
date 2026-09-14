@@ -34,7 +34,8 @@
         .header-actions { display: flex; align-items: center; gap: 8px; }
         .location-badge { background: var(--glass); border: 1px solid var(--card-border); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; backdrop-filter: blur(8px); max-width: 180px; overflow: hidden; }
         .location-badge span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .header-profile-btn { background: var(--glass); border: 1px solid var(--card-border); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+        .header-profile-btn { background: var(--glass); border: 1px solid var(--card-border); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; overflow: hidden; padding: 0; }
+        .header-profile-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
         .header-profile-btn:active { background: rgba(255,255,255,0.15); }
 
         .view-content { flex: 1; position: relative; display: none; overflow: hidden; min-height: 0; }
@@ -89,18 +90,26 @@
         .btn-delete-lot { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); color: #FF2D55; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; transition: background 0.2s; }
 
         .profile-header { display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--glass); border-radius: 24px; border: 1px solid var(--card-border); margin-bottom: 20px; }
-        .profile-avatar-big { width: 84px; height: 84px; border-radius: 50%; background: var(--primary-grad); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 12px; box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4); }
+        .profile-avatar-big { width: 84px; height: 84px; border-radius: 50%; background: var(--primary-grad); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 12px; box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4); position: relative; overflow: hidden; cursor: pointer; }
+        .profile-avatar-big img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .profile-avatar-big .photo-edit-badge { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; background: var(--primary-grad); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-dark); font-size: 13px; z-index: 2; }
         .profile-stats { display: flex; width: 100%; justify-content: space-around; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--card-border); }
         .stat-item { text-align: center; cursor: pointer; }
         .stat-val { font-size: 18px; font-weight: 800; color: #FFF; }
         .stat-lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
         .upload-box { border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 18px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.03); margin-bottom: 12px; transition: border-color 0.2s ease; }
-        .media-preview-list { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 12px; }
-        .preview-thumb { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 1px solid var(--card-border); background: #000; flex-shrink: 0; }
+        .media-preview-list { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 12px; padding: 4px 2px; }
+        .media-preview-list:empty { display: none; }
+        .preview-thumb-wrapper { position: relative; flex-shrink: 0; width: 80px; height: 80px; border-radius: 12px; overflow: hidden; border: 1px solid var(--card-border); background: #1a1c24; }
+        .preview-thumb-wrapper img, .preview-thumb-wrapper video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .preview-remove-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0, 0, 0, 0.75); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; padding: 0; backdrop-filter: blur(4px); }
+        .preview-remove-btn:active { background: #FF2D55; }
+        .preview-badge { position: absolute; bottom: 4px; left: 4px; background: rgba(0, 0, 0, 0.7); color: #fff; font-size: 9px; padding: 2px 5px; border-radius: 6px; backdrop-filter: blur(4px); }
 
         .chat-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: var(--glass); border: 1px solid var(--card-border); border-radius: 18px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s ease; }
-        .chat-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--primary-grad); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .chat-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--primary-grad); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
+        .chat-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
         .action-icon-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: #FFF; width: 36px; height: 36px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .delete-btn { background: rgba(255, 69, 58, 0.15); border: 1px solid rgba(255, 69, 58, 0.3); color: #FF453A; }
 
@@ -121,6 +130,14 @@
         .star-rating .star { color: rgba(255,255,255,0.2); transition: color 0.2s; }
         .star-rating .star.selected { color: var(--accent-gold); }
         .review-card { background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+
+        .point-items-list { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; max-height: 50vh; overflow-y: auto; }
+        .point-item-card { display: flex; gap: 10px; padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); border-radius: 14px; cursor: pointer; align-items: center; transition: background 0.2s; }
+        .point-item-card:active { background: rgba(255,255,255,0.1); }
+        .point-item-card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #1a1c24; }
+        .point-item-card .info { flex: 1; min-width: 0; }
+        .point-item-card .info .t { font-size: 13px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .point-item-card .info .s { font-size: 11px; color: var(--accent-gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .bottom-nav { height: 68px; background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95)); backdrop-filter: blur(16px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--card-border); z-index: 100; flex-shrink: 0; padding: 6px 0; }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tg-theme-hint-color, var(--text-sub)); font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.2s ease; padding: 4px 12px; user-select: none; }
@@ -144,6 +161,19 @@
         .leaflet-tooltip-top:before { border-top-color: var(--card-border); }
         .leaflet-control-zoom a { background: rgba(18, 20, 28, 0.9) !important; color: #fff !important; border: 1px solid var(--card-border) !important; }
         .custom-marker-icon { background: transparent !important; border: none !important; }
+
+        /* ✅ ЭКРАН ВЫБОРА ТОЧКИ — z-index ВЫШЕ модалок */
+        #map-picker-view {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-dark);
+            z-index: 6000;
+            display: none;
+            flex-direction: column;
+        }
+        #map-picker-header { padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--card-border); background: rgba(9, 10, 15, 0.95); flex-shrink: 0; }
+        #map-picker { flex: 1; width: 100%; min-height: 0; }
+        #map-picker-footer { padding: 12px 16px; background: rgba(9, 10, 15, 0.95); border-top: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -216,12 +246,14 @@
                 <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleFileSelect(event)">
             </div>
             <div class="media-preview-list" id="preview-list"></div>
-            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение:</label>
-            <div style="display:flex; gap:8px;">
-                <button class="btn-gps" style="font-size:12px; padding:8px 12px;" onclick="setNewItemToCurrentGPS()">🎯 Моё гео</button>
-                <span id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); align-self:center;">Кликните по карте</span>
+            <div id="preview-counter" style="font-size:11px; color:var(--text-sub); margin-bottom:8px; display:none;">
+                Загружено: <span id="preview-count">0</span>
             </div>
-            <div id="map-add" style="height:190px; border-radius:16px; margin-top:6px; overflow:hidden; border:1px solid var(--card-border);"></div>
+            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение:</label>
+            <button type="button" class="btn-gps" style="width:100%; padding:12px;" onclick="openMapPicker()">🗺️ Указать на карте</button>
+            <div id="add-item-coords-display" style="font-size:11px; color:var(--accent-green); text-align:center; margin-top:-4px;">
+                📍 Метка не установлена
+            </div>
             <button class="btn-gps" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px;" onclick="publishItem()">Опубликовать лот</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('add-lot-modal')">Отмена</button>
         </div>
@@ -248,16 +280,49 @@
         </div>
     </div>
 
+    <div id="items-list-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="text-align:center; font-weight:800;">Лоты в этой точке</h3>
+            <p style="font-size:12px; color:var(--text-sub); text-align:center;">Выберите, что вас интересует</p>
+            <div id="items-list-container" class="point-items-list"></div>
+            <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('items-list-modal')">Закрыть</button>
+        </div>
+    </div>
+
     <div id="lightbox" class="modal-overlay" onclick="closeLightbox()">
         <span style="position:absolute; top:20px; right:20px; font-size:32px; color:#fff; cursor:pointer;">&times;</span>
         <div id="lightbox-body"></div>
+    </div>
+
+    <!-- ✅ Экран выбора точки — ВНЕ модалок, поверх всего -->
+    <div id="map-picker-view">
+        <div id="map-picker-header">
+            <button type="button" style="background:none; border:none; color:var(--text-main); font-size:22px; cursor:pointer; padding:0 4px;" onclick="closeMapPicker()">←</button>
+            <div style="font-weight:700; font-size:15px;">Укажите место на карте</div>
+        </div>
+        <div id="map-picker"></div>
+        <div id="map-picker-footer">
+            <div id="map-picker-coords" style="font-size:12px; color:var(--text-sub); text-align:center;">
+                Нажмите на карту или перетащите маркер
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="btn-gps" style="flex:1; background:var(--glass); border:1px solid var(--card-border); color:var(--text-main); padding:12px;" onclick="mapPickerGoToMyGps()">
+                    🎯 Моё гео
+                </button>
+                <button type="button" class="btn-gps" style="flex:1; background:var(--primary-grad); padding:12px;" onclick="saveMapPicker()">
+                    ✓ Сохранить точку
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="app-header">
         <div class="logo" onclick="switchTab('swipe')">ДарМаркет</div>
         <div class="header-actions">
             <div class="location-badge" onclick="getUserGPS()">📍 <span id="current-region-label">Определение...</span></div>
-            <div class="header-profile-btn" onclick="switchTab('profile')">👤</div>
+            <div class="header-profile-btn" id="header-profile-btn" onclick="switchTab('profile')">
+                <span id="header-avatar-content">👤</span>
+            </div>
         </div>
     </div>
 
@@ -326,7 +391,11 @@
 
     <div id="view-profile" class="view-content" style="padding: 20px; overflow-y:auto;">
         <div class="profile-header">
-            <div class="profile-avatar-big" id="profile-avatar-icon">👤</div>
+            <div class="profile-avatar-big" id="profile-avatar-big" onclick="openProfilePhotoPicker()">
+                <span id="profile-avatar-icon">👤</span>
+                <div class="photo-edit-badge">📷</div>
+            </div>
+            <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" onchange="handleProfilePhoto(event)">
             <h2 id="profile-display-name" style="font-size:20px; font-weight:800;">Пользователь</h2>
             <div id="profile-display-phone" style="font-size:12px; color:var(--text-sub); margin-top:2px;"></div>
             <div id="profile-display-city" style="font-size:12px; color:var(--accent-pink); margin-top:4px;"></div>
@@ -418,9 +487,15 @@ let userLat = 59.9342, userLng = 30.3351;
 let newItemLat = 59.9342, newItemLng = 30.3351;
 let currentRadiusKm = 15;
 
-let mapFull = null, mapAdd = null;
-let userMarker = null, addMarker = null, userCircle = null;
+let mapFull = null;
+let userMarker = null, userCircle = null;
 let markersLayer = null, myMarkersLayer = null;
+
+let mapPickerMap = null;
+let mapPickerMarker = null;
+let mapPickerLat = null;
+let mapPickerLng = null;
+let mapPickerOpenedFromModal = false; // ✅ Запомнили, что пришли из модалки
 
 let uploadedMedia = [];
 let activeChatId = null;
@@ -428,10 +503,12 @@ let pendingSwipeCard = null;
 let selectedRating = 5;
 let selectedMapItem = null;
 
-let userProfile = { id: null, name: 'Гость', phone: '', username: '', city: 'Санкт-Петербург', rating: 5.0, reviews: [] };
+let userProfile = { id: null, name: 'Гость', phone: '', username: '', city: 'Санкт-Петербург', rating: 5.0, avatar: null, reviews: [] };
 let allItems = [];
 let chatList = [];
 let currentMessages = [];
+
+let swipedItemIds = new Set();
 
 const regionsRF = [
     { name: 'Москва', lat: 55.7558, lng: 37.6173 },
@@ -457,24 +534,21 @@ const regionsRF = [
 ];
 
 /* ============================================================
-   ИНИЦИАЛИЗАЦИЯ — БЫСТРЫЙ ЗАПУСК
+   ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
 window.addEventListener('DOMContentLoaded', async () => {
     TelegramApp.init();
     populateRegions();
 
-    // ✅ Скрываем лоадер через 300мс — интерфейс появляется сразу
     setTimeout(() => {
         const loader = document.getElementById('loader');
         if (loader) loader.classList.add('hidden');
     }, 300);
 
-    // Инициализируем карту сразу
     if (typeof L !== 'undefined') {
         initLeafletMaps();
     }
 
-    // Данные грузим в фоне с таймаутами
     (async () => {
         try {
             console.log('⏳ Начинаем загрузку данных...');
@@ -507,7 +581,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     })();
 
-    // Realtime — новые сообщения
     sb.channel('messages-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             const msg = payload.new;
@@ -519,7 +592,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         })
         .subscribe();
 
-    // Realtime — новые лоты
     sb.channel('items-realtime')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
             loadItems().then(() => {
@@ -569,15 +641,37 @@ async function initUser() {
 
     updateProfileUI();
     updateHeaderCity();
+    updateProfilePhotoUI();
 }
 
 function updateProfileUI() {
     document.getElementById('profile-display-name').innerText = userProfile.name || 'Гость';
     document.getElementById('profile-display-phone').innerText = userProfile.phone || (userProfile.username ? '@' + userProfile.username : 'Телефон не указан');
     document.getElementById('profile-display-city').innerText = `📍 ${userProfile.city || 'Санкт-Петербург'}`;
-    document.getElementById('profile-avatar-icon').innerText = userProfile.name ? userProfile.name[0].toUpperCase() : '👤';
     document.getElementById('profile-rating-val').innerText = `${(userProfile.rating || 5).toFixed(1)} ★`;
     renderProfileReviews();
+}
+
+function updateProfilePhotoUI() {
+    const avatarBig = document.getElementById('profile-avatar-big');
+    const headerBtn = document.getElementById('header-profile-btn');
+    const avatarUrl = userProfile.avatar;
+
+    if (avatarBig) {
+        if (avatarUrl) {
+            avatarBig.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="avatar"><div class="photo-edit-badge">📷</div>`;
+        } else {
+            avatarBig.innerHTML = `<span id="profile-avatar-icon">👤</span><div class="photo-edit-badge">📷</div>`;
+        }
+    }
+
+    if (headerBtn) {
+        if (avatarUrl) {
+            headerBtn.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="avatar">`;
+        } else {
+            headerBtn.innerHTML = `<span id="header-avatar-content">👤</span>`;
+        }
+    }
 }
 
 function updateHeaderCity() {
@@ -585,7 +679,7 @@ function updateHeaderCity() {
     if (label) label.innerText = userProfile.city || 'Санкт-Петербург';
 }
 
-function renderProfile() { updateProfileUI(); }
+function renderProfile() { updateProfileUI(); updateProfilePhotoUI(); }
 
 function renderProfileReviews() {
     const container = document.getElementById('profile-reviews-list');
@@ -628,11 +722,49 @@ async function saveRegistration() {
 }
 
 /* ============================================================
-   ЛОТЫ — ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА
+   ФОТО ПРОФИЛЯ
+   ============================================================ */
+function openProfilePhotoPicker() {
+    const input = document.getElementById('profile-photo-input');
+    if (input) input.click();
+}
+
+async function handleProfilePhoto(evt) {
+    const file = evt.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) { showToast('⚠️ Только изображения'); return; }
+    if (file.size > 3 * 1024 * 1024) { showToast('⚠️ Файл больше 3 МБ'); evt.target.value = ''; return; }
+
+    showToast('📤 Загрузка фото...');
+
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `${userProfile.id}/avatar_${Date.now()}.${ext}`;
+
+    const { error: upErr } = await sb.storage.from('item-media').upload(fileName, file, {
+        cacheControl: '3600', upsert: true, contentType: file.type
+    });
+
+    if (upErr) { console.error('Avatar upload:', upErr); showToast('⚠️ Ошибка загрузки'); evt.target.value = ''; return; }
+
+    const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
+    const publicUrl = urlData.publicUrl;
+
+    const { error: updErr } = await sb.from('profiles').update({ avatar: publicUrl }).eq('id', userProfile.id);
+    if (updErr) { console.error('Avatar save:', updErr); showToast('⚠️ Ошибка сохранения'); evt.target.value = ''; return; }
+
+    userProfile.avatar = publicUrl;
+    updateProfilePhotoUI();
+    showToast('✅ Фото обновлено');
+    evt.target.value = '';
+}
+
+/* ============================================================
+   ЛОТЫ
    ============================================================ */
 async function loadItems() {
     const { data, error } = await sb.from('items')
-        .select('id, owner_id, title, swap_for, description, condition, media, lat, lng, created_at, profiles!items_owner_id_fkey(name, rating)')
+        .select('id, owner_id, title, swap_for, description, condition, media, lat, lng, created_at, profiles!items_owner_id_fkey(name, rating, avatar)')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(100);
@@ -651,7 +783,8 @@ async function loadItems() {
         isMine: item.owner_id === userProfile.id,
         ownerId: item.owner_id,
         ownerName: item.profiles?.name || 'Пользователь',
-        ownerRating: item.profiles?.rating || 5.0
+        ownerRating: item.profiles?.rating || 5.0,
+        ownerAvatar: item.profiles?.avatar || null
     }));
 }
 
@@ -677,10 +810,11 @@ async function publishItem() {
     if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
 
     uploadedMedia = [];
-    document.getElementById('preview-list').innerHTML = '';
+    renderPreviews();
     document.getElementById('add-title').value = '';
     document.getElementById('add-swap').value = '';
     document.getElementById('add-desc').value = '';
+    document.getElementById('add-item-coords-display').innerText = '📍 Метка не установлена';
 
     closeModal('add-lot-modal');
     await loadItems();
@@ -729,10 +863,12 @@ function renderMyLotsGrid() {
 function renderCards() {
     const deck = document.getElementById('deck');
     const controls = document.getElementById('controls-bar');
+    if (!deck || !controls) return;
     deck.innerHTML = '';
 
     const filtered = allItems.filter(item => {
         if (item.isMine) return false;
+        if (swipedItemIds.has(item.id)) return false;
         const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
         item.currentDist = dist;
         return dist <= currentRadiusKm;
@@ -749,10 +885,10 @@ function renderCards() {
     }
     controls.style.display = 'flex';
 
-    filtered.slice(0, 10).forEach((item, i) => {
+    filtered.slice(0, 5).forEach((item, i) => {
         const card = document.createElement('div');
         card.className = 'swipe-card';
-        card.style.zIndex = filtered.length - i;
+        card.style.zIndex = 100 - i;
         card.dataset.itemId = item.id;
         card.dataset.title = item.title;
         card._item = item;
@@ -866,9 +1002,12 @@ function initSwipeEvents(card) {
     };
 
     card.addEventListener('mousedown', onStart);
+    card.addEventListener('touchstart', onStart, { passive: true });
+
+    card._onMove = onMove;
+    card._onEnd = onEnd;
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onEnd);
-    card.addEventListener('touchstart', onStart, { passive: true });
     window.addEventListener('touchmove', onMove, { passive: true });
     window.addEventListener('touchend', onEnd);
 }
@@ -876,6 +1015,9 @@ function initSwipeEvents(card) {
 function completeSwipe(card, isLike, offeredIds = []) {
     const item = card._item;
     if (!item) return;
+
+    swipedItemIds.add(item.id);
+
     const moveX = isLike ? window.innerWidth : -window.innerWidth;
     card.style.transform = `translate3d(${moveX}px, ${card.offsetHeight}px, 0) rotate(${isLike ? 30 : -30}deg)`;
     card.style.opacity = '0';
@@ -885,7 +1027,19 @@ function completeSwipe(card, isLike, offeredIds = []) {
         createChatWith(item, offeredIds);
     }
 
-    setTimeout(() => { card.remove(); renderCards(); }, 250);
+    if (card._onMove) {
+        window.removeEventListener('mousemove', card._onMove);
+        window.removeEventListener('touchmove', card._onMove);
+    }
+    if (card._onEnd) {
+        window.removeEventListener('mouseup', card._onEnd);
+        window.removeEventListener('touchend', card._onEnd);
+    }
+
+    setTimeout(() => {
+        card.remove();
+        renderCards();
+    }, 250);
 }
 
 function triggerBtnSwipe(isLike) {
@@ -949,7 +1103,7 @@ function confirmOfferAndSwipe() {
 }
 
 /* ============================================================
-   ЧАТЫ — ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА
+   ЧАТЫ
    ============================================================ */
 async function createChatWith(item, offeredIds = []) {
     if (!item.ownerId || item.ownerId === userProfile.id) return;
@@ -1001,7 +1155,7 @@ async function loadChats() {
 
     const otherIds = [...new Set(chats.map(c => c.user1_id === userProfile.id ? c.user2_id : c.user1_id))];
 
-    const { data: profiles } = await sb.from('profiles').select('id, name, username').in('id', otherIds);
+    const { data: profiles } = await sb.from('profiles').select('id, name, username, avatar').in('id', otherIds);
     const profileMap = {};
     (profiles || []).forEach(p => { profileMap[p.id] = p; });
 
@@ -1022,6 +1176,7 @@ async function loadChats() {
             id: chat.id,
             otherUserId: otherId,
             otherName: otherProfile.name || 'Пользователь',
+            otherAvatar: otherProfile.avatar || null,
             itemTitle: chat.items?.title || 'Обмен',
             itemMedia: chat.items?.media?.[0]?.url || '',
             lastMessage: lastMsg?.text || 'Начните диалог',
@@ -1043,9 +1198,13 @@ function renderChatsList() {
     chatList.forEach(chat => {
         const el = document.createElement('div');
         el.className = 'chat-item';
+        const avatarContent = chat.otherAvatar
+            ? `<img src="${escapeHtml(chat.otherAvatar)}" alt="">`
+            : '💬';
+
         el.innerHTML = `
             <div style="display:flex; align-items:center; gap:12px; flex:1;" onclick="openChat(${chat.id})">
-                <div class="chat-avatar">💬</div>
+                <div class="chat-avatar">${avatarContent}</div>
                 <div style="min-width:0;">
                     <div style="font-weight:700; font-size:14px;">${escapeHtml(chat.otherName)}</div>
                     <div style="font-size:12px; color:var(--text-sub); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(chat.lastMessage)}</div>
@@ -1063,7 +1222,13 @@ async function openChat(chatId) {
     if (!chat) return;
 
     document.getElementById('single-chat-name').innerText = chat.otherName;
-    document.getElementById('single-chat-avatar').innerText = '💬';
+
+    const avatarEl = document.getElementById('single-chat-avatar');
+    if (chat.otherAvatar) {
+        avatarEl.innerHTML = `<img src="${escapeHtml(chat.otherAvatar)}" alt="">`;
+    } else {
+        avatarEl.innerText = '💬';
+    }
 
     await loadMessages(chatId);
     renderMessages();
@@ -1165,20 +1330,13 @@ const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStre
 
 function initLeafletMaps() {
     initFullMap();
-    initAddMap();
     updateMapMarkers();
 }
 
-function makePinIcon(color) {
+function makeCircleIcon(color, size = 28) {
     const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z" fill="${fill}" stroke="#FFF" stroke-width="2"/><circle cx="16" cy="16" r="6" fill="#FFF"/></svg>`;
-    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [32, 44], iconAnchor: [16, 44], popupAnchor: [0, -44], tooltipAnchor: [16, -44] });
-}
-
-function makeCircleIcon(color) {
-    const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="${fill}" stroke="#FFF" stroke-width="2.5"/></svg>`;
-    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14], tooltipAnchor: [14, -14] });
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="${fill}" stroke="#FFF" stroke-width="2.5"/></svg>`;
+    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [size, size], iconAnchor: [size/2, size/2], popupAnchor: [0, -size/2], tooltipAnchor: [size/2, -size/2] });
 }
 
 function initFullMap() {
@@ -1187,7 +1345,7 @@ function initFullMap() {
     markersLayer = L.layerGroup().addTo(mapFull);
     myMarkersLayer = L.layerGroup().addTo(mapFull);
 
-    userMarker = L.marker([userLat, userLng], { draggable: true, icon: makePinIcon('violet') }).addTo(mapFull);
+    userMarker = L.marker([userLat, userLng], { draggable: true, icon: makeCircleIcon('violet', 32) }).addTo(mapFull);
     userCircle = L.circle([userLat, userLng], { radius: currentRadiusKm * 1000, color: '#7000FF', fillColor: '#7000FF', fillOpacity: 0.12, weight: 2 }).addTo(mapFull);
 
     userMarker.on('dragend', () => {
@@ -1200,45 +1358,89 @@ function initFullMap() {
     });
 }
 
-function initAddMap() {
-    mapAdd = L.map('map-add', { zoomControl: true, attributionControl: true }).setView([newItemLat, newItemLng], 13);
-    L.tileLayer(TILE_URL, { subdomains: 'abcd', maxZoom: 20, attribution: TILE_ATTR }).addTo(mapAdd);
-
-    addMarker = L.marker([newItemLat, newItemLng], { draggable: true, icon: makeCircleIcon('red') }).addTo(mapAdd);
-    addMarker.on('dragend', () => {
-        const p = addMarker.getLatLng();
-        newItemLat = p.lat; newItemLng = p.lng;
-        updateCoordsLabel(newItemLat, newItemLng);
-    });
-    mapAdd.on('click', (e) => {
-        newItemLat = e.latlng.lat; newItemLng = e.latlng.lng;
-        addMarker.setLatLng(e.latlng);
-        updateCoordsLabel(newItemLat, newItemLng);
-    });
-}
-
-function updateCoordsLabel(lat, lng) {
-    const label = document.getElementById('add-item-coords-label');
-    if (label) { label.innerText = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`; label.style.color = 'var(--accent-green)'; }
-}
-
 function updateMapMarkers() {
     if (!markersLayer || !myMarkersLayer) return;
     markersLayer.clearLayers();
     myMarkersLayer.clearLayers();
 
+    const groups = {};
     allItems.forEach(item => {
         const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
         if (!item.isMine && dist > currentRadiusKm) return;
 
-        const marker = L.marker([item.lat, item.lng], { icon: makeCircleIcon(item.isMine ? 'green' : 'pink') });
-        marker.bindTooltip(item.isMine ? `🟢 Ваш: ${item.title}` : item.title, { direction: 'top', offset: [0, -14] });
-        marker.on('click', () => {
-            if (item.isMine) showToast(`🟢 Ваш лот: ${item.title}`);
-            else openMapItemModal(item, dist);
-        });
-        if (item.isMine) marker.addTo(myMarkersLayer); else marker.addTo(markersLayer);
+        const key = `${item.lat.toFixed(4)}_${item.lng.toFixed(4)}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
     });
+
+    Object.keys(groups).forEach(key => {
+        const items = groups[key];
+        const first = items[0];
+        const isMine = first.isMine;
+
+        const marker = L.marker([first.lat, first.lng], {
+            icon: makeCircleIcon(isMine ? 'green' : 'pink', 28)
+        });
+
+        const hint = items.length > 1
+            ? (isMine ? `🟢 ${items.length} ваших лотов` : `${items.length} лота здесь`)
+            : (isMine ? `🟢 Ваш: ${first.title}` : first.title);
+
+        marker.bindTooltip(hint, { direction: 'top', offset: [0, -14] });
+
+        marker.on('click', () => {
+            if (items.length === 1) {
+                if (first.isMine) {
+                    showToast(`🟢 Ваш лот: ${first.title}`);
+                } else {
+                    const dist = getDistanceKm(userLat, userLng, first.lat, first.lng);
+                    openMapItemModal(first, dist);
+                }
+            } else {
+                openItemsListModal(items);
+            }
+        });
+
+        if (isMine) marker.addTo(myMarkersLayer);
+        else marker.addTo(markersLayer);
+    });
+}
+
+function openItemsListModal(items) {
+    const container = document.getElementById('items-list-container');
+    container.innerHTML = '';
+
+    items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'point-item-card';
+
+        const img = document.createElement('img');
+        img.src = item.media[0]?.url || '';
+        img.loading = 'lazy';
+        img.alt = item.title;
+
+        const info = document.createElement('div');
+        info.className = 'info';
+        info.innerHTML = `
+            <div class="t">${escapeHtml(item.title)}</div>
+            <div class="s">🔄 ${escapeHtml(item.swapFor)}</div>
+        `;
+
+        card.append(img, info);
+        card.addEventListener('click', () => {
+            closeModal('items-list-modal');
+            if (item.isMine) {
+                showToast(`🟢 Ваш лот: ${item.title}`);
+            } else {
+                const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
+                openMapItemModal(item, dist);
+            }
+        });
+
+        container.appendChild(card);
+    });
+
+    openModal('items-list-modal');
 }
 
 function openMapItemModal(item, dist) {
@@ -1274,17 +1476,11 @@ function getUserGPS() {
     );
 }
 
-function setNewItemToCurrentGPS() { getUserGPS(); }
-
 function updateMapAndAddress(lat, lng) {
     if (mapFull) {
         mapFull.setView([lat, lng], 11);
         userMarker.setLatLng([lat, lng]);
         userCircle.setLatLng([lat, lng]);
-    }
-    if (mapAdd) {
-        mapAdd.setView([lat, lng], 13);
-        addMarker.setLatLng([lat, lng]);
     }
     reverseGeocode(lat, lng);
     renderCards();
@@ -1352,58 +1548,207 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 /* ============================================================
+   ✅ ЭКРАН ВЫБОРА ТОЧКИ НА КАРТЕ (map-picker) — поверх всего
+   ============================================================ */
+function openMapPicker() {
+    mapPickerLat = newItemLat || userLat;
+    mapPickerLng = newItemLng || userLng;
+    mapPickerOpenedFromModal = true;
+
+    // ✅ ВАЖНО: не закрываем модалку — она останется под картой,
+    // и после закрытия карты мы вернёмся в неё же
+    const view = document.getElementById('map-picker-view');
+    view.style.display = 'flex';
+
+    setTimeout(() => initMapPicker(), 100);
+}
+
+function initMapPicker() {
+    if (typeof L === 'undefined') {
+        showToast('⚠️ Карта не загрузилась');
+        return;
+    }
+
+    const container = document.getElementById('map-picker');
+    if (!container) return;
+
+    if (mapPickerMap) {
+        try { mapPickerMap.remove(); } catch (e) {}
+        mapPickerMap = null;
+    }
+
+    mapPickerMap = L.map(container, {
+        center: [mapPickerLat, mapPickerLng],
+        zoom: 14,
+        zoomControl: true
+    });
+
+    L.tileLayer(TILE_URL, { subdomains: 'abcd', maxZoom: 20, attribution: TILE_ATTR }).addTo(mapPickerMap);
+
+    mapPickerMarker = L.marker([mapPickerLat, mapPickerLng], {
+        draggable: true,
+        icon: makeCircleIcon('red', 32)
+    }).addTo(mapPickerMap);
+
+    mapPickerMarker.on('dragend', () => {
+        const pos = mapPickerMarker.getLatLng();
+        mapPickerLat = pos.lat;
+        mapPickerLng = pos.lng;
+        updateMapPickerCoords();
+    });
+
+    mapPickerMap.on('click', (e) => {
+        mapPickerLat = e.latlng.lat;
+        mapPickerLng = e.latlng.lng;
+        mapPickerMarker.setLatLng([mapPickerLat, mapPickerLng]);
+        updateMapPickerCoords();
+    });
+
+    updateMapPickerCoords();
+
+    setTimeout(() => {
+        if (mapPickerMap) mapPickerMap.invalidateSize();
+    }, 200);
+}
+
+function updateMapPickerCoords() {
+    const el = document.getElementById('map-picker-coords');
+    if (el) {
+        el.innerText = `📍 ${mapPickerLat.toFixed(5)}, ${mapPickerLng.toFixed(5)}`;
+        el.style.color = 'var(--accent-green)';
+    }
+}
+
+function mapPickerGoToMyGps() {
+    if (!navigator.geolocation) { showToast('⚠️ GPS недоступен'); return; }
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            mapPickerLat = pos.coords.latitude;
+            mapPickerLng = pos.coords.longitude;
+            if (mapPickerMap) {
+                mapPickerMap.setView([mapPickerLat, mapPickerLng], 15);
+                mapPickerMarker.setLatLng([mapPickerLat, mapPickerLng]);
+            }
+            updateMapPickerCoords();
+            showToast('📍 Ваше местоположение');
+        },
+        () => showToast('⚠️ Не удалось определить гео'),
+        { enableHighAccuracy: true, timeout: 8000 }
+    );
+}
+
+function saveMapPicker() {
+    newItemLat = mapPickerLat;
+    newItemLng = mapPickerLng;
+
+    const display = document.getElementById('add-item-coords-display');
+    if (display) {
+        display.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
+        display.style.color = 'var(--accent-green)';
+    }
+
+    showToast('✓ Точка сохранена');
+    closeMapPicker();
+    // ✅ Модалка add-lot-modal остаётся открытой — пользователь продолжит с того же места
+}
+
+function closeMapPicker() {
+    const view = document.getElementById('map-picker-view');
+    view.style.display = 'none';
+
+    if (mapPickerMap) {
+        try { mapPickerMap.remove(); } catch (e) {}
+        mapPickerMap = null;
+        mapPickerMarker = null;
+    }
+    // ✅ Ничего не делаем с add-lot-modal — она остаётся как была
+}
+
+/* ============================================================
+   ПРЕВЬЮ ЗАГРУЖЕННЫХ ФАЙЛОВ
+   ============================================================ */
+function renderPreviews() {
+    const list = document.getElementById('preview-list');
+    const counter = document.getElementById('preview-counter');
+    const countEl = document.getElementById('preview-count');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (uploadedMedia.length === 0) {
+        if (counter) counter.style.display = 'none';
+        return;
+    }
+
+    if (counter) counter.style.display = 'block';
+    if (countEl) countEl.innerText = String(uploadedMedia.length);
+
+    uploadedMedia.forEach((media, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'preview-thumb-wrapper';
+
+        const el = document.createElement(media.type === 'video' ? 'video' : 'img');
+        el.src = media.url;
+        if (media.type === 'video') { el.muted = true; el.playsInline = true; }
+        wrapper.appendChild(el);
+
+        const badge = document.createElement('span');
+        badge.className = 'preview-badge';
+        badge.innerText = media.type === 'video' ? '🎥' : '📷';
+        wrapper.appendChild(badge);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'preview-remove-btn';
+        removeBtn.innerText = '✕';
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            uploadedMedia.splice(index, 1);
+            renderPreviews();
+        });
+        wrapper.appendChild(removeBtn);
+
+        list.appendChild(wrapper);
+    });
+}
+
+/* ============================================================
    ЗАГРУЗКА ФОТО В SUPABASE STORAGE
    ============================================================ */
 async function handleFileSelect(evt) {
     const files = evt.target.files;
-    const list = document.getElementById('preview-list');
     if (!files.length) return;
 
     showToast('📤 Загрузка фото...');
+    let ok = 0, fail = 0;
 
     for (const file of files) {
         if (file.size > 10 * 1024 * 1024) {
             showToast(`⚠️ ${file.name} — больше 10 МБ`);
+            fail++;
             continue;
         }
         const isVideo = file.type.startsWith('video');
 
-        // Локальное превью
-        const localUrl = URL.createObjectURL(file);
-        const thumbEl = document.createElement(isVideo ? 'video' : 'img');
-        thumbEl.src = localUrl;
-        thumbEl.className = 'preview-thumb';
-        if (isVideo) { thumbEl.autoplay = true; thumbEl.loop = true; thumbEl.muted = true; }
-        list.appendChild(thumbEl);
-
-        // Загружаем в Storage
         const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
         const fileName = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
         const { error } = await sb.storage.from('item-media').upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: file.type
+            cacheControl: '3600', upsert: false, contentType: file.type
         });
 
-        if (error) {
-            console.error('Upload error:', error);
-            showToast('⚠️ Ошибка загрузки файла');
-            thumbEl.remove();
-            continue;
-        }
+        if (error) { console.error('Upload error:', error); fail++; continue; }
 
         const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
-        const publicUrl = urlData.publicUrl;
-
-        uploadedMedia.push({ type: isVideo ? 'video' : 'image', url: publicUrl });
-
-        thumbEl.src = publicUrl;
-        URL.revokeObjectURL(localUrl);
+        uploadedMedia.push({ type: isVideo ? 'video' : 'image', url: urlData.publicUrl });
+        ok++;
     }
 
     evt.target.value = '';
-    showToast(`✅ Загружено: ${uploadedMedia.length}`);
+    renderPreviews();
+
+    if (ok > 0) showToast(`✅ Загружено: ${ok}${fail ? `, ошибок: ${fail}` : ''}`);
+    else if (fail > 0) showToast('⚠️ Не удалось загрузить файлы');
 }
 
 /* ============================================================
@@ -1415,14 +1760,11 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 function openCreateLotModal() {
     newItemLat = userLat; newItemLng = userLng;
     openModal('add-lot-modal');
-    setTimeout(() => {
-        if (mapAdd) {
-            mapAdd.invalidateSize();
-            mapAdd.setView([newItemLat, newItemLng], 13);
-            addMarker.setLatLng([newItemLat, newItemLng]);
-            updateCoordsLabel(newItemLat, newItemLng);
-        }
-    }, 250);
+
+    const display = document.getElementById('add-item-coords-display');
+    if (display) {
+        display.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
+    }
 }
 
 function openLightbox(type, url) {

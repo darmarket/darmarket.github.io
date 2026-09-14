@@ -843,38 +843,42 @@
             margin-bottom: 10px;
         }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            height: 64px;
-            background: rgba(12, 14, 22, 0.95);
-            backdrop-filter: blur(16px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid var(--card-border);
-            z-index: 100;
-            flex-shrink: 0;
-        }
+   .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--tg-theme-hint-color, var(--text-sub));
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.15s ease;
+    padding: 6px 12px;
+    border-radius: 10px;
+    -webkit-user-select: none;
+    user-select: none;
+}
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--text-sub);
-            font-size: 10px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
+.nav-item:active {
+    transform: scale(0.92);
+}
 
-        .nav-item.active {
-            color: var(--accent-pink);
-        }
+.nav-item.active {
+    color: var(--tg-theme-button-color, var(--accent-pink));
+}
 
-        .nav-icon {
-            font-size: 18px;
-        }
+.nav-icon {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.nav-item.active .nav-icon {
+    transform: translateY(-1px);
+}
 
         /* Toast */
         .match-toast {
@@ -1155,23 +1159,34 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('swipe')">
-            <span class="nav-icon">🔥</span>
-            <span>Обмен</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('map')">
-            <span class="nav-icon">🗺️</span>
-            <span>Карта</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('my-lots')">
-            <span class="nav-icon">📦</span>
-            <span>Мои лоты</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('chats')">
-            <span class="nav-icon">💬</span>
-            <span>Чаты</span>
-        </div>
+<div class="bottom-nav">
+    <div class="nav-item active" data-tab="swipe">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        <span>Обмен</span>
+    </div>
+    <div class="nav-item" data-tab="map">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+            <line x1="8" y1="2" x2="8" y2="18"/>
+            <line x1="16" y1="6" x2="16" y2="22"/>
+        </svg>
+        <span>Карта</span>
+    </div>
+    <div class="nav-item" data-tab="my-lots">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        <span>Мои лоты</span>
+    </div>
+    <div class="nav-item" data-tab="chats">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Чаты</span>
     </div>
 </div>
 

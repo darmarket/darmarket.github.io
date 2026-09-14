@@ -148,7 +148,6 @@
 </head>
 <body>
 
-<!-- LOADER -->
 <div id="loader" class="loader-overlay">
     <div class="loader-spinner"></div>
     <div class="loader-text">Загрузка ДарМаркет...</div>
@@ -214,7 +213,7 @@
             <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы:</label>
             <div class="upload-box" onclick="document.getElementById('file-input').click()">
                 📸 Нажмите для загрузки
-                <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFileSelect(event)">
+                <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleFileSelect(event)">
             </div>
             <div class="media-preview-list" id="preview-list"></div>
             <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение:</label>
@@ -351,9 +350,9 @@
 
 <script>
 /* ============================================================
-   SUPABASE ПОДКЛЮЧЕНИЕ
+   SUPABASE
    ============================================================ */
-const SUPABASE_URL = 'https://pqmlxnapfjzprtbkjfke.supabase.co';
+const SUPABASE_URL = 'https://pqmxnapfzprtbkjfke.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbWx4bmFwZmp6cHJ0YmtqZmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzcyOTksImV4cCI6MjEwNDk1MzI5OX0.cRW_goFrXxjg3q209USNjkTcJpUy9yF5_ib_4DEjdaE';
 
 const { createClient } = supabase;
@@ -376,9 +375,7 @@ const TelegramApp = {
                 this.webApp.expand();
                 this.user = (this.webApp.initDataUnsafe && this.webApp.initDataUnsafe.user) || null;
                 this.applyTheme();
-                if (this.webApp.onEvent) {
-                    this.webApp.onEvent('themeChanged', () => this.applyTheme());
-                }
+                if (this.webApp.onEvent) this.webApp.onEvent('themeChanged', () => this.applyTheme());
                 console.log('✅ Telegram:', this.user);
             } else {
                 console.log('🌐 Обычный веб');
@@ -431,13 +428,9 @@ let pendingSwipeCard = null;
 let selectedRating = 5;
 let selectedMapItem = null;
 
-let userProfile = {
-    id: null, name: 'Гость', phone: '', username: '',
-    city: 'Санкт-Петербург', rating: 5.0, reviews: []
-};
-
-let allItems = [];   // Все лоты из базы
-let chatList = [];   // Все чаты пользователя
+let userProfile = { id: null, name: 'Гость', phone: '', username: '', city: 'Санкт-Петербург', rating: 5.0, reviews: [] };
+let allItems = [];
+let chatList = [];
 let currentMessages = [];
 
 const regionsRF = [
@@ -464,42 +457,41 @@ const regionsRF = [
 ];
 
 /* ============================================================
-   ИНИЦИАЛИЗАЦИЯ
+   ИНИЦИАЛИЗАЦИЯ — БЫСТРЫЙ ЗАПУСК
    ============================================================ */
 window.addEventListener('DOMContentLoaded', async () => {
     TelegramApp.init();
     populateRegions();
 
-    // ✅ Показываем интерфейс СРАЗУ — не ждём базу
+    // ✅ Скрываем лоадер через 300мс — интерфейс появляется сразу
     setTimeout(() => {
         const loader = document.getElementById('loader');
         if (loader) loader.classList.add('hidden');
     }, 300);
 
-    // Инициализируем карту сразу, чтобы она грузилась параллельно
+    // Инициализируем карту сразу
     if (typeof L !== 'undefined') {
         initLeafletMaps();
     }
 
-    // ✅ Данные грузим в фоне, с таймаутом, чтобы не зависало
+    // Данные грузим в фоне с таймаутами
     (async () => {
         try {
             console.log('⏳ Начинаем загрузку данных...');
 
-            const timeoutPromise = (promise, ms, name) =>
-                Promise.race([
-                    promise,
-                    new Promise((_, rej) => setTimeout(() => rej(new Error(`${name} timeout`)), ms))
-                ]);
+            const withTimeout = (promise, ms, name) => Promise.race([
+                promise,
+                new Promise((_, rej) => setTimeout(() => rej(new Error(`${name} timeout`)), ms))
+            ]);
 
-            await timeoutPromise(initUser(), 8000, 'initUser');
+            await withTimeout(initUser(), 8000, 'initUser');
             console.log('✅ Профиль загружен');
 
-            await timeoutPromise(loadItems(), 8000, 'loadItems');
-            console.log('✅ Лоты загружены');
+            await withTimeout(loadItems(), 8000, 'loadItems');
+            console.log(`✅ Загружено лотов: ${allItems.length}`);
 
-            await timeoutPromise(loadChats(), 5000, 'loadChats');
-            console.log('✅ Чаты загружены');
+            await withTimeout(loadChats(), 5000, 'loadChats');
+            console.log(`✅ Загружено чатов: ${chatList.length}`);
 
             renderProfile();
             renderChatsList();
@@ -510,13 +502,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             console.log('🎉 Всё загружено');
         } catch (e) {
             console.error('❌ Init error:', e.message);
-            showToast('⚠️ Данные не загрузились, работаем оффлайн');
-            // Показываем пустой интерфейс
+            showToast('⚠️ Данные не загрузились');
             renderCards();
         }
     })();
 
-    // Realtime — слушаем новые сообщения
+    // Realtime — новые сообщения
     sb.channel('messages-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             const msg = payload.new;
@@ -524,9 +515,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 currentMessages.push(msg);
                 renderMessages();
             }
-            loadChats().then(() => {
-                if (!activeChatId) renderChatsList();
-            });
+            loadChats().then(() => { if (!activeChatId) renderChatsList(); });
         })
         .subscribe();
 
@@ -543,48 +532,38 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ============================================================
-   АВТОРИЗАЦИЯ / ПРОФИЛЬ
+   АВТОРИЗАЦИЯ
    ============================================================ */
 async function initUser() {
     const tgUser = TelegramApp.user;
     let userId = tgUser ? tgUser.id : null;
 
     if (!userId) {
-        // Fallback для тестирования вне Telegram
         userId = parseInt(localStorage.getItem('dm_uid') || '0') || Math.floor(1e9 + Math.random() * 9e8);
         localStorage.setItem('dm_uid', String(userId));
     }
 
     userProfile.id = userId;
 
-    // Пробуем загрузить профиль из БД
     const { data, error } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
-
-    if (error) console.warn('Profile load error:', error);
+    if (error) console.warn('Profile load:', error);
 
     if (data) {
         userProfile = { ...userProfile, ...data, reviews: [] };
     } else {
-        // Создаём новый профиль
         const newProfile = {
             id: userId,
             name: tgUser ? (tgUser.first_name || 'Пользователь') : 'Гость',
             username: tgUser ? (tgUser.username || null) : null,
             phone: null,
             city: 'Санкт-Петербург',
-            lat: userLat,
-            lng: userLng
+            lat: userLat, lng: userLng
         };
         const { data: created, error: createErr } = await sb.from('profiles').insert(newProfile).select().single();
-        if (createErr) {
-            console.error('Profile create error:', createErr);
-            showToast('⚠️ Ошибка профиля');
-        } else if (created) {
-            userProfile = { ...userProfile, ...created, reviews: [] };
-        }
+        if (createErr) { console.error('Profile create:', createErr); throw createErr; }
+        userProfile = { ...userProfile, ...created, reviews: [] };
     }
 
-    // Загружаем отзывы о себе
     const { data: reviewsData } = await sb.from('reviews').select('*').eq('to_user_id', userId).order('created_at', { ascending: false });
     if (reviewsData) userProfile.reviews = reviewsData;
 
@@ -606,9 +585,7 @@ function updateHeaderCity() {
     if (label) label.innerText = userProfile.city || 'Санкт-Петербург';
 }
 
-function renderProfile() {
-    updateProfileUI();
-}
+function renderProfile() { updateProfileUI(); }
 
 function renderProfileReviews() {
     const container = document.getElementById('profile-reviews-list');
@@ -639,43 +616,28 @@ async function saveRegistration() {
     const name = document.getElementById('reg-name').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
     const city = document.getElementById('reg-city').value.trim();
-
     if (!name) { showToast('⚠️ Укажите имя'); return; }
 
-    const { error } = await sb.from('profiles').update({
-        name, phone, city, updated_at: new Date().toISOString()
-    }).eq('id', userProfile.id);
+    const { error } = await sb.from('profiles').update({ name, phone, city, updated_at: new Date().toISOString() }).eq('id', userProfile.id);
+    if (error) { showToast('⚠️ Ошибка сохранения'); console.error(error); return; }
 
-    if (error) {
-        showToast('⚠️ Ошибка сохранения');
-        console.error(error);
-        return;
-    }
-
-    userProfile.name = name;
-    userProfile.phone = phone;
-    userProfile.city = city;
-    updateProfileUI();
-    updateHeaderCity();
+    userProfile.name = name; userProfile.phone = phone; userProfile.city = city;
+    updateProfileUI(); updateHeaderCity();
     closeModal('auth-modal');
     showToast('✅ Профиль сохранён!');
 }
 
 /* ============================================================
-   ЛОТЫ
+   ЛОТЫ — ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА
    ============================================================ */
 async function loadItems() {
     const { data, error } = await sb.from('items')
-        .select('*, profiles!items_owner_id_fkey(name, rating)')
+        .select('id, owner_id, title, swap_for, description, condition, media, lat, lng, created_at, profiles!items_owner_id_fkey(name, rating)')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(500);
+        .limit(100);
 
-    if (error) {
-        console.error('Load items error:', error);
-        showToast('⚠️ Ошибка загрузки лотов');
-        return;
-    }
+    if (error) { console.error('Load items error:', error); throw error; }
 
     allItems = (data || []).map(item => ({
         id: item.id,
@@ -708,17 +670,11 @@ async function publishItem() {
         description: desc || 'Новое предложение',
         condition,
         media: uploadedMedia.map(m => ({ type: m.type, url: m.url })),
-        lat: newItemLat,
-        lng: newItemLng
+        lat: newItemLat, lng: newItemLng
     };
 
-    const { data, error } = await sb.from('items').insert(newItem).select().single();
-
-    if (error) {
-        console.error(error);
-        showToast('⚠️ Ошибка публикации');
-        return;
-    }
+    const { error } = await sb.from('items').insert(newItem).select().single();
+    if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
 
     uploadedMedia = [];
     document.getElementById('preview-list').innerHTML = '';
@@ -757,7 +713,7 @@ function renderMyLotsGrid() {
     container.innerHTML = myItems.map(item => `
         <div class="my-lot-card">
             <div class="my-lot-img-wrapper">
-                <img src="${escapeHtml(item.media[0]?.url || '')}" class="my-lot-img">
+                <img src="${escapeHtml(item.media[0]?.url || '')}" class="my-lot-img" loading="lazy">
                 <span class="my-lot-badge">${escapeHtml(item.condition)}</span>
             </div>
             <div class="my-lot-title">${escapeHtml(item.title)}</div>
@@ -807,7 +763,7 @@ function renderCards() {
             const cls = mIdx === 0 ? 'active' : '';
             indicators += `<div class="indicator-dot ${cls}"></div>`;
             if (med.type === 'image') {
-                mediaElements += `<img src="${escapeHtml(med.url)}" class="media-item ${cls}" data-idx="${mIdx}">`;
+                mediaElements += `<img src="${escapeHtml(med.url)}" class="media-item ${cls}" data-idx="${mIdx}" loading="lazy">`;
             } else {
                 mediaElements += `<video src="${escapeHtml(med.url)}" class="media-item ${cls}" data-idx="${mIdx}" autoplay loop muted playsinline></video>`;
             }
@@ -839,7 +795,6 @@ function renderCards() {
         `;
         deck.appendChild(card);
 
-        // Карусель
         const leftBtn = card.querySelector('.carousel-btn-left');
         const rightBtn = card.querySelector('.carousel-btn-right');
         leftBtn.addEventListener('click', (e) => { e.stopPropagation(); changeMedia(card, -1); });
@@ -865,7 +820,6 @@ function changeMedia(card, direction) {
 
 function initSwipeEvents(card) {
     let dragging = false, startX = 0, startY = 0, curX = 0, curY = 0;
-
     const badgeLike = card.querySelector('.badge-like');
     const badgePass = card.querySelector('.badge-pass');
 
@@ -885,8 +839,7 @@ function initSwipeEvents(card) {
     const onMove = (e) => {
         if (!dragging) return;
         const p = getPoint(e);
-        curX = p.x - startX;
-        curY = p.y - startY;
+        curX = p.x - startX; curY = p.y - startY;
         card.style.transform = `translate3d(${curX}px, ${curY}px, 0) rotate(${curX * 0.08}deg)`;
         if (curX > 30) { badgeLike.style.opacity = Math.min(curX / 100, 1); badgePass.style.opacity = '0'; }
         else if (curX < -30) { badgePass.style.opacity = Math.min(Math.abs(curX) / 100, 1); badgeLike.style.opacity = '0'; }
@@ -907,8 +860,7 @@ function initSwipeEvents(card) {
             completeSwipe(card, false);
         } else {
             card.style.transform = 'translate3d(0,0,0) rotate(0)';
-            badgeLike.style.opacity = '0';
-            badgePass.style.opacity = '0';
+            badgeLike.style.opacity = '0'; badgePass.style.opacity = '0';
         }
         curX = curY = 0;
     };
@@ -933,10 +885,7 @@ function completeSwipe(card, isLike, offeredIds = []) {
         createChatWith(item, offeredIds);
     }
 
-    setTimeout(() => {
-        card.remove();
-        renderCards();
-    }, 250);
+    setTimeout(() => { card.remove(); renderCards(); }, 250);
 }
 
 function triggerBtnSwipe(isLike) {
@@ -967,7 +916,7 @@ function openOfferModal(targetTitle) {
         container.innerHTML = myItems.map(item => `
             <label class="offer-item-check">
                 <input type="checkbox" value="${item.id}" class="offer-checkbox">
-                <img src="${escapeHtml(item.media[0]?.url || '')}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                <img src="${escapeHtml(item.media[0]?.url || '')}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" loading="lazy">
                 <div style="font-size:13px; font-weight:600;">${escapeHtml(item.title)}</div>
             </label>
         `).join('');
@@ -1000,14 +949,13 @@ function confirmOfferAndSwipe() {
 }
 
 /* ============================================================
-   ЧАТЫ
+   ЧАТЫ — ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА
    ============================================================ */
 async function createChatWith(item, offeredIds = []) {
     if (!item.ownerId || item.ownerId === userProfile.id) return;
 
-    // Проверяем, есть ли уже чат
     const { data: existing } = await sb.from('chats')
-        .select('*')
+        .select('id')
         .or(`and(user1_id.eq.${userProfile.id},user2_id.eq.${item.ownerId}),and(user1_id.eq.${item.ownerId},user2_id.eq.${userProfile.id})`)
         .eq('item_id', item.id)
         .maybeSingle();
@@ -1026,18 +974,13 @@ async function createChatWith(item, offeredIds = []) {
         if (error) { console.error(error); return; }
         chatId = newChat.id;
 
-        // Первое сообщение от лица «покупателя»
         const offeredItems = allItems.filter(i => offeredIds.includes(i.id));
         const names = offeredItems.map(i => `«${i.title}»`).join(', ');
         const text = names
             ? `Здравствуйте! Интересует ваш лот «${item.title}».\n\nПредлагаю взамен: ${names}`
             : `Здравствуйте! Интересует ваш лот «${item.title}».`;
 
-        await sb.from('messages').insert({
-            chat_id: chatId,
-            sender_id: userProfile.id,
-            text: text
-        });
+        await sb.from('messages').insert({ chat_id: chatId, sender_id: userProfile.id, text });
     }
 
     await loadChats();
@@ -1047,32 +990,44 @@ async function createChatWith(item, offeredIds = []) {
 async function loadChats() {
     if (!userProfile.id) return;
 
-    const { data, error } = await sb.from('chats')
-        .select('*, item:items!chats_item_id_fkey(id, title, media, owner_id)')
+    const { data: chats, error } = await sb.from('chats')
+        .select('id, user1_id, user2_id, item_id, created_at, items!chats_item_id_fkey(id, title, media)')
         .or(`user1_id.eq.${userProfile.id},user2_id.eq.${userProfile.id}`)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+    if (error) { console.error('Chats error:', error); throw error; }
+    if (!chats || chats.length === 0) { chatList = []; return; }
+
+    const otherIds = [...new Set(chats.map(c => c.user1_id === userProfile.id ? c.user2_id : c.user1_id))];
+
+    const { data: profiles } = await sb.from('profiles').select('id, name, username').in('id', otherIds);
+    const profileMap = {};
+    (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+    const chatIds = chats.map(c => c.id);
+    const { data: lastMsgs } = await sb.from('messages')
+        .select('chat_id, text, created_at')
+        .in('chat_id', chatIds)
         .order('created_at', { ascending: false });
 
-    if (error) { console.error(error); return; }
+    const lastMsgMap = {};
+    (lastMsgs || []).forEach(m => { if (!lastMsgMap[m.chat_id]) lastMsgMap[m.chat_id] = m; });
 
-    chatList = [];
-
-    for (const chat of data || []) {
+    chatList = chats.map(chat => {
         const otherId = chat.user1_id === userProfile.id ? chat.user2_id : chat.user1_id;
-        const { data: otherProfile } = await sb.from('profiles').select('name, username').eq('id', otherId).maybeSingle();
-
-        const { data: lastMsgs } = await sb.from('messages')
-            .select('*').eq('chat_id', chat.id).order('created_at', { ascending: false }).limit(1);
-
-        chatList.push({
+        const otherProfile = profileMap[otherId] || {};
+        const lastMsg = lastMsgMap[chat.id];
+        return {
             id: chat.id,
             otherUserId: otherId,
-            otherName: otherProfile?.name || 'Пользователь',
-            itemTitle: chat.item?.title || 'Обмен',
-            itemMedia: chat.item?.media?.[0]?.url || '',
-            lastMessage: lastMsgs?.[0]?.text || 'Начните диалог',
+            otherName: otherProfile.name || 'Пользователь',
+            itemTitle: chat.items?.title || 'Обмен',
+            itemMedia: chat.items?.media?.[0]?.url || '',
+            lastMessage: lastMsg?.text || 'Начните диалог',
             createdAt: chat.created_at
-        });
-    }
+        };
+    });
 }
 
 function renderChatsList() {
@@ -1122,8 +1077,7 @@ async function openChat(chatId) {
 }
 
 async function loadMessages(chatId) {
-    const { data, error } = await sb.from('messages')
-        .select('*').eq('chat_id', chatId).order('created_at', { ascending: true });
+    const { data, error } = await sb.from('messages').select('*').eq('chat_id', chatId).order('created_at', { ascending: true });
     if (error) { console.error(error); return; }
     currentMessages = data || [];
 }
@@ -1145,12 +1099,7 @@ async function sendChatMessage() {
     const text = input.value.trim();
     if (!text || !activeChatId) return;
 
-    const { error } = await sb.from('messages').insert({
-        chat_id: activeChatId,
-        sender_id: userProfile.id,
-        text: text
-    });
-
+    const { error } = await sb.from('messages').insert({ chat_id: activeChatId, sender_id: userProfile.id, text });
     if (error) { showToast('⚠️ Ошибка отправки'); return; }
     input.value = '';
 }
@@ -1170,9 +1119,7 @@ async function deleteChat(chatId) {
     showToast('🗑️ Диалог удалён');
 }
 
-function deleteActiveChat() {
-    if (activeChatId) deleteChat(activeChatId);
-}
+function deleteActiveChat() { if (activeChatId) deleteChat(activeChatId); }
 
 /* ============================================================
    ОТЗЫВЫ
@@ -1206,7 +1153,6 @@ async function submitReview() {
     });
 
     if (error) { showToast('⚠️ Ошибка отзыва'); return; }
-
     closeModal('rate-modal');
     showToast('🌟 Отзыв опубликован!');
 }
@@ -1318,8 +1264,7 @@ function getUserGPS() {
     if (!navigator.geolocation) { showToast('⚠️ GPS не поддерживается'); return; }
     navigator.geolocation.getCurrentPosition(
         pos => {
-            userLat = pos.coords.latitude;
-            userLng = pos.coords.longitude;
+            userLat = pos.coords.latitude; userLng = pos.coords.longitude;
             newItemLat = userLat; newItemLng = userLng;
             updateMapAndAddress(userLat, userLng);
             showToast('📍 Обновлено!');
@@ -1407,22 +1352,58 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 /* ============================================================
-   MEDIA (локально — пока без загрузки на сервер)
+   ЗАГРУЗКА ФОТО В SUPABASE STORAGE
    ============================================================ */
-function handleFileSelect(evt) {
+async function handleFileSelect(evt) {
     const files = evt.target.files;
     const list = document.getElementById('preview-list');
+    if (!files.length) return;
+
+    showToast('📤 Загрузка фото...');
+
     for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) {
+            showToast(`⚠️ ${file.name} — больше 10 МБ`);
+            continue;
+        }
         const isVideo = file.type.startsWith('video');
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const url = e.target.result;
-            uploadedMedia.push({ type: isVideo ? 'video' : 'image', url });
-            if (isVideo) list.innerHTML += `<video src="${url}" class="preview-thumb" autoplay loop muted></video>`;
-            else list.innerHTML += `<img src="${url}" class="preview-thumb">`;
-        };
-        reader.readAsDataURL(file);
+
+        // Локальное превью
+        const localUrl = URL.createObjectURL(file);
+        const thumbEl = document.createElement(isVideo ? 'video' : 'img');
+        thumbEl.src = localUrl;
+        thumbEl.className = 'preview-thumb';
+        if (isVideo) { thumbEl.autoplay = true; thumbEl.loop = true; thumbEl.muted = true; }
+        list.appendChild(thumbEl);
+
+        // Загружаем в Storage
+        const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
+        const fileName = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+        const { error } = await sb.storage.from('item-media').upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type
+        });
+
+        if (error) {
+            console.error('Upload error:', error);
+            showToast('⚠️ Ошибка загрузки файла');
+            thumbEl.remove();
+            continue;
+        }
+
+        const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
+        const publicUrl = urlData.publicUrl;
+
+        uploadedMedia.push({ type: isVideo ? 'video' : 'image', url: publicUrl });
+
+        thumbEl.src = publicUrl;
+        URL.revokeObjectURL(localUrl);
     }
+
+    evt.target.value = '';
+    showToast(`✅ Загружено: ${uploadedMedia.length}`);
 }
 
 /* ============================================================

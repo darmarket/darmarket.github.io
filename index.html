@@ -99,18 +99,74 @@
         .stat-val { font-size: 18px; font-weight: 800; color: #FFF; }
         .stat-lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-        /* ✅ ОБНОВЛЕНО: upload-box без onClick, обработчик в JS */
-        .upload-box { border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 18px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.03); margin-bottom: 8px; transition: border-color 0.2s ease; user-select: none; }
-        .upload-box:hover, .upload-box:active { border-color: var(--accent-pink); }
+        /* ===== ✅ НОВЫЙ БЛОК ЗАГРУЗКИ МЕДИА ===== */
+        .media-upload-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 4px 2px 8px 2px;
+            margin-bottom: 8px;
+            scrollbar-width: thin;
+            min-height: 100px;
+        }
+        .media-upload-row::-webkit-scrollbar { height: 4px; }
+        .media-upload-row::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
 
-        /* ✅ ОБНОВЛЕНО: превью вынесено ОТДЕЛЬНО, чтобы клики не пересекались с upload-box */
-        .media-preview-list { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; margin: 8px 0 12px 0; padding: 4px 2px; min-height: 0; scrollbar-width: thin; position: relative; z-index: 5; }
-        .media-preview-list::-webkit-scrollbar { height: 4px; }
-        .media-preview-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
-        .preview-thumb-wrapper { position: relative; flex-shrink: 0; width: 90px; height: 90px; border-radius: 12px; overflow: hidden; border: 1px solid var(--card-border); background: #1a1c24; }
-        .preview-thumb-wrapper img, .preview-thumb-wrapper video { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+        /* Кнопка "+" для добавления */
+        .add-media-btn {
+            flex-shrink: 0;
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            color: var(--text-sub);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .add-media-btn:active { background: rgba(255,255,255,0.1); border-color: var(--accent-pink); }
+        .add-media-btn .plus-icon {
+            font-size: 32px;
+            line-height: 1;
+            font-weight: 200;
+            color: #FFF;
+        }
+        .add-media-btn .plus-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            padding: 0 4px;
+        }
 
-        /* ✅ ОБНОВЛЕНО: крестик больше и кликабельный, z-index выше */
+        /* Превью-обёртка */
+        .preview-thumb-wrapper {
+            position: relative;
+            flex-shrink: 0;
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            background: #1a1c24;
+        }
+        .preview-thumb-wrapper img,
+        .preview-thumb-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* ✅ Крестик удаления — крупный и кликабельный */
         .preview-remove-btn {
             position: absolute;
             top: 4px;
@@ -119,9 +175,9 @@
             height: 28px;
             border-radius: 50%;
             background: rgba(0,0,0,0.85);
-            border: 2px solid rgba(255,255,255,0.6);
+            border: 2px solid rgba(255,255,255,0.7);
             color: #fff;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -129,15 +185,27 @@
             cursor: pointer;
             line-height: 1;
             padding: 0;
-            z-index: 10;
+            z-index: 100;
             pointer-events: auto;
             backdrop-filter: blur(4px);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.7);
             -webkit-tap-highlight-color: transparent;
         }
         .preview-remove-btn:active { background: #FF2D55; transform: scale(0.9); }
 
-        .preview-badge { position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.7); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; backdrop-filter: blur(4px); z-index: 2; pointer-events: none; }
+        .preview-badge {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
+            z-index: 2;
+            pointer-events: none;
+        }
 
         .preview-counter { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; display: none; }
         .preview-counter.visible { display: block; }
@@ -303,14 +371,15 @@
             <textarea id="add-desc" placeholder="Описание..." rows="3"></textarea>
             <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы:</label>
 
-            <!-- ✅ ОБНОВЛЕНО: убран inline onclick, добавлен id -->
-            <div class="upload-box" id="upload-trigger">
-                📸 Нажмите для загрузки
+            <!-- ✅ НОВЫЙ БЛОК: превью + кнопка "+" в одной строке -->
+            <div class="media-upload-row" id="media-upload-row">
+                <button type="button" class="add-media-btn" id="add-media-btn">
+                    <span class="plus-icon">+</span>
+                    <span class="plus-label">Добавить</span>
+                </button>
             </div>
             <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;">
 
-            <!-- ✅ ОБНОВЛЕНО: превью вынесено отдельно от upload-box -->
-            <div class="media-preview-list" id="preview-list"></div>
             <div class="preview-counter" id="preview-counter">
                 Загружено: <span id="preview-count">0</span>
             </div>
@@ -658,7 +727,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     })();
 
-    // ✅ Realtime: сообщения
     sb.channel('messages-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
             const msg = payload.new;
@@ -676,19 +744,15 @@ window.addEventListener('DOMContentLoaded', async () => {
         })
         .subscribe((status) => console.log('📡 Messages:', status));
 
-    // ✅ Realtime: лоты — новые добавляются в ленту и на карту
     sb.channel('items-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'items' }, async (payload) => {
             const newItem = payload.new;
-            console.log('🆕 Новый лот:', newItem.title);
-
             if (newItem.owner_id === userProfile.id) {
                 await loadItems();
                 renderMyLotsGrid();
                 updateMapMarkers();
                 return;
             }
-
             if (seenItemIds.has(newItem.id)) return;
 
             const dist = getDistanceKm(userLat, userLng, parseFloat(newItem.lat), parseFloat(newItem.lng));
@@ -952,8 +1016,11 @@ async function publishItem() {
     if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
 
     uploadedMedia = [];
-    document.getElementById('preview-list').innerHTML = '';
     document.getElementById('preview-counter').classList.remove('visible');
+
+    // ✅ Очищаем все превью и пересоздаём кнопку "+"
+    renderMediaUploadRow();
+
     document.getElementById('add-title').value = '';
     document.getElementById('add-swap').value = '';
     document.getElementById('add-desc').value = '';
@@ -1106,11 +1173,7 @@ function appendNewCardToDeck(itemId) {
     if (controls) controls.style.display = 'flex';
 
     if (deck.querySelector(`[data-item-id="${itemId}"]`)) return;
-
-    // Убираем заглушку если есть
-    if (!deck.querySelector('.swipe-card')) {
-        deck.innerHTML = '';
-    }
+    if (!deck.querySelector('.swipe-card')) deck.innerHTML = '';
 
     const card = createCardElement(item, 1);
     card.style.transform = 'translate3d(0, 30px, 0) scale(0.95)';
@@ -1280,33 +1343,23 @@ function confirmOfferAndSwipe() {
 /* ============================================================
    ЧАТЫ
    ============================================================ */
-/**
- * ✅ ОБНОВЛЕНО: теперь ищем чат ТОЛЬКО по паре пользователей (без item_id).
- * Если чат с этим человеком уже есть — пишем в него, а не создаём новый.
- */
 async function createChatWith(item, offeredIds = []) {
     if (!item.ownerId || item.ownerId === userProfile.id) return;
 
-    console.log('💬 Создание/поиск чата с', item.ownerId);
-
-    // ✅ Ищем ЛЮБОЙ существующий чат между этими двумя пользователями
     const { data: existingChats, error: searchErr } = await sb.from('chats')
         .select('id, item_id')
         .or(`and(user1_id.eq.${userProfile.id},user2_id.eq.${item.ownerId}),and(user1_id.eq.${item.ownerId},user2_id.eq.${userProfile.id})`)
         .order('created_at', { ascending: true })
         .limit(1);
 
-    if (searchErr) { console.error('Chat search error:', searchErr); }
+    if (searchErr) console.error('Chat search error:', searchErr);
 
     let chatId;
     let isNewChat = false;
 
     if (existingChats && existingChats.length > 0) {
-        // ✅ Чат уже есть — используем его
         chatId = existingChats[0].id;
-        console.log('✅ Найден существующий чат:', chatId);
     } else {
-        // Создаём новый чат
         const { data: newChat, error } = await sb.from('chats').insert({
             user1_id: userProfile.id,
             user2_id: item.ownerId,
@@ -1317,10 +1370,8 @@ async function createChatWith(item, offeredIds = []) {
         if (error) { console.error('Chat create error:', error); return; }
         chatId = newChat.id;
         isNewChat = true;
-        console.log('🆕 Создан новый чат:', chatId);
     }
 
-    // Формируем текст сообщения
     const offeredItems = allItems.filter(i => offeredIds.includes(i.id));
     const names = offeredItems.map(i => `«${i.title}»`).join(', ');
 
@@ -1330,7 +1381,6 @@ async function createChatWith(item, offeredIds = []) {
             ? `Здравствуйте! Интересует ваш лот «${item.title}».\n\nПредлагаю взамен: ${names}`
             : `Здравствуйте! Интересует ваш лот «${item.title}».`;
     } else {
-        // ✅ Если чат уже был — короткое сообщение про новый лот
         text = names
             ? `Ещё интересует лот «${item.title}».\n\nПредлагаю взамен: ${names}`
             : `Ещё интересует лот «${item.title}».`;
@@ -1860,11 +1910,107 @@ function saveMapPicker() {
 }
 
 /* ============================================================
-   ✅ ЗАГРУЗКА ФОТО (обновлено — клики на крестик работают)
+   ✅ ЗАГРУЗКА ФОТО — НОВАЯ ЛОГИКА
    ============================================================ */
+
+/** Пересоздаёт строку медиа: кнопка "+" + все превью */
+function renderMediaUploadRow() {
+    const row = document.getElementById('media-upload-row');
+    if (!row) return;
+
+    // Очищаем всё
+    row.innerHTML = '';
+
+    // Кнопка "+" — всегда первая
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'add-media-btn';
+    addBtn.id = 'add-media-btn';
+    addBtn.innerHTML = `
+        <span class="plus-icon">+</span>
+        <span class="plus-label">Добавить</span>
+    `;
+    addBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('file-input').click();
+    });
+
+    row.appendChild(addBtn);
+
+    // Потом все превью с крестиками
+    uploadedMedia.forEach((media, index) => {
+        if (!media) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'preview-thumb-wrapper';
+
+        const el = document.createElement(media.type === 'video' ? 'video' : 'img');
+        el.src = media.publicUrl || media.url;
+        el.alt = 'preview';
+        if (media.type === 'video') {
+            el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true;
+        }
+        wrapper.appendChild(el);
+
+        const badge = document.createElement('span');
+        badge.className = 'preview-badge';
+        badge.textContent = media.type === 'video' ? '🎥' : '📷';
+        wrapper.appendChild(badge);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'preview-remove-btn';
+        removeBtn.textContent = '✕';
+        wrapper.appendChild(removeBtn);
+
+        // ✅ Единый обработчик удаления
+        const doRemove = (e) => {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+            }
+            removeUploadedMedia(index);
+        };
+
+        removeBtn.addEventListener('click', doRemove);
+        removeBtn.addEventListener('touchend', doRemove);
+        removeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+        removeBtn.addEventListener('touchstart', (e) => e.stopPropagation());
+
+        row.appendChild(wrapper);
+    });
+
+    updatePreviewCounter();
+}
+
+/** Удаление файла */
+function removeUploadedMedia(index) {
+    const media = uploadedMedia[index];
+    if (!media) return;
+
+    if (media.url?.startsWith('blob:')) {
+        try { URL.revokeObjectURL(media.url); } catch (e) {}
+    }
+
+    uploadedMedia[index] = null;
+    renderMediaUploadRow();
+    showToast('🗑️ Файл удалён');
+}
+
+/** Счётчик */
+function updatePreviewCounter() {
+    const real = uploadedMedia.filter(m => m !== null);
+    const counter = document.getElementById('preview-counter');
+    const countEl = document.getElementById('preview-count');
+    if (counter) counter.classList.toggle('visible', real.length > 0);
+    if (countEl) countEl.innerText = real.length;
+}
+
+/** Обработка выбора файлов */
 async function handleFileSelect(evt) {
     const files = evt.target.files;
-    const list = document.getElementById('preview-list');
     if (!files.length) return;
 
     const realCount = uploadedMedia.filter(m => m !== null).length;
@@ -1884,47 +2030,16 @@ async function handleFileSelect(evt) {
         const isVideo = file.type.startsWith('video');
         const localUrl = URL.createObjectURL(file);
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'preview-thumb-wrapper';
-
-        const thumbEl = document.createElement(isVideo ? 'video' : 'img');
-        thumbEl.src = localUrl;
-        if (isVideo) { thumbEl.autoplay = true; thumbEl.loop = true; thumbEl.muted = true; }
-        wrapper.appendChild(thumbEl);
-
-        const badge = document.createElement('span');
-        badge.className = 'preview-badge';
-        badge.textContent = isVideo ? '🎥' : '📷';
-        wrapper.appendChild(badge);
-
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'preview-remove-btn';
-        removeBtn.textContent = '✕';
-        wrapper.appendChild(removeBtn);
-
-        list.appendChild(wrapper);
-
-        const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: file, publicUrl: null };
-        uploadedMedia.push(mediaObj);
-        const mediaIndex = uploadedMedia.length - 1;
-
-        // ✅ Обработчик удаления — с полной блокировкой всплытия
-        const doRemove = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-            }
-            removeUploadedMedia(mediaIndex, wrapper);
+        const mediaObj = {
+            type: isVideo ? 'video' : 'image',
+            url: localUrl,
+            file: file,
+            publicUrl: null
         };
+        uploadedMedia.push(mediaObj);
 
-        removeBtn.addEventListener('click', doRemove);
-        removeBtn.addEventListener('touchend', doRemove);
-        removeBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); });
-        removeBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); });
-
-        updatePreviewCounter();
+        // Сразу показываем превью
+        renderMediaUploadRow();
 
         const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
         const fileName = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -1936,7 +2051,7 @@ async function handleFileSelect(evt) {
         if (error) {
             console.error('Upload error:', error);
             showToast('⚠️ Ошибка загрузки файла');
-            removeUploadedMedia(mediaIndex, wrapper);
+            removeUploadedMedia(uploadedMedia.indexOf(mediaObj));
             continue;
         }
 
@@ -1945,35 +2060,14 @@ async function handleFileSelect(evt) {
 
         mediaObj.publicUrl = publicUrl;
         mediaObj.url = publicUrl;
-        thumbEl.src = publicUrl;
         URL.revokeObjectURL(localUrl);
+
+        // Обновляем превью — теперь уже с публичным URL
+        renderMediaUploadRow();
     }
 
     evt.target.value = '';
     showToast(`✅ Загружено: ${uploadedMedia.filter(m => m !== null).length}`);
-}
-
-function removeUploadedMedia(index, wrapperEl) {
-    console.log('🗑️ Удаление файла с индексом', index);
-    const media = uploadedMedia[index];
-    if (!media) return;
-
-    if (media.url?.startsWith('blob:')) { try { URL.revokeObjectURL(media.url); } catch (e) {} }
-
-    uploadedMedia[index] = null;
-
-    if (wrapperEl && wrapperEl.parentNode) wrapperEl.parentNode.removeChild(wrapperEl);
-
-    updatePreviewCounter();
-    showToast('🗑️ Файл удалён');
-}
-
-function updatePreviewCounter() {
-    const real = uploadedMedia.filter(m => m !== null);
-    const counter = document.getElementById('preview-counter');
-    const countEl = document.getElementById('preview-count');
-    if (counter) counter.classList.toggle('visible', real.length > 0);
-    if (countEl) countEl.innerText = real.length;
 }
 
 /* ============================================================
@@ -1985,13 +2079,19 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 function openCreateLotModal() {
     newItemLat = userLat; newItemLng = userLng;
     uploadedMedia = [];
-    document.getElementById('preview-list').innerHTML = '';
-    document.getElementById('preview-counter').classList.remove('visible');
 
     const label = document.getElementById('add-item-coords-label');
     if (label) {
         label.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
     }
+
+    // Сбрасываем форму
+    document.getElementById('add-title').value = '';
+    document.getElementById('add-swap').value = '';
+    document.getElementById('add-desc').value = '';
+
+    // Перерисовываем строку медиа
+    renderMediaUploadRow();
 
     openModal('add-lot-modal');
 }
@@ -2043,26 +2143,19 @@ function escapeHtml(str) {
 }
 
 /* ============================================================
-   ✅ ИНИЦИАЛИЗАЦИЯ ОБРАБОТЧИКА ЗАГРУЗКИ ФАЙЛОВ
-   (перенесено из inline onclick в JS — так надёжнее)
+   ✅ ПОДПИСКА НА ВЫБОР ФАЙЛОВ
    ============================================================ */
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        const uploadTrigger = document.getElementById('upload-trigger');
         const fileInput = document.getElementById('file-input');
-
-        if (uploadTrigger && fileInput) {
-            uploadTrigger.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                fileInput.click();
-            });
+        if (fileInput) {
             fileInput.addEventListener('change', handleFileSelect);
             console.log('✅ Обработчик загрузки файлов подключён');
-        } else {
-            console.warn('⚠️ upload-trigger или file-input не найдены');
         }
-    }, 500);
+
+        // Первичный рендер строки медиа
+        renderMediaUploadRow();
+    }, 300);
 });
 </script>
 </body>

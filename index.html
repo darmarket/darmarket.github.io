@@ -76,7 +76,13 @@
         .map-header-tools { padding: 12px 16px; background: rgba(9, 10, 15, 0.95); border-bottom: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 8px; z-index: 10; flex-shrink: 0; }
         .map-box-full { flex: 1; width: 100%; z-index: 1; min-height: 0; }
 
-        select, input[type="text"], input[type="tel"], textarea, input[type="range"] { width: 100%; padding: 10px 14px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: white; font-size: 13px; outline: none; }
+        select, input[type="text"], input[type="tel"], textarea, input[type="range"] {
+            width: 100%; padding: 12px 14px; border-radius: 14px;
+            background: rgba(255,255,255,0.06); border: 1px solid var(--card-border);
+            color: white; font-size: 13px; outline: none;
+            font-family: inherit; line-height: 1.4; min-height: 46px;
+        }
+        textarea { resize: vertical; min-height: 80px; padding: 12px 14px; line-height: 1.4; }
         select option { background: #12141C; color: white; }
         .radius-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sub); }
         .btn-gps { background: var(--accent-purple); color: white; border: none; padding: 10px 16px; border-radius: 14px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
@@ -88,7 +94,12 @@
         .my-lot-badge { position: absolute; top: 6px; right: 6px; background: rgba(18, 20, 28, 0.85); backdrop-filter: blur(8px); border: 1px solid var(--card-border); padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; color: #FFF; max-width: calc(100% - 12px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .my-lot-title { font-size: 13px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; width: 100%; }
         .my-lot-swap { font-size: 10px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; width: 100%; }
-        .btn-delete-lot { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); color: #FF2D55; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; transition: background 0.2s; }
+        .my-lot-actions { display: flex; gap: 6px; width: 100%; }
+        .btn-edit-lot, .btn-delete-lot { flex: 1; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; transition: background 0.2s; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.06); }
+        .btn-edit-lot { color: var(--accent-purple); }
+        .btn-edit-lot:active { background: rgba(112, 0, 255, 0.2); }
+        .btn-delete-lot { color: #FF2D55; }
+        .btn-delete-lot:active { background: rgba(255, 45, 85, 0.2); }
 
         .profile-header { display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--glass); border-radius: 24px; border: 1px solid var(--card-border); margin-bottom: 20px; }
         .profile-avatar-big { width: 84px; height: 84px; border-radius: 50%; background: var(--primary-grad); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 12px; box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4); position: relative; overflow: hidden; cursor: pointer; }
@@ -99,114 +110,18 @@
         .stat-val { font-size: 18px; font-weight: 800; color: #FFF; }
         .stat-lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-        /* ===== ✅ НОВЫЙ БЛОК ЗАГРУЗКИ МЕДИА ===== */
-        .media-upload-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 4px 2px 8px 2px;
-            margin-bottom: 8px;
-            scrollbar-width: thin;
-            min-height: 100px;
-        }
+        .media-upload-row { display: flex; gap: 10px; align-items: center; overflow-x: auto; overflow-y: hidden; padding: 4px 2px 8px 2px; margin-bottom: 8px; scrollbar-width: thin; min-height: 100px; }
         .media-upload-row::-webkit-scrollbar { height: 4px; }
         .media-upload-row::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
-
-        /* Кнопка "+" для добавления */
-        .add-media-btn {
-            flex-shrink: 0;
-            width: 90px;
-            height: 90px;
-            border-radius: 12px;
-            border: 2px dashed rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.04);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            cursor: pointer;
-            color: var(--text-sub);
-            transition: all 0.2s ease;
-            user-select: none;
-        }
+        .add-media-btn { flex-shrink: 0; width: 90px; height: 90px; border-radius: 12px; border: 2px dashed rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: var(--text-sub); transition: all 0.2s ease; user-select: none; }
         .add-media-btn:active { background: rgba(255,255,255,0.1); border-color: var(--accent-pink); }
-        .add-media-btn .plus-icon {
-            font-size: 32px;
-            line-height: 1;
-            font-weight: 200;
-            color: #FFF;
-        }
-        .add-media-btn .plus-label {
-            font-size: 10px;
-            font-weight: 500;
-            text-align: center;
-            padding: 0 4px;
-        }
-
-        /* Превью-обёртка */
-        .preview-thumb-wrapper {
-            position: relative;
-            flex-shrink: 0;
-            width: 90px;
-            height: 90px;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-            background: #1a1c24;
-        }
-        .preview-thumb-wrapper img,
-        .preview-thumb-wrapper video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            pointer-events: none;
-        }
-
-        /* ✅ Крестик удаления — крупный и кликабельный */
-        .preview-remove-btn {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.85);
-            border: 2px solid rgba(255,255,255,0.7);
-            color: #fff;
-            font-size: 15px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0;
-            z-index: 100;
-            pointer-events: auto;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.7);
-            -webkit-tap-highlight-color: transparent;
-        }
+        .add-media-btn .plus-icon { font-size: 32px; line-height: 1; font-weight: 200; color: #FFF; }
+        .add-media-btn .plus-label { font-size: 10px; font-weight: 500; text-align: center; padding: 0 4px; }
+        .preview-thumb-wrapper { position: relative; flex-shrink: 0; width: 90px; height: 90px; border-radius: 12px; overflow: hidden; border: 1px solid var(--card-border); background: #1a1c24; }
+        .preview-thumb-wrapper img, .preview-thumb-wrapper video { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+        .preview-remove-btn { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.85); border: 2px solid rgba(255,255,255,0.7); color: #fff; font-size: 15px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; padding: 0; z-index: 100; pointer-events: auto; backdrop-filter: blur(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.7); -webkit-tap-highlight-color: transparent; }
         .preview-remove-btn:active { background: #FF2D55; transform: scale(0.9); }
-
-        .preview-badge {
-            position: absolute;
-            bottom: 4px;
-            left: 4px;
-            background: rgba(0,0,0,0.75);
-            color: #fff;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 6px;
-            backdrop-filter: blur(4px);
-            z-index: 2;
-            pointer-events: none;
-        }
-
+        .preview-badge { position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; backdrop-filter: blur(4px); z-index: 2; pointer-events: none; }
         .preview-counter { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; display: none; }
         .preview-counter.visible { display: block; }
 
@@ -227,7 +142,8 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(16px); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto; }
+        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
+        .modal-box label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 4px; margin-top: 4px; }
         .offer-item-check { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); cursor: pointer; }
         .star-rating { display: flex; justify-content: center; gap: 8px; font-size: 32px; cursor: pointer; margin: 6px 0; }
         .star-rating .star { color: rgba(255,255,255,0.2); transition: color 0.2s; }
@@ -239,26 +155,7 @@
         .nav-item.active { color: var(--tg-theme-button-color, var(--accent-pink)); }
         .nav-icon { width: 24px; height: 24px; display: block; flex-shrink: 0; fill: currentColor; }
 
-        .nav-badge {
-            position: absolute;
-            top: 0;
-            right: 8px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            border-radius: 9px;
-            background: #FF2D55;
-            color: white;
-            font-size: 11px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--bg-dark);
-            line-height: 1;
-            box-shadow: 0 2px 6px rgba(255, 45, 85, 0.5);
-            z-index: 1;
-        }
+        .nav-badge { position: absolute; top: 0; right: 8px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #FF2D55; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-dark); line-height: 1; box-shadow: 0 2px 6px rgba(255, 45, 85, 0.5); z-index: 1; }
         .nav-badge.hidden { display: none; }
 
         .match-toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary-grad); color: white; padding: 12px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 25px rgba(255, 45, 85, 0.5); z-index: 9999; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90%; }
@@ -278,29 +175,9 @@
         .leaflet-control-zoom a { background: rgba(18, 20, 28, 0.9) !important; color: #fff !important; border: 1px solid var(--card-border) !important; }
         .custom-marker-icon { background: transparent !important; border: none !important; }
 
-        .cluster-icon {
-            background: var(--primary-grad);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 15px;
-            border: 3px solid rgba(255,255,255,0.5);
-            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.6);
-            width: 44px;
-            height: 44px;
-        }
+        .cluster-icon { background: var(--primary-grad); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(255, 45, 85, 0.6); width: 44px; height: 44px; }
 
-        #map-picker-view {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-dark);
-            z-index: 6000;
-            display: none;
-            flex-direction: column;
-        }
+        #map-picker-view { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-dark); z-index: 6000; display: none; flex-direction: column; }
         #map-picker-view.active { display: flex; }
         #map-picker-map { flex: 1; width: 100%; min-height: 0; }
     </style>
@@ -356,35 +233,33 @@
 
     <div id="add-lot-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
-            <h2 style="text-align:center; font-weight:800;">Выложить лот</h2>
-            <input type="text" id="add-title" placeholder="Название вещи">
-            <input type="text" id="add-swap" placeholder="Что вы хотите взамен?">
-            <div>
-                <label style="font-size:12px; color:var(--text-sub); display:block; margin-bottom:4px;">Состояние:</label>
-                <select id="add-condition">
-                    <option value="Новое с биркой">Новое с биркой</option>
-                    <option value="Отличное" selected>Отличное</option>
-                    <option value="Хорошее">Хорошее</option>
-                    <option value="Среднее">Среднее</option>
-                </select>
-            </div>
-            <textarea id="add-desc" placeholder="Описание..." rows="3"></textarea>
-            <label style="font-size:12px; color:var(--text-sub); display:block;">Медиафайлы:</label>
+            <h2 id="add-lot-title" style="text-align:center; font-weight:800;">Выложить лот</h2>
 
-            <!-- ✅ НОВЫЙ БЛОК: превью + кнопка "+" в одной строке -->
-            <div class="media-upload-row" id="media-upload-row">
-                <button type="button" class="add-media-btn" id="add-media-btn">
-                    <span class="plus-icon">+</span>
-                    <span class="plus-label">Добавить</span>
-                </button>
-            </div>
+            <label>Название вещи:</label>
+            <input type="text" id="add-title" placeholder="Например: iPhone 12">
+
+            <label>Что хотите взамен:</label>
+            <input type="text" id="add-swap" placeholder="Например: MacBook Air">
+
+            <label>Состояние:</label>
+            <select id="add-condition">
+                <option value="Новое с биркой">Новое с биркой</option>
+                <option value="Отличное" selected>Отличное</option>
+                <option value="Хорошее">Хорошее</option>
+                <option value="Среднее">Среднее</option>
+            </select>
+
+            <label>Описание:</label>
+            <textarea id="add-desc" placeholder="Опишите состояние, комплектацию и т.д." rows="4"></textarea>
+
+            <label>Медиафайлы:</label>
+            <div class="media-upload-row" id="media-upload-row"></div>
             <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;">
-
             <div class="preview-counter" id="preview-counter">
                 Загружено: <span id="preview-count">0</span>
             </div>
 
-            <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение:</label>
+            <label>📍 Местонахождение:</label>
             <div style="display:flex; gap:8px; align-items:center;">
                 <button type="button" class="btn-gps" style="flex:1; padding:12px; background:var(--accent-purple);" onclick="openMapPicker()">
                     🗺️ Указать на карте
@@ -393,7 +268,8 @@
             <div id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); text-align:center; margin-top:6px;">
                 📍 Метка не установлена
             </div>
-            <button class="btn-gps" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px; margin-top:6px;" onclick="publishItem()">Опубликовать лот</button>
+
+            <button class="btn-gps" id="publish-btn" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px; margin-top:8px;" onclick="publishItem()">Опубликовать</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('add-lot-modal')">Отмена</button>
         </div>
     </div>
@@ -562,7 +438,7 @@
 /* ============================================================
    SUPABASE
    ============================================================ */
-const SUPABASE_URL = 'https://pqmlxnapfjzprtbkjfke.supabase.co';
+const SUPABASE_URL = 'https://pqmxnapfzprtbkjfke.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbWx4bmFwZmp6cHJ0YmtqZmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzcyOTksImV4cCI6MjEwNDk1MzI5OX0.cRW_goFrXxjg3q209USNjkTcJpUy9yF5_ib_4DEjdaE';
 
 const { createClient } = supabase;
@@ -628,8 +504,8 @@ let userLat = 59.9342, userLng = 30.3351;
 let newItemLat = 59.9342, newItemLng = 30.3351;
 let currentRadiusKm = 15;
 
-let mapFull = null, mapAdd = null, mapPicker = null;
-let userMarker = null, addMarker = null, pickerMarker = null, userCircle = null;
+let mapFull = null, mapPicker = null;
+let userMarker = null, pickerMarker = null, userCircle = null;
 let markersLayer = null, myMarkersLayer = null;
 
 let uploadedMedia = [];
@@ -637,6 +513,7 @@ let activeChatId = null;
 let pendingSwipeCard = null;
 let selectedRating = 5;
 let selectedMapItem = null;
+let editingItemId = null;
 
 let userProfile = { id: null, name: 'Гость', phone: '', username: '', city: 'Санкт-Петербург', rating: 5.0, avatar: null, reviews: [] };
 let allItems = [];
@@ -691,9 +568,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (loader) loader.classList.add('hidden');
     }, 300);
 
-    if (typeof L !== 'undefined') {
-        initLeafletMaps();
-    }
+    if (typeof L !== 'undefined') initLeafletMaps();
 
     (async () => {
         try {
@@ -747,25 +622,30 @@ window.addEventListener('DOMContentLoaded', async () => {
     sb.channel('items-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'items' }, async (payload) => {
             const newItem = payload.new;
+            console.log('🆕 Новый лот:', newItem.title);
+
             if (newItem.owner_id === userProfile.id) {
                 await loadItems();
                 renderMyLotsGrid();
                 updateMapMarkers();
                 return;
             }
-            if (seenItemIds.has(newItem.id)) return;
-
+            if (seenItemIds.has(newItem.id)) {
+                await loadItems();
+                updateMapMarkers();
+                return;
+            }
             const dist = getDistanceKm(userLat, userLng, parseFloat(newItem.lat), parseFloat(newItem.lng));
             if (dist > currentRadiusKm) {
                 await loadItems();
                 updateMapMarkers();
                 return;
             }
-
-            const exists = allItems.some(i => i.id === newItem.id);
-            if (!exists) {
-                await loadItems();
-                appendNewCardToDeck(newItem.id);
+            await loadItems();
+            const item = allItems.find(i => i.id === newItem.id);
+            if (item) {
+                item.currentDist = dist;
+                addNewCardToDeck(item);
                 updateMapMarkers();
                 showToast(`🆕 Новый лот: ${newItem.title}`);
                 TelegramApp.haptic('success');
@@ -780,6 +660,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             allItems = allItems.filter(i => i.id !== payload.old.id);
             updateMapMarkers();
             renderMyLotsGrid();
+            renderCards();
         })
         .subscribe((status) => console.log('📡 Items:', status));
 
@@ -883,8 +764,8 @@ function renderProfileAvatar() {
 async function handleProfilePhoto(evt) {
     const file = evt.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { showToast('⚠️ Только изображения'); return; }
-    if (file.size > 3 * 1024 * 1024) { showToast('⚠️ Файл больше 3 МБ'); return; }
+    if (!file.type.startsWith('image/')) { showToast('⚠️ Только изображения'); evt.target.value = ''; return; }
+    if (file.size > 3 * 1024 * 1024) { showToast('⚠️ Файл больше 3 МБ'); evt.target.value = ''; return; }
 
     showToast('📤 Загрузка фото...');
     const ext = file.name.split('.').pop() || 'jpg';
@@ -893,17 +774,29 @@ async function handleProfilePhoto(evt) {
     const { error } = await sb.storage.from('avatars').upload(fileName, file, {
         cacheControl: '3600', upsert: true, contentType: file.type
     });
-    if (error) { console.error(error); showToast('⚠️ Ошибка загрузки'); return; }
+
+    if (error) {
+        console.error('❌ Avatar upload error:', error);
+        if (error.message?.includes('not found') || error.message?.includes('Bucket not found')) {
+            showToast('⚠️ Bucket "avatars" не создан');
+        } else if (error.message?.includes('policy') || error.message?.includes('row-level')) {
+            showToast('⚠️ Нет прав. Настройте RLS');
+        } else {
+            showToast('⚠️ Ошибка: ' + (error.message || 'загрузки'));
+        }
+        evt.target.value = '';
+        return;
+    }
 
     const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
     const publicUrl = urlData.publicUrl;
 
     const { error: updateErr } = await sb.from('profiles').update({ avatar: publicUrl }).eq('id', userProfile.id);
-    if (updateErr) { showToast('⚠️ Ошибка сохранения'); return; }
+    if (updateErr) { showToast('⚠️ Ошибка сохранения'); evt.target.value = ''; return; }
 
     userProfile.avatar = publicUrl;
     renderProfileAvatar();
-    showToast('✅ Фото обновлено');
+    showToast('✅ Фото профиля обновлено');
     evt.target.value = '';
 }
 
@@ -996,31 +889,32 @@ async function publishItem() {
 
     const finalLat = parseFloat(newItemLat);
     const finalLng = parseFloat(newItemLng);
+    if (isNaN(finalLat) || isNaN(finalLng)) { showToast('⚠️ Укажите место на карте'); return; }
 
-    if (isNaN(finalLat) || isNaN(finalLng)) {
-        showToast('⚠️ Укажите место на карте');
-        return;
+    const mediaData = realMedia.map(m => ({ type: m.type, url: m.publicUrl || m.url }));
+
+    if (editingItemId) {
+        const { error } = await sb.from('items').update({
+            title, swap_for: swap, description: desc || 'Новое предложение',
+            condition, media: mediaData, lat: finalLat, lng: finalLng
+        }).eq('id', editingItemId);
+        if (error) { console.error(error); showToast('⚠️ Ошибка обновления'); return; }
+        showToast('✅ Лот обновлён!');
+    } else {
+        const newItem = {
+            owner_id: userProfile.id, title, swap_for: swap,
+            description: desc || 'Новое предложение', condition,
+            media: mediaData, lat: finalLat, lng: finalLng
+        };
+        const { error } = await sb.from('items').insert(newItem).select().single();
+        if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
+        showToast('🎉 Лот опубликован!');
     }
 
-    const newItem = {
-        owner_id: userProfile.id,
-        title, swap_for: swap,
-        description: desc || 'Новое предложение',
-        condition,
-        media: realMedia.map(m => ({ type: m.type, url: m.publicUrl || m.url })),
-        lat: finalLat,
-        lng: finalLng
-    };
-
-    const { data: inserted, error } = await sb.from('items').insert(newItem).select().single();
-    if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
-
     uploadedMedia = [];
+    editingItemId = null;
     document.getElementById('preview-counter').classList.remove('visible');
-
-    // ✅ Очищаем все превью и пересоздаём кнопку "+"
     renderMediaUploadRow();
-
     document.getElementById('add-title').value = '';
     document.getElementById('add-swap').value = '';
     document.getElementById('add-desc').value = '';
@@ -1030,10 +924,40 @@ async function publishItem() {
     renderCards();
     renderMyLotsGrid();
     updateMapMarkers();
-    showToast('🎉 Лот опубликован!');
+}
+
+function editMyItem(id) {
+    const item = allItems.find(i => i.id === id);
+    if (!item) { showToast('⚠️ Лот не найден'); return; }
+
+    editingItemId = id;
+    document.getElementById('add-lot-title').innerText = 'Редактировать лот';
+    document.getElementById('add-title').value = item.title || '';
+    document.getElementById('add-swap').value = item.swapFor || '';
+    document.getElementById('add-desc').value = item.desc || '';
+    document.getElementById('add-condition').value = item.condition || 'Отличное';
+
+    newItemLat = parseFloat(item.lat);
+    newItemLng = parseFloat(item.lng);
+
+    uploadedMedia = (item.media || []).map(m => ({
+        type: m.type, url: m.url, publicUrl: m.url, file: null
+    }));
+
+    renderMediaUploadRow();
+
+    const label = document.getElementById('add-item-coords-label');
+    if (label) {
+        label.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
+        label.style.color = 'var(--accent-green)';
+    }
+
+    document.getElementById('publish-btn').innerText = 'Сохранить изменения';
+    openModal('add-lot-modal');
 }
 
 async function deleteMyItem(id) {
+    if (!confirm('Удалить лот?')) return;
     const { error } = await sb.from('items').delete().eq('id', id);
     if (error) { showToast('⚠️ Ошибка удаления'); return; }
     await loadItems();
@@ -1061,7 +985,10 @@ function renderMyLotsGrid() {
             </div>
             <div class="my-lot-title">${escapeHtml(item.title)}</div>
             <div class="my-lot-swap">Ищу: ${escapeHtml(item.swapFor)}</div>
-            <button class="btn-delete-lot" onclick="deleteMyItem(${item.id})">Удалить</button>
+            <div class="my-lot-actions">
+                <button class="btn-edit-lot" onclick="editMyItem('${item.id}')">✏️ Изменить</button>
+                <button class="btn-delete-lot" onclick="deleteMyItem('${item.id}')">🗑️</button>
+            </div>
         </div>
     `).join('');
 }
@@ -1083,10 +1010,10 @@ function renderCards() {
     });
 
     if (filtered.length === 0) {
-        deck.innerHTML = `<div style="text-align:center; padding:32px 20px; background:var(--card-bg); border-radius:24px; border:1px solid var(--card-border); max-width:320px;">
+        deck.innerHTML = `<div class="empty-deck" style="text-align:center; padding:32px 20px; background:var(--card-bg); border-radius:24px; border:1px solid var(--card-border); max-width:320px;">
             <div style="font-size:48px; margin-bottom:12px;">🎉</div>
             <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">Лоты закончились</h3>
-            <p style="color:var(--text-sub); font-size:13px; line-height:1.4;">Попробуйте увеличить радиус или зайдите позже</p>
+            <p style="color:var(--text-sub); font-size:13px; line-height:1.4;">Новые лоты появятся здесь автоматически</p>
         </div>`;
         controls.style.display = 'none';
         return;
@@ -1158,33 +1085,31 @@ function createCardElement(item, zIndex) {
     return card;
 }
 
-function appendNewCardToDeck(itemId) {
+function addNewCardToDeck(item) {
     const deck = document.getElementById('deck');
-    if (!deck) return;
-
-    const item = allItems.find(i => i.id === itemId);
-    if (!item) return;
-
-    const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
-    if (dist > currentRadiusKm) return;
-    item.currentDist = dist;
-
     const controls = document.getElementById('controls-bar');
-    if (controls) controls.style.display = 'flex';
+    if (!deck || !item) return;
 
-    if (deck.querySelector(`[data-item-id="${itemId}"]`)) return;
-    if (!deck.querySelector('.swipe-card')) deck.innerHTML = '';
+    if (deck.querySelector(`[data-item-id="${item.id}"]`)) return;
 
-    const card = createCardElement(item, 1);
-    card.style.transform = 'translate3d(0, 30px, 0) scale(0.95)';
+    const emptyDeck = deck.querySelector('.empty-deck');
+    if (emptyDeck) { deck.innerHTML = ''; controls.style.display = 'flex'; }
+
+    const existingCount = deck.querySelectorAll('.swipe-card').length;
+    const card = createCardElement(item, Math.max(1, 20 - existingCount));
+
+    card.style.transform = 'translate3d(0, 40px, 0) scale(0.9)';
     card.style.opacity = '0';
-    card.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    card.style.transition = 'all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
     deck.appendChild(card);
+    controls.style.display = 'flex';
 
     requestAnimationFrame(() => {
-        card.style.transform = 'translate3d(0, 0, 0) scale(1)';
-        card.style.opacity = '1';
+        setTimeout(() => {
+            card.style.transform = 'translate3d(0, 0, 0) scale(1)';
+            card.style.opacity = '1';
+        }, 20);
     });
 }
 
@@ -1366,7 +1291,6 @@ async function createChatWith(item, offeredIds = []) {
             item_id: item.id,
             offered_item_id: offeredIds[0] || null
         }).select().single();
-
         if (error) { console.error('Chat create error:', error); return; }
         chatId = newChat.id;
         isNewChat = true;
@@ -1529,7 +1453,6 @@ async function sendChatMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text || !activeChatId) return;
-
     const { error } = await sb.from('messages').insert({ chat_id: activeChatId, sender_id: userProfile.id, text });
     if (error) { showToast('⚠️ Ошибка отправки'); return; }
     input.value = '';
@@ -1575,17 +1498,13 @@ async function submitReview() {
     const text = document.getElementById('review-text').value.trim();
     if (!text) { showToast('⚠️ Напишите отзыв'); return; }
     if (!activeChatId) return;
-
     const chat = chatList.find(c => c.id === activeChatId);
     if (!chat) return;
 
     const { error } = await sb.from('reviews').insert({
-        from_user_id: userProfile.id,
-        to_user_id: chat.otherUserId,
-        stars: selectedRating,
-        text
+        from_user_id: userProfile.id, to_user_id: chat.otherUserId,
+        stars: selectedRating, text
     });
-
     if (error) { showToast('⚠️ Ошибка отзыва'); return; }
     closeModal('rate-modal');
     showToast('🌟 Отзыв опубликован!');
@@ -1618,8 +1537,7 @@ function makeClusterIcon(count) {
     return L.divIcon({
         html: `<div class="cluster-icon">${count}</div>`,
         className: 'custom-marker-icon',
-        iconSize: [44, 44],
-        iconAnchor: [22, 22]
+        iconSize: [44, 44], iconAnchor: [22, 22]
     });
 }
 
@@ -1686,18 +1604,15 @@ function openItemsListModal(items) {
     items.forEach(item => {
         const card = document.createElement('div');
         card.style.cssText = 'display:flex; gap:10px; padding:10px; background:rgba(255,255,255,0.04); border:1px solid var(--card-border); border-radius:14px; cursor:pointer; align-items:center;';
-
         const img = document.createElement('img');
         img.src = item.media[0]?.url || '';
         img.style.cssText = 'width:50px;height:50px;border-radius:10px;object-fit:cover;flex-shrink:0;';
-
         const info = document.createElement('div');
         info.style.cssText = 'flex:1; min-width:0;';
         info.innerHTML = `
             <div style="font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.title)}</div>
             <div style="font-size:11px;color:var(--accent-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔄 ${escapeHtml(item.swapFor)}</div>
         `;
-
         card.append(img, info);
         card.addEventListener('click', () => {
             closeModal('items-list-modal');
@@ -1706,7 +1621,6 @@ function openItemsListModal(items) {
         });
         container.appendChild(card);
     });
-
     openModal('items-list-modal');
 }
 
@@ -1742,8 +1656,6 @@ function getUserGPS() {
         { enableHighAccuracy: true, timeout: 8000 }
     );
 }
-
-function setNewItemToCurrentGPS() { getUserGPS(); }
 
 function updateMapAndAddress(lat, lng) {
     if (mapFull) {
@@ -1824,22 +1736,15 @@ let pickerTempLat = null, pickerTempLng = null;
 function openMapPicker() {
     const view = document.getElementById('map-picker-view');
     if (!view) return;
-
     pickerTempLat = newItemLat || userLat;
     pickerTempLng = newItemLng || userLng;
-
     view.classList.add('active');
 
     setTimeout(() => {
-        if (mapPicker) {
-            try { mapPicker.remove(); } catch (e) {}
-            mapPicker = null;
-        }
-
+        if (mapPicker) { try { mapPicker.remove(); } catch (e) {} mapPicker = null; }
         const container = document.getElementById('map-picker-map');
         mapPicker = L.map(container, { zoomControl: true, attributionControl: true }).setView([pickerTempLat, pickerTempLng], 13);
         L.tileLayer(TILE_URL, { subdomains: 'abcd', maxZoom: 20, attribution: TILE_ATTR }).addTo(mapPicker);
-
         pickerMarker = L.marker([pickerTempLat, pickerTempLng], { draggable: true, icon: makePinIcon('red') }).addTo(mapPicker);
 
         pickerMarker.on('dragend', () => {
@@ -1847,13 +1752,11 @@ function openMapPicker() {
             pickerTempLat = p.lat; pickerTempLng = p.lng;
             updatePickerCoords();
         });
-
         mapPicker.on('click', (e) => {
             pickerTempLat = e.latlng.lat; pickerTempLng = e.latlng.lng;
             pickerMarker.setLatLng(e.latlng);
             updatePickerCoords();
         });
-
         updatePickerCoords();
         setTimeout(() => { if (mapPicker) mapPicker.invalidateSize(); }, 200);
     }, 100);
@@ -1864,8 +1767,7 @@ function closeMapPicker() {
     if (view) view.classList.remove('active');
     if (mapPicker) {
         try { mapPicker.remove(); } catch (e) {}
-        mapPicker = null;
-        pickerMarker = null;
+        mapPicker = null; pickerMarker = null;
     }
 }
 
@@ -1898,47 +1800,34 @@ function mapPickerMyGPS() {
 function saveMapPicker() {
     newItemLat = parseFloat(pickerTempLat);
     newItemLng = parseFloat(pickerTempLng);
-
     const label = document.getElementById('add-item-coords-label');
     if (label) {
         label.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
         label.style.color = 'var(--accent-green)';
     }
-
     showToast('✓ Точка сохранена');
     closeMapPicker();
 }
 
 /* ============================================================
-   ✅ ЗАГРУЗКА ФОТО — НОВАЯ ЛОГИКА
+   ЗАГРУЗКА МЕДИА
    ============================================================ */
-
-/** Пересоздаёт строку медиа: кнопка "+" + все превью */
 function renderMediaUploadRow() {
     const row = document.getElementById('media-upload-row');
     if (!row) return;
-
-    // Очищаем всё
     row.innerHTML = '';
 
-    // Кнопка "+" — всегда первая
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.className = 'add-media-btn';
-    addBtn.id = 'add-media-btn';
-    addBtn.innerHTML = `
-        <span class="plus-icon">+</span>
-        <span class="plus-label">Добавить</span>
-    `;
+    addBtn.innerHTML = `<span class="plus-icon">+</span><span class="plus-label">Добавить</span>`;
     addBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         document.getElementById('file-input').click();
     });
-
     row.appendChild(addBtn);
 
-    // Потом все превью с крестиками
     uploadedMedia.forEach((media, index) => {
         if (!media) return;
 
@@ -1948,9 +1837,7 @@ function renderMediaUploadRow() {
         const el = document.createElement(media.type === 'video' ? 'video' : 'img');
         el.src = media.publicUrl || media.url;
         el.alt = 'preview';
-        if (media.type === 'video') {
-            el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true;
-        }
+        if (media.type === 'video') { el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true; }
         wrapper.appendChild(el);
 
         const badge = document.createElement('span');
@@ -1964,16 +1851,10 @@ function renderMediaUploadRow() {
         removeBtn.textContent = '✕';
         wrapper.appendChild(removeBtn);
 
-        // ✅ Единый обработчик удаления
         const doRemove = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-            }
+            if (e) { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); }
             removeUploadedMedia(index);
         };
-
         removeBtn.addEventListener('click', doRemove);
         removeBtn.addEventListener('touchend', doRemove);
         removeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -1985,21 +1866,15 @@ function renderMediaUploadRow() {
     updatePreviewCounter();
 }
 
-/** Удаление файла */
 function removeUploadedMedia(index) {
     const media = uploadedMedia[index];
     if (!media) return;
-
-    if (media.url?.startsWith('blob:')) {
-        try { URL.revokeObjectURL(media.url); } catch (e) {}
-    }
-
+    if (media.url?.startsWith('blob:')) { try { URL.revokeObjectURL(media.url); } catch (e) {} }
     uploadedMedia[index] = null;
     renderMediaUploadRow();
     showToast('🗑️ Файл удалён');
 }
 
-/** Счётчик */
 function updatePreviewCounter() {
     const real = uploadedMedia.filter(m => m !== null);
     const counter = document.getElementById('preview-counter');
@@ -2008,7 +1883,6 @@ function updatePreviewCounter() {
     if (countEl) countEl.innerText = real.length;
 }
 
-/** Обработка выбора файлов */
 async function handleFileSelect(evt) {
     const files = evt.target.files;
     if (!files.length) return;
@@ -2023,22 +1897,12 @@ async function handleFileSelect(evt) {
     showToast('📤 Загрузка...');
 
     for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) {
-            showToast(`⚠️ ${file.name} — больше 10 МБ`);
-            continue;
-        }
+        if (file.size > 10 * 1024 * 1024) { showToast(`⚠️ ${file.name} — больше 10 МБ`); continue; }
         const isVideo = file.type.startsWith('video');
         const localUrl = URL.createObjectURL(file);
 
-        const mediaObj = {
-            type: isVideo ? 'video' : 'image',
-            url: localUrl,
-            file: file,
-            publicUrl: null
-        };
+        const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: file, publicUrl: null };
         uploadedMedia.push(mediaObj);
-
-        // Сразу показываем превью
         renderMediaUploadRow();
 
         const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
@@ -2061,8 +1925,6 @@ async function handleFileSelect(evt) {
         mediaObj.publicUrl = publicUrl;
         mediaObj.url = publicUrl;
         URL.revokeObjectURL(localUrl);
-
-        // Обновляем превью — теперь уже с публичным URL
         renderMediaUploadRow();
     }
 
@@ -2077,22 +1939,21 @@ function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
 function openCreateLotModal() {
+    editingItemId = null;
     newItemLat = userLat; newItemLng = userLng;
     uploadedMedia = [];
 
-    const label = document.getElementById('add-item-coords-label');
-    if (label) {
-        label.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
-    }
-
-    // Сбрасываем форму
+    document.getElementById('add-lot-title').innerText = 'Выложить лот';
     document.getElementById('add-title').value = '';
     document.getElementById('add-swap').value = '';
     document.getElementById('add-desc').value = '';
+    document.getElementById('add-condition').value = 'Отличное';
 
-    // Перерисовываем строку медиа
+    const label = document.getElementById('add-item-coords-label');
+    if (label) label.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
+
+    document.getElementById('publish-btn').innerText = 'Опубликовать';
     renderMediaUploadRow();
-
     openModal('add-lot-modal');
 }
 
@@ -2143,17 +2004,12 @@ function escapeHtml(str) {
 }
 
 /* ============================================================
-   ✅ ПОДПИСКА НА ВЫБОР ФАЙЛОВ
+   ПОДПИСКА НА ВЫБОР ФАЙЛОВ
    ============================================================ */
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const fileInput = document.getElementById('file-input');
-        if (fileInput) {
-            fileInput.addEventListener('change', handleFileSelect);
-            console.log('✅ Обработчик загрузки файлов подключён');
-        }
-
-        // Первичный рендер строки медиа
+        if (fileInput) fileInput.addEventListener('change', handleFileSelect);
         renderMediaUploadRow();
     }, 300);
 });

@@ -470,28 +470,51 @@ window.addEventListener('DOMContentLoaded', async () => {
     TelegramApp.init();
     populateRegions();
 
-    try {
-        await initUser();
-        await loadItems();
-        await loadChats();
-        renderProfile();
-        renderChatsList();
-        renderCards();
-        renderMyLotsGrid();
-
-        if (typeof L !== 'undefined') {
-            initLeafletMaps();
-        }
-    } catch (e) {
-        console.error('Init error:', e);
-        showToast('⚠️ Ошибка загрузки');
-    }
-
-    // Скрыть лоадер
+    // ✅ Показываем интерфейс СРАЗУ — не ждём базу
     setTimeout(() => {
         const loader = document.getElementById('loader');
         if (loader) loader.classList.add('hidden');
-    }, 400);
+    }, 300);
+
+    // Инициализируем карту сразу, чтобы она грузилась параллельно
+    if (typeof L !== 'undefined') {
+        initLeafletMaps();
+    }
+
+    // ✅ Данные грузим в фоне, с таймаутом, чтобы не зависало
+    (async () => {
+        try {
+            console.log('⏳ Начинаем загрузку данных...');
+
+            const timeoutPromise = (promise, ms, name) =>
+                Promise.race([
+                    promise,
+                    new Promise((_, rej) => setTimeout(() => rej(new Error(`${name} timeout`)), ms))
+                ]);
+
+            await timeoutPromise(initUser(), 8000, 'initUser');
+            console.log('✅ Профиль загружен');
+
+            await timeoutPromise(loadItems(), 8000, 'loadItems');
+            console.log('✅ Лоты загружены');
+
+            await timeoutPromise(loadChats(), 5000, 'loadChats');
+            console.log('✅ Чаты загружены');
+
+            renderProfile();
+            renderChatsList();
+            renderCards();
+            renderMyLotsGrid();
+            updateMapMarkers();
+
+            console.log('🎉 Всё загружено');
+        } catch (e) {
+            console.error('❌ Init error:', e.message);
+            showToast('⚠️ Данные не загрузились, работаем оффлайн');
+            // Показываем пустой интерфейс
+            renderCards();
+        }
+    })();
 
     // Realtime — слушаем новые сообщения
     sb.channel('messages-realtime')
@@ -501,7 +524,6 @@ window.addEventListener('DOMContentLoaded', async () => {
                 currentMessages.push(msg);
                 renderMessages();
             }
-            // Обновить превью чата
             loadChats().then(() => {
                 if (!activeChatId) renderChatsList();
             });

@@ -102,16 +102,48 @@
         .upload-box { border: 2px dashed rgba(255,255,255,0.2); border-radius: 16px; padding: 18px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.03); margin-bottom: 8px; transition: border-color 0.2s ease; }
         .upload-box:hover, .upload-box:active { border-color: var(--accent-pink); }
 
-        .media-preview-list { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; margin: 8px 0 12px 0; padding: 4px 2px; min-height: 0; scrollbar-width: thin; }
+        /* ✅ ПРЕВЬЮ С ПОДПИСЯМИ И КРУПНЫМ КРЕСТИКОМ */
+        .preview-counter { font-size: 12px; font-weight: 600; color: var(--accent-green); margin: 8px 0 6px 0; display: none; }
+        .preview-counter.visible { display: block; }
+
+        .media-preview-list {
+            display: flex; gap: 10px;
+            overflow-x: auto; overflow-y: hidden;
+            margin: 8px 0 12px 0; padding: 4px 2px 8px 2px;
+            scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+        }
         .media-preview-list::-webkit-scrollbar { height: 4px; }
         .media-preview-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
-        .preview-thumb-wrapper { position: relative; flex-shrink: 0; width: 90px; height: 90px; border-radius: 12px; overflow: hidden; border: 1px solid var(--card-border); background: #1a1c24; }
-        .preview-thumb-wrapper img, .preview-thumb-wrapper video { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .preview-remove-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; padding: 0; z-index: 2; backdrop-filter: blur(4px); }
-        .preview-remove-btn:active { background: #FF2D55; transform: scale(0.9); }
-        .preview-badge { position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.7); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; backdrop-filter: blur(4px); z-index: 2; }
-        .preview-counter { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; display: none; }
-        .preview-counter.visible { display: block; }
+
+        .preview-thumb-item { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; width: 84px; }
+        .preview-thumb-label { font-size: 10px; font-weight: 600; color: var(--text-sub); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .preview-thumb-wrapper {
+            position: relative; width: 84px; height: 84px;
+            border-radius: 12px; overflow: hidden;
+            border: 2px solid var(--card-border);
+            background: #1a1c24; transition: border-color 0.2s;
+        }
+        .preview-thumb-wrapper img,
+        .preview-thumb-wrapper video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .preview-remove-btn {
+            position: absolute; top: 3px; right: 3px;
+            width: 26px; height: 26px; border-radius: 50%;
+            background: #FF2D55; border: 2px solid #FFFFFF;
+            color: #fff; font-size: 14px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; line-height: 1; padding: 0; z-index: 3;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        .preview-remove-btn:active { background: #FF0000; transform: scale(0.85); }
+
+        .preview-badge {
+            position: absolute; bottom: 3px; left: 3px;
+            background: rgba(0,0,0,0.8); color: #fff;
+            font-size: 10px; padding: 2px 6px; border-radius: 6px;
+            backdrop-filter: blur(4px); z-index: 2;
+        }
 
         .chat-item { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: var(--glass); border: 1px solid var(--card-border); border-radius: 18px; margin-bottom: 10px; cursor: pointer; transition: background 0.2s ease; }
         .chat-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--primary-grad); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
@@ -142,27 +174,7 @@
         .nav-item.active { color: var(--tg-theme-button-color, var(--accent-pink)); }
         .nav-icon { width: 24px; height: 24px; display: block; flex-shrink: 0; fill: currentColor; }
 
-        /* ✅ НОВОЕ: Badge для непрочитанных сообщений */
-        .nav-badge {
-            position: absolute;
-            top: 0;
-            right: 8px;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            border-radius: 9px;
-            background: #FF2D55;
-            color: white;
-            font-size: 11px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--bg-dark);
-            line-height: 1;
-            box-shadow: 0 2px 6px rgba(255, 45, 85, 0.5);
-            z-index: 1;
-        }
+        .nav-badge { position: absolute; top: 0; right: 8px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #FF2D55; color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-dark); line-height: 1; box-shadow: 0 2px 6px rgba(255, 45, 85, 0.5); z-index: 1; }
         .nav-badge.hidden { display: none; }
 
         .match-toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary-grad); color: white; padding: 12px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 25px rgba(255, 45, 85, 0.5); z-index: 9999; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; display: flex; align-items: center; gap: 8px; max-width: 90%; }
@@ -182,30 +194,9 @@
         .leaflet-control-zoom a { background: rgba(18, 20, 28, 0.9) !important; color: #fff !important; border: 1px solid var(--card-border) !important; }
         .custom-marker-icon { background: transparent !important; border: none !important; }
 
-        .cluster-icon {
-            background: var(--primary-grad);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 15px;
-            border: 3px solid rgba(255,255,255,0.5);
-            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.6);
-            width: 44px;
-            height: 44px;
-        }
+        .cluster-icon { background: var(--primary-grad); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(255, 45, 85, 0.6); width: 44px; height: 44px; }
 
-        /* ✅ ОБНОВЛЕНО: Map picker теперь модалка поверх всего */
-        #map-picker-view {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-dark);
-            z-index: 6000;
-            display: none;
-            flex-direction: column;
-        }
+        #map-picker-view { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-dark); z-index: 6000; display: none; flex-direction: column; }
         #map-picker-view.active { display: flex; }
         #map-picker-map { flex: 1; width: 100%; min-height: 0; }
     </style>
@@ -279,10 +270,12 @@
                 📸 Нажмите для загрузки
                 <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleFileSelect(event)">
             </div>
-            <div class="media-preview-list" id="preview-list"></div>
+
             <div class="preview-counter" id="preview-counter">
-                Загружено: <span id="preview-count">0</span>
+                ✅ Загружено: <span id="preview-count">0</span>
             </div>
+            <div class="media-preview-list" id="preview-list"></div>
+
             <label style="font-size:12px; color:var(--text-sub); display:block;">📍 Местонахождение:</label>
             <div style="display:flex; gap:8px; align-items:center;">
                 <button type="button" class="btn-gps" style="flex:1; padding:12px; background:var(--accent-purple);" onclick="openMapPicker()">
@@ -542,14 +535,12 @@ let allItems = [];
 let chatList = [];
 let currentMessages = [];
 
-// ✅ Хранилище просмотренных лотов
 let seenItemIds = new Set(JSON.parse(localStorage.getItem('dm_seen') || '[]'));
 function markItemSeen(id) {
     seenItemIds.add(id);
     try { localStorage.setItem('dm_seen', JSON.stringify([...seenItemIds].slice(-500))); } catch (e) {}
 }
 
-// ✅ Хранилище прочитанных чатов (для badge)
 let readChatIds = new Set(JSON.parse(localStorage.getItem('dm_read_chats') || '[]'));
 function markChatRead(id) {
     readChatIds.add(String(id));
@@ -629,41 +620,63 @@ window.addEventListener('DOMContentLoaded', async () => {
     })();
 
     sb.channel('messages-realtime')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
             const msg = payload.new;
-            // ✅ Если сообщение в активном чате — сразу читаем
             if (String(msg.chat_id) === String(activeChatId)) {
                 currentMessages.push(msg);
                 renderMessages();
                 markChatRead(msg.chat_id);
             } else if (msg.sender_id !== userProfile.id) {
-                // ✅ Иначе — не читаем, badge обновится
                 showToast('💬 Новое сообщение');
+                TelegramApp.haptic('light');
             }
-            loadChats().then(() => {
-                if (!activeChatId) renderChatsList();
-                updateChatsBadge();
-            });
+            await loadChats();
+            if (!activeChatId) renderChatsList();
+            updateChatsBadge();
         })
         .subscribe();
 
     sb.channel('items-realtime')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => {
-            loadItems().then(() => {
-                renderCards();
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'items' }, async (payload) => {
+            const newItem = payload.new;
+            if (newItem.owner_id === userProfile.id) {
+                await loadItems();
                 renderMyLotsGrid();
                 updateMapMarkers();
-            });
-        })
-        .subscribe();
+                return;
+            }
+            if (seenItemIds.has(newItem.id)) return;
 
-    // ✅ Realtime для чатов (новые чаты после матчей)
+            await loadItems();
+            updateMapMarkers();
+
+            const exists = document.querySelector(`[data-item-id="${newItem.id}"]`);
+            if (!exists) {
+                const dist = getDistanceKm(userLat, userLng, parseFloat(newItem.lat), parseFloat(newItem.lng));
+                if (dist <= currentRadiusKm) {
+                    showToast(`🆕 Новый лот: ${newItem.title}`);
+                    TelegramApp.haptic('success');
+                    renderCards();
+                }
+            }
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'items' }, async () => {
+            await loadItems();
+            renderMyLotsGrid();
+            updateMapMarkers();
+        })
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'items' }, async (payload) => {
+            allItems = allItems.filter(i => i.id !== payload.old.id);
+            updateMapMarkers();
+            renderMyLotsGrid();
+        })
+        .subscribe((status) => console.log('📡 Items realtime:', status));
+
     sb.channel('chats-realtime')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, () => {
-            loadChats().then(() => {
-                renderChatsList();
-                updateChatsBadge();
-            });
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async () => {
+            await loadChats();
+            renderChatsList();
+            updateChatsBadge();
         })
         .subscribe();
 });
@@ -675,11 +688,9 @@ function updateChatsBadge() {
     const badge = document.getElementById('chats-badge');
     if (!badge) return;
 
-    // Считаем чаты, где последнее сообщение НЕ от меня и чат не прочитан
     const unreadCount = chatList.filter(chat => {
         if (String(chat.id) === String(activeChatId)) return false;
         if (readChatIds.has(String(chat.id))) return false;
-        // Если последнее сообщение НЕ от меня — значит непрочитанное
         return chat.lastMessageSenderId && chat.lastMessageSenderId !== userProfile.id;
     }).length;
 
@@ -851,8 +862,8 @@ async function loadItems() {
         desc: item.description || '',
         condition: item.condition,
         media: item.media || [],
-        lat: parseFloat(item.lat),   // ✅ гарантируем число
-        lng: parseFloat(item.lng),   // ✅ гарантируем число
+        lat: parseFloat(item.lat),
+        lng: parseFloat(item.lng),
         isMine: item.owner_id === userProfile.id,
         ownerId: item.owner_id,
         ownerName: item.profiles?.name || 'Пользователь',
@@ -872,7 +883,6 @@ async function publishItem() {
     const realMedia = uploadedMedia.filter(m => m !== null);
     if (realMedia.length === 0) { showToast('📸 Загрузите фото'); return; }
 
-    // ✅ Гарантируем, что координаты — числа из выбранной точки
     const finalLat = parseFloat(newItemLat);
     const finalLng = parseFloat(newItemLng);
 
@@ -891,12 +901,8 @@ async function publishItem() {
         lng: finalLng
     };
 
-    console.log('📤 Публикация лота:', newItem);
-
     const { data: inserted, error } = await sb.from('items').insert(newItem).select().single();
     if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
-
-    console.log('✅ Лот создан:', inserted);
 
     uploadedMedia = [];
     document.getElementById('preview-list').innerHTML = '';
@@ -1186,20 +1192,39 @@ function confirmOfferAndSwipe() {
 }
 
 /* ============================================================
-   ЧАТЫ
+   ЧАТЫ — ✅ ОБНОВЛЕНО: единый чат на пользователя
    ============================================================ */
 async function createChatWith(item, offeredIds = []) {
     if (!item.ownerId || item.ownerId === userProfile.id) return;
 
-    const { data: existing } = await sb.from('chats')
-        .select('id')
+    // ✅ Ищем ЛЮБОЙ существующий чат с этим человеком (без привязки к лоту)
+    const { data: existingChats, error: searchErr } = await sb.from('chats')
+        .select('id, item_id')
         .or(`and(user1_id.eq.${userProfile.id},user2_id.eq.${item.ownerId}),and(user1_id.eq.${item.ownerId},user2_id.eq.${userProfile.id})`)
-        .eq('item_id', item.id)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+    const existing = existingChats && existingChats[0];
+
+    const offeredItems = allItems.filter(i => offeredIds.includes(i.id));
+    const names = offeredItems.map(i => `«${i.title}»`).join(', ');
 
     let chatId;
+    let messageText;
+
     if (existing) {
         chatId = existing.id;
+        const isSameItem = String(existing.item_id) === String(item.id);
+
+        if (isSameItem) {
+            messageText = names
+                ? `Уточняю по лоту «${item.title}». Предлагаю: ${names}`
+                : `Уточняю по лоту «${item.title}».`;
+        } else {
+            messageText = names
+                ? `Также интересует ваш лот «${item.title}».\n\nПредлагаю взамен: ${names}\n\nМожет, договоримся об обмене сразу нескольких вещей?`
+                : `Также интересует ваш лот «${item.title}».\n\nМожет, договоримся об обмене сразу нескольких вещей?`;
+        }
     } else {
         const { data: newChat, error } = await sb.from('chats').insert({
             user1_id: userProfile.id,
@@ -1208,19 +1233,26 @@ async function createChatWith(item, offeredIds = []) {
             offered_item_id: offeredIds[0] || null
         }).select().single();
 
-        if (error) { console.error(error); return; }
+        if (error) { console.error(error); showToast('⚠️ Ошибка создания чата'); return; }
         chatId = newChat.id;
 
-        const offeredItems = allItems.filter(i => offeredIds.includes(i.id));
-        const names = offeredItems.map(i => `«${i.title}»`).join(', ');
-        const text = names
+        messageText = names
             ? `Здравствуйте! Интересует ваш лот «${item.title}».\n\nПредлагаю взамен: ${names}`
             : `Здравствуйте! Интересует ваш лот «${item.title}».`;
+    }
 
-        await sb.from('messages').insert({ chat_id: chatId, sender_id: userProfile.id, text });
+    const { error: msgErr } = await sb.from('messages').insert({
+        chat_id: chatId,
+        sender_id: userProfile.id,
+        text: messageText
+    });
 
-        // ✅ Уведомление о матче
-        TelegramApp.haptic('success');
+    if (msgErr) { console.error('Message error:', msgErr); }
+
+    TelegramApp.haptic('success');
+    if (existing) {
+        showToast('💬 Сообщение отправлено в существующий чат');
+    } else {
         showToast('🔥 Взаимный лайк! Открыт чат');
     }
 
@@ -1268,7 +1300,7 @@ async function loadChats() {
             itemTitle: chat.items?.title || 'Обмен',
             itemMedia: chat.items?.media?.[0]?.url || '',
             lastMessage: lastMsg?.text || 'Начните диалог',
-            lastMessageSenderId: lastMsg?.sender_id || null,   // ✅ нужно для badge
+            lastMessageSenderId: lastMsg?.sender_id || null,
             createdAt: chat.created_at
         };
     });
@@ -1292,7 +1324,6 @@ function renderChatsList() {
             ? `<div class="chat-avatar"><img src="${escapeHtml(chat.otherAvatar)}" alt=""></div>`
             : `<div class="chat-avatar">💬</div>`;
 
-        // ✅ Индикатор непрочитанного
         const isUnread = !readChatIds.has(String(chat.id)) &&
                          chat.lastMessageSenderId &&
                          chat.lastMessageSenderId !== userProfile.id;
@@ -1330,7 +1361,6 @@ async function openChat(chatId) {
     await loadMessages(chatId);
     renderMessages();
 
-    // ✅ Помечаем как прочитанный
     markChatRead(chatId);
     renderChatsList();
 
@@ -1477,20 +1507,16 @@ function initFullMap() {
     });
 }
 
-/* ✅ ОБНОВЛЕНО: точная группировка — округление до 5 знаков (~1 м)
-   Теперь лоты в разных точках показываются отдельно */
 function updateMapMarkers() {
     if (!markersLayer || !myMarkersLayer) return;
     markersLayer.clearLayers();
     myMarkersLayer.clearLayers();
 
-    // Группировка с точностью ~1 метр (5 знаков после запятой)
     const groups = {};
     allItems.forEach(item => {
         const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
         if (!item.isMine && dist > currentRadiusKm) return;
 
-        // ✅ Округление до 5 знаков — точнее чем 4, разные точки не сливаются
         const key = `${item.lat.toFixed(5)}_${item.lng.toFixed(5)}`;
         if (!groups[key]) groups[key] = [];
         groups[key].push(item);
@@ -1656,7 +1682,7 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 /* ============================================================
-   MAP PICKER — теперь модалка поверх всего
+   MAP PICKER
    ============================================================ */
 let pickerTempLat = null, pickerTempLng = null;
 
@@ -1734,12 +1760,9 @@ function mapPickerMyGPS() {
     );
 }
 
-// ✅ СОХРАНЕНИЕ ТОЧКИ — теперь newItemLat/newItemLng точно обновляются
 function saveMapPicker() {
     newItemLat = parseFloat(pickerTempLat);
     newItemLng = parseFloat(pickerTempLng);
-
-    console.log('📍 Точка сохранена:', newItemLat, newItemLng);
 
     const label = document.getElementById('add-item-coords-label');
     if (label) {
@@ -1752,7 +1775,7 @@ function saveMapPicker() {
 }
 
 /* ============================================================
-   ЗАГРУЗКА ФОТО
+   ЗАГРУЗКА ФОТО — ✅ ОБНОВЛЕНО
    ============================================================ */
 async function handleFileSelect(evt) {
     const files = evt.target.files;
@@ -1776,12 +1799,20 @@ async function handleFileSelect(evt) {
         const isVideo = file.type.startsWith('video');
         const localUrl = URL.createObjectURL(file);
 
+        const item = document.createElement('div');
+        item.className = 'preview-thumb-item';
+
+        const label = document.createElement('div');
+        label.className = 'preview-thumb-label';
+        label.textContent = isVideo ? '🎥 Видео' : '📷 Фото';
+        item.appendChild(label);
+
         const wrapper = document.createElement('div');
         wrapper.className = 'preview-thumb-wrapper';
 
         const thumbEl = document.createElement(isVideo ? 'video' : 'img');
         thumbEl.src = localUrl;
-        if (isVideo) { thumbEl.autoplay = true; thumbEl.loop = true; thumbEl.muted = true; }
+        if (isVideo) { thumbEl.autoplay = true; thumbEl.loop = true; thumbEl.muted = true; thumbEl.playsInline = true; }
         wrapper.appendChild(thumbEl);
 
         const badge = document.createElement('span');
@@ -1795,7 +1826,8 @@ async function handleFileSelect(evt) {
         removeBtn.textContent = '✕';
         wrapper.appendChild(removeBtn);
 
-        list.appendChild(wrapper);
+        item.appendChild(wrapper);
+        list.appendChild(item);
 
         const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: file, publicUrl: null };
         uploadedMedia.push(mediaObj);
@@ -1804,7 +1836,7 @@ async function handleFileSelect(evt) {
         removeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            removeUploadedMedia(mediaIndex, wrapper);
+            removeUploadedMedia(mediaIndex, item);
         });
 
         updatePreviewCounter();
@@ -1819,7 +1851,7 @@ async function handleFileSelect(evt) {
         if (error) {
             console.error('Upload error:', error);
             showToast('⚠️ Ошибка загрузки файла');
-            removeUploadedMedia(mediaIndex, wrapper);
+            removeUploadedMedia(mediaIndex, item);
             continue;
         }
 
@@ -1830,18 +1862,21 @@ async function handleFileSelect(evt) {
         mediaObj.url = publicUrl;
         thumbEl.src = publicUrl;
         URL.revokeObjectURL(localUrl);
+
+        label.textContent = isVideo ? '🎥 Видео ✓' : '📷 Фото ✓';
+        label.style.color = 'var(--accent-green)';
     }
 
     evt.target.value = '';
     showToast(`✅ Загружено: ${uploadedMedia.filter(m => m !== null).length}`);
 }
 
-function removeUploadedMedia(index, wrapperEl) {
+function removeUploadedMedia(index, itemEl) {
     const media = uploadedMedia[index];
     if (!media) return;
     if (media.url?.startsWith('blob:')) { try { URL.revokeObjectURL(media.url); } catch (e) {} }
     uploadedMedia[index] = null;
-    if (wrapperEl && wrapperEl.parentNode) wrapperEl.parentNode.removeChild(wrapperEl);
+    if (itemEl && itemEl.parentNode) itemEl.parentNode.removeChild(itemEl);
     updatePreviewCounter();
     showToast('🗑️ Файл удалён');
 }

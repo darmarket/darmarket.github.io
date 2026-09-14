@@ -436,7 +436,7 @@
 
 <script>
 /* ============================================================
-   SUPABASE
+   SUPABASE — ПРАВИЛЬНЫЙ URL
    ============================================================ */
 const SUPABASE_URL = 'https://pqmlxnapfjzprtbkjfke.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbWx4bmFwZmp6cHJ0YmtqZmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzcyOTksImV4cCI6MjEwNDk1MzI5OX0.cRW_goFrXxjg3q209USNjkTcJpUy9yF5_ib_4DEjdaE';
@@ -609,7 +609,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 currentMessages.push(msg);
                 renderMessages();
                 markChatRead(msg.chat_id);
-            } else if (msg.sender_id !== userProfile.id) {
+            } else if (String(msg.sender_id) !== String(userProfile.id)) {
                 showToast('💬 Новое сообщение');
                 TelegramApp.haptic('light');
             }
@@ -622,7 +622,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     sb.channel('items-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'items' }, async (payload) => {
             const newItem = payload.new;
-            if (newItem.owner_id === userProfile.id) {
+            if (String(newItem.owner_id) === String(userProfile.id)) {
                 await loadItems();
                 renderMyLotsGrid();
                 updateMapMarkers();
@@ -927,7 +927,7 @@ async function publishItem() {
 }
 
 function editMyItem(id) {
-    console.log('🔍 Ищем лот с ID:', id, 'тип:', typeof id);
+    console.log('🔍 Ищем лот с ID:', id);
     const item = allItems.find(i => String(i.id) === String(id));
 
     if (!item) {
@@ -969,11 +969,7 @@ async function deleteMyItem(id) {
     if (!confirm('Удалить лот?')) return;
     console.log('🗑️ Удаляем лот:', id);
     const { error } = await sb.from('items').delete().eq('id', id);
-    if (error) {
-        console.error('Delete error:', error);
-        showToast('⚠️ Ошибка удаления');
-        return;
-    }
+    if (error) { console.error('Delete error:', error); showToast('⚠️ Ошибка удаления'); return; }
     await loadItems();
     renderCards();
     renderMyLotsGrid();
@@ -1006,14 +1002,11 @@ function renderMyLotsGrid() {
         </div>
     `).join('');
 
-    // ✅ Вешаем обработчики через addEventListener
     container.querySelectorAll('[data-edit-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const id = btn.getAttribute('data-edit-id');
-            console.log('✏️ Редактирование ID:', id);
-            editMyItem(id);
+            editMyItem(btn.getAttribute('data-edit-id'));
         });
     });
 
@@ -1021,9 +1014,7 @@ function renderMyLotsGrid() {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const id = btn.getAttribute('data-delete-id');
-            console.log('🗑️ Удаление ID:', id);
-            deleteMyItem(id);
+            deleteMyItem(btn.getAttribute('data-delete-id'));
         });
     });
 }
@@ -1427,7 +1418,7 @@ function renderChatsList() {
             : '';
 
         el.innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;" onclick="openChat('${chat.id}')">
+            <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;" data-open-chat="${chat.id}">
                 ${avatarHtml}
                 <div style="min-width:0; flex:1;">
                     <div style="font-weight:700; font-size:14px;">${escapeHtml(chat.otherName)}</div>
@@ -1435,9 +1426,19 @@ function renderChatsList() {
                 </div>
                 ${unreadDot}
             </div>
-            <button class="action-icon-btn delete-btn" onclick="event.stopPropagation(); deleteChat('${chat.id}')">🗑️</button>
+            <button class="action-icon-btn delete-btn" data-del-chat="${chat.id}">🗑️</button>
         `;
         container.appendChild(el);
+    });
+
+    container.querySelectorAll('[data-open-chat]').forEach(el => {
+        el.addEventListener('click', () => openChat(el.getAttribute('data-open-chat')));
+    });
+    container.querySelectorAll('[data-del-chat]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteChat(el.getAttribute('data-del-chat'));
+        });
     });
 }
 
@@ -1558,19 +1559,19 @@ function initLeafletMaps() {
 
 function makePinIcon(color) {
     const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z" fill="${fill}" stroke="#FFF" stroke-width="2"/><circle cx="16" cy="16" r="6" fill="#FFF"/></svg>`;
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z" fill="' + fill + '" stroke="#FFF" stroke-width="2"/><circle cx="16" cy="16" r="6" fill="#FFF"/></svg>';
     return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [32, 44], iconAnchor: [16, 44], popupAnchor: [0, -44], tooltipAnchor: [16, -44] });
 }
 
 function makeCircleIcon(color) {
     const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="${fill}" stroke="#FFF" stroke-width="2.5"/></svg>`;
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="' + fill + '" stroke="#FFF" stroke-width="2.5"/></svg>';
     return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14], tooltipAnchor: [14, -14] });
 }
 
 function makeClusterIcon(count) {
     return L.divIcon({
-        html: `<div class="cluster-icon">${count}</div>`,
+        html: '<div class="cluster-icon">' + count + '</div>',
         className: 'custom-marker-icon',
         iconSize: [44, 44], iconAnchor: [22, 22]
     });
@@ -1605,7 +1606,7 @@ function updateMapMarkers() {
         const dist = getDistanceKm(userLat, userLng, item.lat, item.lng);
         if (!item.isMine && dist > currentRadiusKm) return;
 
-        const key = `${item.lat.toFixed(5)}_${item.lng.toFixed(5)}`;
+        const key = item.lat.toFixed(5) + '_' + item.lng.toFixed(5);
         if (!groups[key]) groups[key] = [];
         groups[key].push(item);
     });
@@ -1616,15 +1617,15 @@ function updateMapMarkers() {
 
         if (items.length > 1) {
             const marker = L.marker([first.lat, first.lng], { icon: makeClusterIcon(items.length) });
-            marker.bindTooltip(`${items.length} лотов`, { direction: 'top', offset: [0, -20] });
+            marker.bindTooltip(items.length + ' лотов', { direction: 'top', offset: [0, -20] });
             marker.on('click', () => openItemsListModal(items));
             if (first.isMine) marker.addTo(myMarkersLayer); else marker.addTo(markersLayer);
         } else {
             const item = first;
             const marker = L.marker([item.lat, item.lng], { icon: makeCircleIcon(item.isMine ? 'green' : 'pink') });
-            marker.bindTooltip(item.isMine ? `🟢 Ваш: ${item.title}` : item.title, { direction: 'top', offset: [0, -14] });
+            marker.bindTooltip(item.isMine ? '🟢 Ваш: ' + item.title : item.title, { direction: 'top', offset: [0, -14] });
             marker.on('click', () => {
-                if (item.isMine) showToast(`🟢 Ваш лот: ${item.title}`);
+                if (item.isMine) showToast('🟢 Ваш лот: ' + item.title);
                 else openMapItemModal(item, getDistanceKm(userLat, userLng, item.lat, item.lng));
             });
             if (item.isMine) marker.addTo(myMarkersLayer); else marker.addTo(markersLayer);
@@ -1644,14 +1645,11 @@ function openItemsListModal(items) {
         img.style.cssText = 'width:50px;height:50px;border-radius:10px;object-fit:cover;flex-shrink:0;';
         const info = document.createElement('div');
         info.style.cssText = 'flex:1; min-width:0;';
-        info.innerHTML = `
-            <div style="font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.title)}</div>
-            <div style="font-size:11px;color:var(--accent-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔄 ${escapeHtml(item.swapFor)}</div>
-        `;
+        info.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(item.title) + '</div><div style="font-size:11px;color:var(--accent-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔄 ' + escapeHtml(item.swapFor) + '</div>';
         card.append(img, info);
         card.addEventListener('click', () => {
             closeModal('items-list-modal');
-            if (item.isMine) showToast(`🟢 Ваш лот: ${item.title}`);
+            if (item.isMine) showToast('🟢 Ваш лот: ' + item.title);
             else openMapItemModal(item, getDistanceKm(userLat, userLng, item.lat, item.lng));
         });
         container.appendChild(card);
@@ -1662,12 +1660,12 @@ function openItemsListModal(items) {
 function openMapItemModal(item, dist) {
     selectedMapItem = item;
     document.getElementById('map-modal-title').innerText = item.title;
-    document.getElementById('map-modal-swap').innerText = `🔄 Взамен: ${item.swapFor}`;
+    document.getElementById('map-modal-swap').innerText = '🔄 Взамен: ' + item.swapFor;
     document.getElementById('map-modal-desc').innerText = item.desc || 'Описание отсутствует';
     document.getElementById('map-modal-condition').innerText = item.condition || 'Отличное';
-    document.getElementById('map-modal-dist').innerText = `📍 ~${dist} км`;
-    document.getElementById('map-modal-owner').innerText = `👤 ${item.ownerName}`;
-    document.getElementById('map-modal-rating').innerText = `★ ${item.ownerRating.toFixed(1)}`;
+    document.getElementById('map-modal-dist').innerText = '📍 ~' + dist + ' км';
+    document.getElementById('map-modal-owner').innerText = '👤 ' + item.ownerName;
+    document.getElementById('map-modal-rating').innerText = '★ ' + item.ownerRating.toFixed(1);
     document.getElementById('map-modal-img').src = item.media[0]?.url || '';
     openModal('map-item-modal');
 }
@@ -1704,10 +1702,10 @@ function updateMapAndAddress(lat, lng) {
 }
 
 function reverseGeocode(lat, lng) {
-    fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}&lang=ru`)
+    fetch('https://photon.komoot.io/reverse?lat=' + lat + '&lon=' + lng + '&lang=ru')
         .then(r => r.json())
         .then(data => {
-            if (data?.features?.length) {
+            if (data && data.features && data.features.length) {
                 const p = data.features[0].properties || {};
                 const city = p.city || p.town || p.village || p.county || p.state;
                 if (city) {
@@ -1809,7 +1807,7 @@ function closeMapPicker() {
 function updatePickerCoords() {
     const el = document.getElementById('map-picker-coords');
     if (el) {
-        el.innerText = `📍 ${pickerTempLat.toFixed(5)}, ${pickerTempLng.toFixed(5)}`;
+        el.innerText = '📍 ' + pickerTempLat.toFixed(5) + ', ' + pickerTempLng.toFixed(5);
         el.style.color = 'var(--accent-green)';
     }
 }
@@ -1837,7 +1835,7 @@ function saveMapPicker() {
     newItemLng = parseFloat(pickerTempLng);
     const label = document.getElementById('add-item-coords-label');
     if (label) {
-        label.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
+        label.innerText = '📍 ' + newItemLat.toFixed(5) + ', ' + newItemLng.toFixed(5);
         label.style.color = 'var(--accent-green)';
     }
     showToast('✓ Точка сохранена');
@@ -1855,7 +1853,7 @@ function renderMediaUploadRow() {
     const addBtn = document.createElement('button');
     addBtn.type = 'button';
     addBtn.className = 'add-media-btn';
-    addBtn.innerHTML = `<span class="plus-icon">+</span><span class="plus-label">Добавить</span>`;
+    addBtn.innerHTML = '<span class="plus-icon">+</span><span class="plus-label">Добавить</span>';
     addBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -1904,7 +1902,7 @@ function renderMediaUploadRow() {
 function removeUploadedMedia(index) {
     const media = uploadedMedia[index];
     if (!media) return;
-    if (media.url?.startsWith('blob:')) { try { URL.revokeObjectURL(media.url); } catch (e) {} }
+    if (media.url && media.url.startsWith('blob:')) { try { URL.revokeObjectURL(media.url); } catch (e) {} }
     uploadedMedia[index] = null;
     renderMediaUploadRow();
     showToast('🗑️ Файл удалён');
@@ -1932,7 +1930,7 @@ async function handleFileSelect(evt) {
     showToast('📤 Загрузка...');
 
     for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) { showToast(`⚠️ ${file.name} — больше 10 МБ`); continue; }
+        if (file.size > 10 * 1024 * 1024) { showToast('⚠️ ' + file.name + ' — больше 10 МБ'); continue; }
         const isVideo = file.type.startsWith('video');
         const localUrl = URL.createObjectURL(file);
 
@@ -1941,7 +1939,7 @@ async function handleFileSelect(evt) {
         renderMediaUploadRow();
 
         const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
-        const fileName = `${userProfile.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const fileName = userProfile.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
 
         const { error } = await sb.storage.from('item-media').upload(fileName, file, {
             cacheControl: '3600', upsert: false, contentType: file.type
@@ -1964,7 +1962,7 @@ async function handleFileSelect(evt) {
     }
 
     evt.target.value = '';
-    showToast(`✅ Загружено: ${uploadedMedia.filter(m => m !== null).length}`);
+    showToast('✅ Загружено: ' + uploadedMedia.filter(m => m !== null).length);
 }
 
 /* ============================================================
@@ -1985,7 +1983,7 @@ function openCreateLotModal() {
     document.getElementById('add-condition').value = 'Отличное';
 
     const label = document.getElementById('add-item-coords-label');
-    if (label) label.innerText = `📍 ${newItemLat.toFixed(5)}, ${newItemLng.toFixed(5)}`;
+    if (label) label.innerText = '📍 ' + newItemLat.toFixed(5) + ', ' + newItemLng.toFixed(5);
 
     document.getElementById('publish-btn').innerText = 'Опубликовать';
     renderMediaUploadRow();
@@ -1995,8 +1993,8 @@ function openCreateLotModal() {
 function openLightbox(type, url) {
     const body = document.getElementById('lightbox-body');
     body.innerHTML = type === 'image'
-        ? `<img src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;">`
-        : `<video src="${url}" style="max-width:100%; max-height:80vh; border-radius:16px;" controls autoplay></video>`;
+        ? '<img src="' + url + '" style="max-width:100%; max-height:80vh; border-radius:16px;">'
+        : '<video src="' + url + '" style="max-width:100%; max-height:80vh; border-radius:16px;" controls autoplay></video>';
     document.getElementById('lightbox').classList.add('active');
 }
 
@@ -2019,7 +2017,7 @@ function switchTab(tabName) {
     document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-    const target = document.getElementById(`view-${tabName}`);
+    const target = document.getElementById('view-' + tabName);
     if (target) target.classList.add('active');
 
     const navMap = { swipe: 0, map: 1, 'my-lots': 2, chats: 3 };

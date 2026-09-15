@@ -404,6 +404,7 @@
         <h3 style="margin-bottom:12px; font-size:16px;">Отзывы:</h3>
         <div id="profile-reviews-list"></div>
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
+        <button class="btn-gps" id="install-app-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="addAppToHomeScreen()">📲 Установить приложение</button>
     </div>
 
     <div id="map-picker-view">
@@ -2058,6 +2059,56 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('❌ Ошибка SW:', err));
     });
 }
+</script>
+    <script>
+// ============================================================
+// PWA — добавление приложения на домашний экран Telegram
+// ============================================================
+
+// Проверяем статус установки при загрузке
+function checkHomeScreenStatus() {
+    if (!window.Telegram || !window.Telegram.WebApp) {
+        console.log('ℹ️ Telegram WebApp не найден');
+        return;
+    }
+    
+    if (typeof window.Telegram.WebApp.checkHomeScreenStatus !== 'function') {
+        console.log('ℹ️ checkHomeScreenStatus не поддерживается (версия Telegram ниже 8.0)');
+        return;
+    }
+
+    window.Telegram.WebApp.checkHomeScreenStatus((status) => {
+        console.log('📱 Статус домашнего экрана:', status);
+        
+        // Если уже добавлено или не поддерживается — не показываем кнопку
+        if (status === 'added' || status === 'unsupported') {
+            return;
+        }
+        
+        // Показываем кнопку
+        const btn = document.getElementById('install-app-btn');
+        if (btn) {
+            btn.style.display = 'block';
+            console.log('✅ Кнопка "Установить приложение" показана');
+        }
+    });
+}
+
+// Сама функция установки (вызывается по клику на кнопку)
+function addAppToHomeScreen() {
+    if (!window.Telegram || !window.Telegram.WebApp || typeof window.Telegram.WebApp.addToHomeScreen !== 'function') {
+        alert('⚠️ Эта функция доступна только в Telegram 8.0+');
+        return;
+    }
+
+    window.Telegram.WebApp.addToHomeScreen();
+    console.log('📲 Запрошено добавление на домашний экран');
+}
+
+// Проверяем статус через 1.5 секунды после загрузки
+window.addEventListener('load', () => {
+    setTimeout(checkHomeScreenStatus, 1500);
+});
 </script>
 </body>
 </html>

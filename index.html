@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ДарМаркет — P2P Обмен вещами</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF2D55">
@@ -29,26 +29,24 @@
             --glass: rgba(255, 255, 255, 0.05);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-                html {
-            height: 100%;
-            overflow: hidden;
-        }
+        html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
         body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
             background-color: #030305;
             color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
+            touch-action: pan-y;
+            overscroll-behavior: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-
+        input, textarea { -webkit-user-select: text; user-select: text; }
         .app-container {
             width: 100%;
             max-width: 420px;
-            height: 100%;
+            height: 100vh;
+            max-height: 880px;
             background-color: var(--bg-dark);
             position: relative;
             display: flex;
@@ -57,20 +55,9 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.9);
         }
         @media (min-width: 421px) {
-            .app-container {
-                border-radius: 32px;
-                height: 92%;
-                max-height: 880px;
-                border: 1px solid var(--card-border);
-            }
+            .app-container { border-radius: 32px; height: 92vh; border: 1px solid var(--card-border); }
         }
-        body.telegram-mini-app .app-container {
-            max-width: 100%;
-            height: 100%;
-            border-radius: 0;
-            box-shadow: none;
-            border: none;
-        }
+        body.telegram-mini-app .app-container { max-width: 100%; max-height: 100%; height: 100vh; border-radius: 0; box-shadow: none; border: none; }
 
         .app-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(9, 10, 15, 0.85); backdrop-filter: blur(16px); z-index: 100; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
         .logo { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; background: var(--primary-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
@@ -185,7 +172,7 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(16px); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90dvh; max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
         .modal-box label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 4px; margin-top: 4px; }
         .offer-item-check { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); cursor: pointer; }
         .star-rating { display: flex; justify-content: center; gap: 8px; font-size: 32px; cursor: pointer; margin: 6px 0; }
@@ -193,7 +180,7 @@
         .star-rating .star.selected { color: var(--accent-gold); }
         .review-card { background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
 
-                .bottom-nav {
+        .bottom-nav {
             height: 68px;
             background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95));
             backdrop-filter: blur(16px);
@@ -653,7 +640,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             console.log('🎉 Всё загружено');
         } catch (e) {
             console.error('❌ Init error:', e.message);
-            showToast('⚠️ Ошибка авторизации: ' + e.message);
+            showToast('⚠️ ' + e.message);
             renderCards();
         }
     })();
@@ -763,10 +750,7 @@ async function initUser() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ initData: tg.initData })
             });
-            if (!r.ok) {
-                const errText = await r.text();
-                throw new Error('Edge Function вернула ' + r.status + ': ' + errText);
-            }
+            if (!r.ok) throw new Error('Auth HTTP ' + r.status);
             authResult = await r.json();
         } else {
             let anonId = localStorage.getItem('dm_anon_id');
@@ -780,20 +764,15 @@ async function initUser() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ anonId })
             });
-            if (!r.ok) {
-                const errText = await r.text();
-                throw new Error('Edge Function вернула ' + r.status + ': ' + errText);
-            }
+            if (!r.ok) throw new Error('Auth HTTP ' + r.status);
             authResult = await r.json();
         }
     } catch (e) {
         console.error('Auth fetch error:', e);
-        throw new Error('Не удалось авторизоваться — проверьте Edge Function');
+        throw new Error('Не удалось авторизоваться');
     }
 
-    if (!authResult || !authResult.email) {
-        throw new Error('Неверный ответ от Edge Function');
-    }
+    if (!authResult || !authResult.email) throw new Error('Неверный ответ авторизации');
 
     const { error: signInErr } = await sb.auth.signInWithPassword({
         email: authResult.email,
@@ -804,14 +783,11 @@ async function initUser() {
     userProfile.id = authResult.userId;
     console.log('✅ Авторизован:', userProfile.id);
 
-    const { data: profileData, error: profileErr } = await sb.from('profiles')
+    const { data: profileData } = await sb.from('profiles')
         .select('*')
         .eq('id', authResult.userId)
         .maybeSingle();
-    if (profileErr) console.warn('Profile load:', profileErr);
-    if (profileData) {
-        userProfile = { ...userProfile, ...profileData, reviews: [] };
-    }
+    if (profileData) userProfile = { ...userProfile, ...profileData, reviews: [] };
 
     const { data: reviewsData } = await sb.from('reviews').select('*')
         .eq('to_user_id', authResult.userId)
@@ -838,7 +814,6 @@ function renderProfileAvatar() {
         if (avatar) headerBtn.innerHTML = `<img src="${escapeHtml(avatar)}" alt="avatar">`;
         else headerBtn.innerHTML = `<span id="header-avatar-icon">👤</span>`;
     }
-
     const bigAvatar = document.getElementById('profile-avatar-big');
     if (bigAvatar) {
         const firstLetter = userProfile.name ? userProfile.name[0].toUpperCase() : '👤';
@@ -863,12 +838,7 @@ async function handleProfilePhoto(evt) {
         cacheControl: '3600', upsert: true, contentType: file.type
     });
 
-    if (error) {
-        console.error('❌ Avatar upload error:', error);
-        showToast('⚠️ Ошибка загрузки фото');
-        evt.target.value = '';
-        return;
-    }
+    if (error) { console.error(error); showToast('⚠️ Ошибка загрузки'); evt.target.value = ''; return; }
 
     const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
     const publicUrl = urlData.publicUrl;
@@ -878,7 +848,7 @@ async function handleProfilePhoto(evt) {
 
     userProfile.avatar = publicUrl;
     renderProfileAvatar();
-    showToast('✅ Фото профиля обновлено');
+    showToast('✅ Фото обновлено');
     evt.target.value = '';
 }
 
@@ -1040,7 +1010,7 @@ function editMyItem(id) {
 async function deleteMyItem(id) {
     if (!confirm('Удалить лот?')) return;
     const { error } = await sb.from('items').delete().eq('id', id);
-    if (error) { console.error('Delete error:', error); showToast('⚠️ Ошибка удаления'); return; }
+    if (error) { console.error(error); showToast('⚠️ Ошибка удаления'); return; }
     await loadItems();
     renderCards();
     renderMyLotsGrid();

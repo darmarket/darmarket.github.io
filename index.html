@@ -236,13 +236,10 @@
     <div id="add-lot-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
             <h2 id="add-lot-title" style="text-align:center; font-weight:800;">Выложить лот</h2>
-
             <label>Название вещи:</label>
             <input type="text" id="add-title" placeholder="Например: iPhone 12">
-
             <label>Что хотите взамен:</label>
             <input type="text" id="add-swap" placeholder="Например: MacBook Air">
-
             <label>Состояние:</label>
             <select id="add-condition">
                 <option value="Новое с биркой">Новое с биркой</option>
@@ -250,27 +247,17 @@
                 <option value="Хорошее">Хорошее</option>
                 <option value="Среднее">Среднее</option>
             </select>
-
             <label>Описание:</label>
             <textarea id="add-desc" placeholder="Опишите состояние, комплектацию и т.д." rows="4"></textarea>
-
             <label>Медиафайлы:</label>
             <div class="media-upload-row" id="media-upload-row"></div>
             <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;">
-            <div class="preview-counter" id="preview-counter">
-                Загружено: <span id="preview-count">0</span>
-            </div>
-
+            <div class="preview-counter" id="preview-counter">Загружено: <span id="preview-count">0</span></div>
             <label>📍 Местонахождение:</label>
             <div style="display:flex; gap:8px; align-items:center;">
-                <button type="button" class="btn-gps" style="flex:1; padding:12px; background:var(--accent-purple);" onclick="openMapPicker()">
-                    🗺️ Указать на карте
-                </button>
+                <button type="button" class="btn-gps" style="flex:1; padding:12px; background:var(--accent-purple);" onclick="openMapPicker()">🗺️ Указать на карте</button>
             </div>
-            <div id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); text-align:center; margin-top:6px;">
-                📍 Метка не установлена
-            </div>
-
+            <div id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); text-align:center; margin-top:6px;">📍 Метка не установлена</div>
             <button class="btn-gps" id="publish-btn" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px; margin-top:8px;" onclick="publishItem()">Опубликовать</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('add-lot-modal')">Отмена</button>
         </div>
@@ -404,8 +391,8 @@
         <h3 style="margin-bottom:12px; font-size:16px;">Отзывы:</h3>
         <div id="profile-reviews-list"></div>
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
-<button class="btn-gps" id="install-app-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="addAppToHomeScreen()">📲 Установить в Telegram</button>
-<button class="btn-gps" id="browser-install-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="handleBrowserInstall()">📲 Установить приложение</button>
+        <button class="btn-gps" id="install-app-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="addAppToHomeScreen()">📲 Установить в Telegram</button>
+        <button class="btn-gps" id="browser-install-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="handleBrowserInstall()">📲 Установить приложение</button>
     </div>
 
     <div id="map-picker-view">
@@ -417,12 +404,8 @@
         <div style="padding:12px 16px; background:rgba(9,10,15,0.95); border-top:1px solid var(--card-border); display:flex; flex-direction:column; gap:8px;">
             <div id="map-picker-coords" style="font-size:12px; color:var(--text-sub); text-align:center;">Нажмите на карту или перетащите маркер</div>
             <div style="display:flex; gap:8px;">
-                <button type="button" class="btn-gps" style="flex:1; background:var(--glass); border:1px solid var(--card-border); color:white; padding:12px;" onclick="mapPickerMyGPS()">
-                    🎯 Моё гео
-                </button>
-                <button type="button" class="btn-gps" style="flex:1; background:var(--primary-grad); padding:12px;" onclick="saveMapPicker()">
-                    ✓ Сохранить
-                </button>
+                <button type="button" class="btn-gps" style="flex:1; background:var(--glass); border:1px solid var(--card-border); color:white; padding:12px;" onclick="mapPickerMyGPS()">🎯 Моё гео</button>
+                <button type="button" class="btn-gps" style="flex:1; background:var(--primary-grad); padding:12px;" onclick="saveMapPicker()">✓ Сохранить</button>
             </div>
         </div>
     </div>
@@ -440,7 +423,7 @@
 
 <script>
 /* ============================================================
-   SUPABASE — ПРАВИЛЬНЫЙ URL
+   SUPABASE
    ============================================================ */
 const SUPABASE_URL = 'https://pqmlxnapfjzprtbkjfke.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbWx4bmFwZmp6cHJ0YmtqZmtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzcyOTksImV4cCI6MjEwNDk1MzI5OX0.cRW_goFrXxjg3q209USNjkTcJpUy9yF5_ib_4DEjdaE';
@@ -779,13 +762,7 @@ async function handleProfilePhoto(evt) {
 
     if (error) {
         console.error('❌ Avatar upload error:', error);
-        if (error.message?.includes('not found') || error.message?.includes('Bucket not found')) {
-            showToast('⚠️ Bucket "avatars" не создан');
-        } else if (error.message?.includes('policy') || error.message?.includes('row-level')) {
-            showToast('⚠️ Нет прав. Настройте RLS');
-        } else {
-            showToast('⚠️ Ошибка: ' + (error.message || 'загрузки'));
-        }
+        showToast('⚠️ Ошибка загрузки фото');
         evt.target.value = '';
         return;
     }
@@ -896,7 +873,6 @@ async function publishItem() {
     const mediaData = realMedia.map(m => ({ type: m.type, url: m.publicUrl || m.url }));
 
     if (editingItemId) {
-        console.log('✏️ Обновляем лот ID:', editingItemId);
         const { error } = await sb.from('items').update({
             title, swap_for: swap, description: desc || 'Новое предложение',
             condition, media: mediaData, lat: finalLat, lng: finalLng
@@ -904,7 +880,6 @@ async function publishItem() {
         if (error) { console.error(error); showToast('⚠️ Ошибка обновления'); return; }
         showToast('✅ Лот обновлён!');
     } else {
-        console.log('➕ Создаём новый лот');
         const newItem = {
             owner_id: userProfile.id, title, swap_for: swap,
             description: desc || 'Новое предложение', condition,
@@ -931,19 +906,10 @@ async function publishItem() {
 }
 
 function editMyItem(id) {
-    console.log('🔍 Ищем лот с ID:', id);
     const item = allItems.find(i => String(i.id) === String(id));
-
-    if (!item) {
-        console.error('❌ Лот не найден. Все ID:', allItems.map(i => i.id));
-        showToast('⚠️ Лот не найден');
-        return;
-    }
-
-    console.log('✅ Лот найден:', item.title);
+    if (!item) { showToast('⚠️ Лот не найден'); return; }
 
     editingItemId = item.id;
-
     document.getElementById('add-lot-title').innerText = 'Редактировать лот';
     document.getElementById('add-title').value = item.title || '';
     document.getElementById('add-swap').value = item.swapFor || '';
@@ -971,9 +937,8 @@ function editMyItem(id) {
 
 async function deleteMyItem(id) {
     if (!confirm('Удалить лот?')) return;
-    console.log('🗑️ Удаляем лот:', id);
     const { error } = await sb.from('items').delete().eq('id', id);
-    if (error) { console.error('Delete error:', error); showToast('⚠️ Ошибка удаления'); return; }
+    if (error) { showToast('⚠️ Ошибка удаления'); return; }
     await loadItems();
     renderCards();
     renderMyLotsGrid();
@@ -1119,7 +1084,6 @@ function addNewCardToDeck(item) {
     const deck = document.getElementById('deck');
     const controls = document.getElementById('controls-bar');
     if (!deck || !item) return;
-
     if (deck.querySelector(`[data-item-id="${item.id}"]`)) return;
 
     const emptyDeck = deck.querySelector('.empty-deck');
@@ -1554,7 +1518,7 @@ async function submitReview() {
    КАРТА
    ============================================================ */
 const TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_3k76_1_566394757fe80d1742b933c9';
-const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>';
+const TILE_ATTR = '© OpenStreetMap © CARTO';
 
 function initLeafletMaps() {
     initFullMap();
@@ -1564,13 +1528,13 @@ function initLeafletMaps() {
 function makePinIcon(color) {
     const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z" fill="' + fill + '" stroke="#FFF" stroke-width="2"/><circle cx="16" cy="16" r="6" fill="#FFF"/></svg>';
-    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [32, 44], iconAnchor: [16, 44], popupAnchor: [0, -44], tooltipAnchor: [16, -44] });
+    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [32, 44], iconAnchor: [16, 44], tooltipAnchor: [16, -44] });
 }
 
 function makeCircleIcon(color) {
     const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="' + fill + '" stroke="#FFF" stroke-width="2.5"/></svg>';
-    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14], tooltipAnchor: [14, -14] });
+    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [28, 28], iconAnchor: [14, 14], tooltipAnchor: [14, -14] });
 }
 
 function makeClusterIcon(count) {
@@ -1640,7 +1604,6 @@ function updateMapMarkers() {
 function openItemsListModal(items) {
     const container = document.getElementById('items-list-container');
     container.innerHTML = '';
-
     items.forEach(item => {
         const card = document.createElement('div');
         card.style.cssText = 'display:flex; gap:10px; padding:10px; background:rgba(255,255,255,0.04); border:1px solid var(--card-border); border-radius:14px; cursor:pointer; align-items:center;';
@@ -1867,13 +1830,11 @@ function renderMediaUploadRow() {
 
     uploadedMedia.forEach((media, index) => {
         if (!media) return;
-
         const wrapper = document.createElement('div');
         wrapper.className = 'preview-thumb-wrapper';
 
         const el = document.createElement(media.type === 'video' ? 'video' : 'img');
         el.src = media.publicUrl || media.url;
-        el.alt = 'preview';
         if (media.type === 'video') { el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true; }
         wrapper.appendChild(el);
 
@@ -1894,8 +1855,6 @@ function renderMediaUploadRow() {
         };
         removeBtn.addEventListener('click', doRemove);
         removeBtn.addEventListener('touchend', doRemove);
-        removeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-        removeBtn.addEventListener('touchstart', (e) => e.stopPropagation());
 
         row.appendChild(wrapper);
     });
@@ -1932,12 +1891,10 @@ async function handleFileSelect(evt) {
     }
 
     showToast('📤 Загрузка...');
-
     for (const file of files) {
         if (file.size > 10 * 1024 * 1024) { showToast('⚠️ ' + file.name + ' — больше 10 МБ'); continue; }
         const isVideo = file.type.startsWith('video');
         const localUrl = URL.createObjectURL(file);
-
         const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: file, publicUrl: null };
         uploadedMedia.push(mediaObj);
         renderMediaUploadRow();
@@ -1951,16 +1908,14 @@ async function handleFileSelect(evt) {
 
         if (error) {
             console.error('Upload error:', error);
-            showToast('⚠️ Ошибка загрузки файла');
+            showToast('⚠️ Ошибка загрузки');
             removeUploadedMedia(uploadedMedia.indexOf(mediaObj));
             continue;
         }
 
         const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
-        const publicUrl = urlData.publicUrl;
-
-        mediaObj.publicUrl = publicUrl;
-        mediaObj.url = publicUrl;
+        mediaObj.publicUrl = urlData.publicUrl;
+        mediaObj.url = urlData.publicUrl;
         URL.revokeObjectURL(localUrl);
         renderMediaUploadRow();
     }
@@ -1979,32 +1934,16 @@ function openCreateLotModal() {
     editingItemId = null;
     newItemLat = userLat; newItemLng = userLng;
     uploadedMedia = [];
-
     document.getElementById('add-lot-title').innerText = 'Выложить лот';
     document.getElementById('add-title').value = '';
     document.getElementById('add-swap').value = '';
     document.getElementById('add-desc').value = '';
     document.getElementById('add-condition').value = 'Отличное';
-
     const label = document.getElementById('add-item-coords-label');
     if (label) label.innerText = '📍 ' + newItemLat.toFixed(5) + ', ' + newItemLng.toFixed(5);
-
     document.getElementById('publish-btn').innerText = 'Опубликовать';
     renderMediaUploadRow();
     openModal('add-lot-modal');
-}
-
-function openLightbox(type, url) {
-    const body = document.getElementById('lightbox-body');
-    body.innerHTML = type === 'image'
-        ? '<img src="' + url + '" style="max-width:100%; max-height:80vh; border-radius:16px;">'
-        : '<video src="' + url + '" style="max-width:100%; max-height:80vh; border-radius:16px;" controls autoplay></video>';
-    document.getElementById('lightbox').classList.add('active');
-}
-
-function closeLightbox() {
-    closeModal('lightbox');
-    document.getElementById('lightbox-body').innerHTML = '';
 }
 
 let _toastTimer = null;
@@ -2033,6 +1972,10 @@ function switchTab(tabName) {
     if (tabName === 'profile') renderProfile();
 
     TelegramApp.showBackButton(tabName !== 'swipe');
+
+    if (tabName === 'profile') {
+        setTimeout(showBrowserInstallBtn, 300);
+    }
 }
 
 function escapeHtml(str) {
@@ -2041,111 +1984,32 @@ function escapeHtml(str) {
 }
 
 /* ============================================================
-   ПОДПИСКА НА ВЫБОР ФАЙЛОВ
+   PWA УСТАНОВКА — ЕДИНСТВЕННЫЙ БЛОК
    ============================================================ */
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        const fileInput = document.getElementById('file-input');
-        if (fileInput) fileInput.addEventListener('change', handleFileSelect);
-        renderMediaUploadRow();
-    }, 300);
-});
-</script>
-<script>
-// Регистрация Service Worker для PWA
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('✅ Service Worker зарегистрирован:', reg.scope))
-            .catch(err => console.log('❌ Ошибка SW:', err));
-    });
-}
-</script>
-    <script>
-// ============================================================
-// PWA — добавление приложения на домашний экран Telegram
-// ============================================================
-
-// Проверяем статус установки при загрузке
-function checkHomeScreenStatus() {
-    if (!window.Telegram || !window.Telegram.WebApp) {
-        console.log('ℹ️ Telegram WebApp не найден');
-        return;
-    }
-    
-    if (typeof window.Telegram.WebApp.checkHomeScreenStatus !== 'function') {
-        console.log('ℹ️ checkHomeScreenStatus не поддерживается (версия Telegram ниже 8.0)');
-        return;
-    }
-
-    window.Telegram.WebApp.checkHomeScreenStatus((status) => {
-        console.log('📱 Статус домашнего экрана:', status);
-        
-        // Если уже добавлено или не поддерживается — не показываем кнопку
-        if (status === 'added' || status === 'unsupported') {
-            return;
-        }
-        
-        // Показываем кнопку
-        const btn = document.getElementById('install-app-btn');
-        if (btn) {
-            btn.style.display = 'block';
-            console.log('✅ Кнопка "Установить приложение" показана');
-        }
-    });
-}
-
-// Сама функция установки (вызывается по клику на кнопку)
-function addAppToHomeScreen() {
-    if (!window.Telegram || !window.Telegram.WebApp || typeof window.Telegram.WebApp.addToHomeScreen !== 'function') {
-        alert('⚠️ Эта функция доступна только в Telegram 8.0+');
-        return;
-    }
-
-    window.Telegram.WebApp.addToHomeScreen();
-    console.log('📲 Запрошено добавление на домашний экран');
-}
-
-// Проверяем статус через 1.5 секунды после загрузки
-window.addEventListener('load', () => {
-    setTimeout(checkHomeScreenStatus, 1500);
-});
-</script>
-    <script>
-// ============================================================
-// Кнопка установки PWA для браузера (новая версия)
-// ============================================================
-
 let deferredPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     console.log('✅ beforeinstallprompt сработал');
-    checkAndShowBrowserInstallButton();
+    showBrowserInstallBtn();
 });
 
-function checkAndShowBrowserInstallButton() {
+function showBrowserInstallBtn() {
     const btn = document.getElementById('browser-install-btn');
-    console.log('🔍 Ищем кнопку:', btn);
     if (!btn) return;
 
-    // Уже установлено — не показываем
     if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('ℹ️ Уже установлено (standalone)');
         btn.style.display = 'none';
         return;
     }
 
-    // В Telegram — не показываем
-    const isInTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
-    if (isInTelegram) {
-        console.log('ℹ️ Мы в Telegram — браузерная кнопка не нужна');
+    const inTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
+    if (inTelegram) {
         btn.style.display = 'none';
         return;
     }
 
-    // Показываем кнопку в браузере ВСЕГДА
     btn.style.display = 'block';
     console.log('✅ Кнопка установки показана');
 }
@@ -2162,32 +2026,63 @@ function handleBrowserInstall() {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((result) => {
             if (result.outcome === 'accepted') {
-                console.log('✅ Пользователь установил');
                 const btn = document.getElementById('browser-install-btn');
                 if (btn) btn.style.display = 'none';
-            } else {
-                console.log('❌ Пользователь отказался');
             }
             deferredPrompt = null;
         });
     } else {
-        alert('Чтобы установить приложение:\n\n1. Откройте меню браузера (три точки)\n2. Выберите «Установить приложение»');
+        alert('Чтобы установить приложение:\n\n1. Откройте меню Chrome (⋮)\n2. Выберите «Установить приложение»');
     }
 }
 
-// Проверяем через 1 секунду после загрузки
+function checkHomeScreenStatus() {
+    if (!window.Telegram || !window.Telegram.WebApp) return;
+    if (typeof window.Telegram.WebApp.checkHomeScreenStatus !== 'function') return;
+
+    window.Telegram.WebApp.checkHomeScreenStatus((status) => {
+        if (status === 'added' || status === 'unsupported') return;
+        const btn = document.getElementById('install-app-btn');
+        if (btn) btn.style.display = 'block';
+    });
+}
+
+function addAppToHomeScreen() {
+    if (!window.Telegram || !window.Telegram.WebApp || typeof window.Telegram.WebApp.addToHomeScreen !== 'function') {
+        alert('⚠️ Эта функция доступна только в Telegram 8.0+');
+        return;
+    }
+    window.Telegram.WebApp.addToHomeScreen();
+}
+
 window.addEventListener('load', () => {
-    setTimeout(checkAndShowBrowserInstallButton, 1000);
+    setTimeout(showBrowserInstallBtn, 1000);
+    setTimeout(checkHomeScreenStatus, 1500);
 });
 
-// Прячем кнопку после установки
 window.addEventListener('appinstalled', () => {
-    console.log('✅ Приложение установлено!');
     const btn = document.getElementById('browser-install-btn');
     if (btn) btn.style.display = 'none';
 });
 
-console.log('✅ Скрипт установки PWA загружен');
+/* ============================================================
+   SERVICE WORKER
+   ============================================================ */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('✅ Service Worker:', reg.scope))
+            .catch(err => console.log('❌ SW error:', err));
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const fileInput = document.getElementById('file-input');
+        if (fileInput) fileInput.addEventListener('change', handleFileSelect);
+        renderMediaUploadRow();
+    }, 300);
+});
 </script>
 </body>
 </html>

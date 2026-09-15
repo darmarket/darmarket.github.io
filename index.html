@@ -6,6 +6,10 @@
     <title>ДарМаркет — P2P Обмен вещами</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF2D55">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ДарМаркет">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -25,10 +29,38 @@
             --glass: rgba(255, 255, 255, 0.05);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; overflow: hidden; }
-        body { background-color: #030305; color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 420px; height: 100vh; max-height: 880px; background-color: var(--bg-dark); position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
-        @media (min-width: 421px) { .app-container { border-radius: 32px; height: 92vh; border: 1px solid var(--card-border); } }
+
+        html { height: 100%; }
+        body {
+            height: 100%;
+            overflow: hidden;
+            background-color: #030305;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100dvh;
+            min-height: 100vh;
+            padding-top: env(safe-area-inset-top, 0);
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100dvh;
+            height: 100vh;
+            max-height: 100dvh;
+            background-color: var(--bg-dark);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+        }
+        @media (min-width: 421px) {
+            .app-container { border-radius: 32px; height: 92dvh; height: 92vh; max-height: 880px; border: 1px solid var(--card-border); }
+        }
         body.telegram-mini-app .app-container { max-width: 100%; max-height: 100%; border-radius: 0; box-shadow: none; border: none; }
 
         .app-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(9, 10, 15, 0.85); backdrop-filter: blur(16px); z-index: 100; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
@@ -144,7 +176,7 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(16px); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90dvh; max-height: 90vh; overflow-y: auto; }
         .modal-box label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 4px; margin-top: 4px; }
         .offer-item-check { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); cursor: pointer; }
         .star-rating { display: flex; justify-content: center; gap: 8px; font-size: 32px; cursor: pointer; margin: 6px 0; }
@@ -152,7 +184,19 @@
         .star-rating .star.selected { color: var(--accent-gold); }
         .review-card { background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
 
-        .bottom-nav { height: 68px; background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95)); backdrop-filter: blur(16px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--card-border); z-index: 100; flex-shrink: 0; padding: 6px 0; }
+        .bottom-nav {
+            min-height: 68px;
+            background: var(--tg-theme-secondary-bg-color, rgba(12, 14, 22, 0.95));
+            backdrop-filter: blur(16px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--card-border);
+            z-index: 100;
+            flex-shrink: 0;
+            padding: 6px 0;
+            padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+        }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tg-theme-hint-color, var(--text-sub)); font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.2s ease; padding: 4px 12px; user-select: none; position: relative; }
         .nav-item.active { color: var(--tg-theme-button-color, var(--accent-pink)); }
         .nav-icon { width: 24px; height: 24px; display: block; flex-shrink: 0; fill: currentColor; }
@@ -236,10 +280,13 @@
     <div id="add-lot-modal" class="modal-overlay">
         <div class="modal-box" style="max-width: 400px;">
             <h2 id="add-lot-title" style="text-align:center; font-weight:800;">Выложить лот</h2>
+
             <label>Название вещи:</label>
             <input type="text" id="add-title" placeholder="Например: iPhone 12">
+
             <label>Что хотите взамен:</label>
             <input type="text" id="add-swap" placeholder="Например: MacBook Air">
+
             <label>Состояние:</label>
             <select id="add-condition">
                 <option value="Новое с биркой">Новое с биркой</option>
@@ -247,17 +294,27 @@
                 <option value="Хорошее">Хорошее</option>
                 <option value="Среднее">Среднее</option>
             </select>
+
             <label>Описание:</label>
             <textarea id="add-desc" placeholder="Опишите состояние, комплектацию и т.д." rows="4"></textarea>
+
             <label>Медиафайлы:</label>
             <div class="media-upload-row" id="media-upload-row"></div>
             <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none;">
-            <div class="preview-counter" id="preview-counter">Загружено: <span id="preview-count">0</span></div>
+            <div class="preview-counter" id="preview-counter">
+                Загружено: <span id="preview-count">0</span>
+            </div>
+
             <label>📍 Местонахождение:</label>
             <div style="display:flex; gap:8px; align-items:center;">
-                <button type="button" class="btn-gps" style="flex:1; padding:12px; background:var(--accent-purple);" onclick="openMapPicker()">🗺️ Указать на карте</button>
+                <button type="button" class="btn-gps" style="flex:1; padding:12px; background:var(--accent-purple);" onclick="openMapPicker()">
+                    🗺️ Указать на карте
+                </button>
             </div>
-            <div id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); text-align:center; margin-top:6px;">📍 Метка не установлена</div>
+            <div id="add-item-coords-label" style="font-size:11px; color:var(--accent-green); text-align:center; margin-top:6px;">
+                📍 Метка не установлена
+            </div>
+
             <button class="btn-gps" id="publish-btn" style="width:100%; padding:14px; background:var(--primary-grad); font-size:15px; margin-top:8px;" onclick="publishItem()">Опубликовать</button>
             <button class="btn-gps" style="background:transparent; border:1px solid var(--card-border); color:var(--text-sub); width:100%; padding:10px;" onclick="closeModal('add-lot-modal')">Отмена</button>
         </div>
@@ -391,7 +448,6 @@
         <h3 style="margin-bottom:12px; font-size:16px;">Отзывы:</h3>
         <div id="profile-reviews-list"></div>
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
-        <button class="btn-gps" id="install-app-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="addAppToHomeScreen()">📲 Установить в Telegram</button>
         <button class="btn-gps" id="browser-install-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="handleBrowserInstall()">📲 Установить приложение</button>
     </div>
 
@@ -404,8 +460,12 @@
         <div style="padding:12px 16px; background:rgba(9,10,15,0.95); border-top:1px solid var(--card-border); display:flex; flex-direction:column; gap:8px;">
             <div id="map-picker-coords" style="font-size:12px; color:var(--text-sub); text-align:center;">Нажмите на карту или перетащите маркер</div>
             <div style="display:flex; gap:8px;">
-                <button type="button" class="btn-gps" style="flex:1; background:var(--glass); border:1px solid var(--card-border); color:white; padding:12px;" onclick="mapPickerMyGPS()">🎯 Моё гео</button>
-                <button type="button" class="btn-gps" style="flex:1; background:var(--primary-grad); padding:12px;" onclick="saveMapPicker()">✓ Сохранить</button>
+                <button type="button" class="btn-gps" style="flex:1; background:var(--glass); border:1px solid var(--card-border); color:white; padding:12px;" onclick="mapPickerMyGPS()">
+                    🎯 Моё гео
+                </button>
+                <button type="button" class="btn-gps" style="flex:1; background:var(--primary-grad); padding:12px;" onclick="saveMapPicker()">
+                    ✓ Сохранить
+                </button>
             </div>
         </div>
     </div>
@@ -762,7 +822,13 @@ async function handleProfilePhoto(evt) {
 
     if (error) {
         console.error('❌ Avatar upload error:', error);
-        showToast('⚠️ Ошибка загрузки фото');
+        if (error.message?.includes('not found') || error.message?.includes('Bucket not found')) {
+            showToast('⚠️ Bucket "avatars" не создан');
+        } else if (error.message?.includes('policy') || error.message?.includes('row-level')) {
+            showToast('⚠️ Нет прав. Настройте RLS');
+        } else {
+            showToast('⚠️ Ошибка: ' + (error.message || 'загрузки'));
+        }
         evt.target.value = '';
         return;
     }
@@ -938,7 +1004,7 @@ function editMyItem(id) {
 async function deleteMyItem(id) {
     if (!confirm('Удалить лот?')) return;
     const { error } = await sb.from('items').delete().eq('id', id);
-    if (error) { showToast('⚠️ Ошибка удаления'); return; }
+    if (error) { console.error('Delete error:', error); showToast('⚠️ Ошибка удаления'); return; }
     await loadItems();
     renderCards();
     renderMyLotsGrid();
@@ -973,16 +1039,13 @@ function renderMyLotsGrid() {
 
     container.querySelectorAll('[data-edit-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             editMyItem(btn.getAttribute('data-edit-id'));
         });
     });
-
     container.querySelectorAll('[data-delete-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             deleteMyItem(btn.getAttribute('data-delete-id'));
         });
     });
@@ -1095,7 +1158,6 @@ function addNewCardToDeck(item) {
     card.style.transform = 'translate3d(0, 40px, 0) scale(0.9)';
     card.style.opacity = '0';
     card.style.transition = 'all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-
     deck.appendChild(card);
     controls.style.display = 'flex';
 
@@ -1518,7 +1580,7 @@ async function submitReview() {
    КАРТА
    ============================================================ */
 const TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_3k76_1_566394757fe80d1742b933c9';
-const TILE_ATTR = '© OpenStreetMap © CARTO';
+const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>';
 
 function initLeafletMaps() {
     initFullMap();
@@ -1528,13 +1590,13 @@ function initLeafletMaps() {
 function makePinIcon(color) {
     const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="44" viewBox="0 0 32 44"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 28 16 28s16-16 16-28c0-8.8-7.2-16-16-16z" fill="' + fill + '" stroke="#FFF" stroke-width="2"/><circle cx="16" cy="16" r="6" fill="#FFF"/></svg>';
-    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [32, 44], iconAnchor: [16, 44], tooltipAnchor: [16, -44] });
+    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [32, 44], iconAnchor: [16, 44], popupAnchor: [0, -44], tooltipAnchor: [16, -44] });
 }
 
 function makeCircleIcon(color) {
     const fill = { violet: '#7000FF', green: '#30D158', pink: '#FF2D55', red: '#FF453A' }[color] || '#7000FF';
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="' + fill + '" stroke="#FFF" stroke-width="2.5"/></svg>';
-    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [28, 28], iconAnchor: [14, 14], tooltipAnchor: [14, -14] });
+    return L.divIcon({ html: svg, className: 'custom-marker-icon', iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -14], tooltipAnchor: [14, -14] });
 }
 
 function makeClusterIcon(count) {
@@ -1604,6 +1666,7 @@ function updateMapMarkers() {
 function openItemsListModal(items) {
     const container = document.getElementById('items-list-container');
     container.innerHTML = '';
+
     items.forEach(item => {
         const card = document.createElement('div');
         card.style.cssText = 'display:flex; gap:10px; padding:10px; background:rgba(255,255,255,0.04); border:1px solid var(--card-border); border-radius:14px; cursor:pointer; align-items:center;';
@@ -1832,9 +1895,9 @@ function renderMediaUploadRow() {
         if (!media) return;
         const wrapper = document.createElement('div');
         wrapper.className = 'preview-thumb-wrapper';
-
         const el = document.createElement(media.type === 'video' ? 'video' : 'img');
         el.src = media.publicUrl || media.url;
+        el.alt = 'preview';
         if (media.type === 'video') { el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true; }
         wrapper.appendChild(el);
 
@@ -1855,6 +1918,8 @@ function renderMediaUploadRow() {
         };
         removeBtn.addEventListener('click', doRemove);
         removeBtn.addEventListener('touchend', doRemove);
+        removeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+        removeBtn.addEventListener('touchstart', (e) => e.stopPropagation());
 
         row.appendChild(wrapper);
     });
@@ -1891,10 +1956,12 @@ async function handleFileSelect(evt) {
     }
 
     showToast('📤 Загрузка...');
+
     for (const file of files) {
         if (file.size > 10 * 1024 * 1024) { showToast('⚠️ ' + file.name + ' — больше 10 МБ'); continue; }
         const isVideo = file.type.startsWith('video');
         const localUrl = URL.createObjectURL(file);
+
         const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: file, publicUrl: null };
         uploadedMedia.push(mediaObj);
         renderMediaUploadRow();
@@ -1908,14 +1975,16 @@ async function handleFileSelect(evt) {
 
         if (error) {
             console.error('Upload error:', error);
-            showToast('⚠️ Ошибка загрузки');
+            showToast('⚠️ Ошибка загрузки файла');
             removeUploadedMedia(uploadedMedia.indexOf(mediaObj));
             continue;
         }
 
         const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
-        mediaObj.publicUrl = urlData.publicUrl;
-        mediaObj.url = urlData.publicUrl;
+        const publicUrl = urlData.publicUrl;
+
+        mediaObj.publicUrl = publicUrl;
+        mediaObj.url = publicUrl;
         URL.revokeObjectURL(localUrl);
         renderMediaUploadRow();
     }
@@ -1939,11 +2008,26 @@ function openCreateLotModal() {
     document.getElementById('add-swap').value = '';
     document.getElementById('add-desc').value = '';
     document.getElementById('add-condition').value = 'Отличное';
+
     const label = document.getElementById('add-item-coords-label');
     if (label) label.innerText = '📍 ' + newItemLat.toFixed(5) + ', ' + newItemLng.toFixed(5);
+
     document.getElementById('publish-btn').innerText = 'Опубликовать';
     renderMediaUploadRow();
     openModal('add-lot-modal');
+}
+
+function openLightbox(type, url) {
+    const body = document.getElementById('lightbox-body');
+    body.innerHTML = type === 'image'
+        ? '<img src="' + url + '" style="max-width:100%; max-height:80vh; border-radius:16px;">'
+        : '<video src="' + url + '" style="max-width:100%; max-height:80vh; border-radius:16px;" controls autoplay></video>';
+    document.getElementById('lightbox').classList.add('active');
+}
+
+function closeLightbox() {
+    closeModal('lightbox');
+    document.getElementById('lightbox-body').innerHTML = '';
 }
 
 let _toastTimer = null;
@@ -1972,10 +2056,6 @@ function switchTab(tabName) {
     if (tabName === 'profile') renderProfile();
 
     TelegramApp.showBackButton(tabName !== 'swipe');
-
-    if (tabName === 'profile') {
-        setTimeout(showBrowserInstallBtn, 300);
-    }
 }
 
 function escapeHtml(str) {
@@ -1984,7 +2064,7 @@ function escapeHtml(str) {
 }
 
 /* ============================================================
-   PWA УСТАНОВКА — ЕДИНСТВЕННЫЙ БЛОК
+   PWA — установка приложения (Chrome / Safari / Яндекс)
    ============================================================ */
 let deferredPrompt = null;
 
@@ -2000,13 +2080,13 @@ function showBrowserInstallBtn() {
     if (!btn) return;
 
     if (window.matchMedia('(display-mode: standalone)').matches) {
-        btn.style.display = 'none';
+        console.log('ℹ️ Уже установлено');
         return;
     }
 
     const inTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
     if (inTelegram) {
-        btn.style.display = 'none';
+        console.log('ℹ️ Мы в Telegram — браузерная кнопка не нужна');
         return;
     }
 
@@ -2032,32 +2112,12 @@ function handleBrowserInstall() {
             deferredPrompt = null;
         });
     } else {
-        alert('Чтобы установить приложение:\n\n1. Откройте меню Chrome (⋮)\n2. Выберите «Установить приложение»');
+        alert('Чтобы установить приложение:\n\n1. Откройте меню браузера (⋮)\n2. Выберите «Установить приложение»');
     }
-}
-
-function checkHomeScreenStatus() {
-    if (!window.Telegram || !window.Telegram.WebApp) return;
-    if (typeof window.Telegram.WebApp.checkHomeScreenStatus !== 'function') return;
-
-    window.Telegram.WebApp.checkHomeScreenStatus((status) => {
-        if (status === 'added' || status === 'unsupported') return;
-        const btn = document.getElementById('install-app-btn');
-        if (btn) btn.style.display = 'block';
-    });
-}
-
-function addAppToHomeScreen() {
-    if (!window.Telegram || !window.Telegram.WebApp || typeof window.Telegram.WebApp.addToHomeScreen !== 'function') {
-        alert('⚠️ Эта функция доступна только в Telegram 8.0+');
-        return;
-    }
-    window.Telegram.WebApp.addToHomeScreen();
 }
 
 window.addEventListener('load', () => {
     setTimeout(showBrowserInstallBtn, 1000);
-    setTimeout(checkHomeScreenStatus, 1500);
 });
 
 window.addEventListener('appinstalled', () => {
@@ -2071,11 +2131,14 @@ window.addEventListener('appinstalled', () => {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('✅ Service Worker:', reg.scope))
-            .catch(err => console.log('❌ SW error:', err));
+            .then(reg => console.log('✅ Service Worker зарегистрирован:', reg.scope))
+            .catch(err => console.log('❌ Ошибка SW:', err));
     });
 }
 
+/* ============================================================
+   FILE INPUT
+   ============================================================ */
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const fileInput = document.getElementById('file-input');

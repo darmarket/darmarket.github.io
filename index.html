@@ -2113,63 +2113,56 @@ window.addEventListener('load', () => {
 </script>
     <script>
 // ============================================================
-// Кнопка установки для браузера (PWA)
+// Кнопка установки PWA для браузера (новая версия)
 // ============================================================
 
 let deferredPrompt = null;
 
-// Перехватываем событие установки (работает только в Chrome/Android)
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    console.log('✅ Браузер готов к установке PWA');
+    console.log('✅ beforeinstallprompt сработал');
     checkAndShowBrowserInstallButton();
 });
 
-// Проверка и показ кнопки
 function checkAndShowBrowserInstallButton() {
     const btn = document.getElementById('browser-install-btn');
+    console.log('🔍 Ищем кнопку:', btn);
     if (!btn) return;
 
-    // Если уже установлено (открыто в standalone) — не показываем
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                         ('standalone' in navigator && navigator.standalone === true);
-    
-    if (isStandalone) {
+    // Уже установлено — не показываем
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('ℹ️ Уже установлено (standalone)');
         btn.style.display = 'none';
         return;
     }
 
-    // Определяем устройство
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const isAndroid = /Android/.test(navigator.userAgent);
-
-    // Показываем кнопку только если мы в браузере (не в Telegram)
-    const isInTelegram = window.Telegram?.WebApp?.initData !== undefined;
-    
-    if (!isInTelegram && (isIOS || isAndroid || deferredPrompt)) {
-        btn.style.display = 'block';
-        console.log('✅ Кнопка установки в браузере показана');
+    // В Telegram — не показываем
+    const isInTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
+    if (isInTelegram) {
+        console.log('ℹ️ Мы в Telegram — браузерная кнопка не нужна');
+        btn.style.display = 'none';
+        return;
     }
+
+    // Показываем кнопку в браузере ВСЕГДА
+    btn.style.display = 'block';
+    console.log('✅ Кнопка установки показана');
 }
 
-// Обработчик клика
 function handleBrowserInstall() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
     if (isIOS) {
-        // На iOS показываем инструкцию
-        alert('Чтобы установить приложение:\n\n1. Нажмите кнопку «Поделиться» (квадрат со стрелкой)\n2. Пролистайте вниз и выберите «На экран «Домой»»\n3. Нажмите «Добавить»');
+        alert('Чтобы установить приложение:\n\n1. Нажмите «Поделиться» (квадрат со стрелкой)\n2. Пролистайте вниз\n3. Выберите «На экран «Домой»»\n4. Нажмите «Добавить»');
         return;
     }
 
     if (deferredPrompt) {
-        // На Android/Chrome — показываем системное окно
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('✅ Пользователь установил приложение');
+        deferredPrompt.userChoice.then((result) => {
+            if (result.outcome === 'accepted') {
+                console.log('✅ Пользователь установил');
                 const btn = document.getElementById('browser-install-btn');
                 if (btn) btn.style.display = 'none';
             } else {
@@ -2178,22 +2171,23 @@ function handleBrowserInstall() {
             deferredPrompt = null;
         });
     } else {
-        // Фолбэк — если браузер не поддерживает
-        alert('Чтобы установить приложение, используйте меню браузера:\n\n1. Откройте меню (три точки)\n2. Выберите «Установить приложение» или «Добавить на главный экран»');
+        alert('Чтобы установить приложение:\n\n1. Откройте меню браузера (три точки)\n2. Выберите «Установить приложение»');
     }
 }
 
-// Проверяем кнопку при загрузке
+// Проверяем через 1 секунду после загрузки
 window.addEventListener('load', () => {
-    setTimeout(checkAndShowBrowserInstallButton, 1500);
+    setTimeout(checkAndShowBrowserInstallButton, 1000);
 });
 
-// Отслеживаем установку
+// Прячем кнопку после установки
 window.addEventListener('appinstalled', () => {
     console.log('✅ Приложение установлено!');
     const btn = document.getElementById('browser-install-btn');
     if (btn) btn.style.display = 'none';
 });
+
+console.log('✅ Скрипт установки PWA загружен');
 </script>
 </body>
 </html>

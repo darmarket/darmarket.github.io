@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ДарМаркет — P2P Обмен вещами</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF2D55">
@@ -29,24 +29,36 @@
             --glass: rgba(255, 255, 255, 0.05);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
+
+        html {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
         body {
+            height: 100%;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            overscroll-behavior: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: #030305;
             color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: pan-y;
-            overscroll-behavior: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
-        input, textarea { -webkit-user-select: text; user-select: text; }
+
         .app-container {
             width: 100%;
             max-width: 420px;
-            height: 100vh;
-            max-height: 880px;
+            height: 100%;
             background-color: var(--bg-dark);
             position: relative;
             display: flex;
@@ -55,16 +67,53 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.9);
         }
         @media (min-width: 421px) {
-            .app-container { border-radius: 32px; height: 92vh; border: 1px solid var(--card-border); }
+            .app-container {
+                border-radius: 32px;
+                height: 92%;
+                max-height: 880px;
+                border: 1px solid var(--card-border);
+            }
         }
-        body.telegram-mini-app .app-container { max-width: 100%; max-height: 100%; height: 100vh; border-radius: 0; box-shadow: none; border: none; }
+        body.telegram-mini-app .app-container {
+            max-width: 100%;
+            height: 100%;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+        }
 
-        .app-header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; background: rgba(9, 10, 15, 0.85); backdrop-filter: blur(16px); z-index: 100; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
+        .app-header {
+            padding: 12px 16px;
+            padding-top: calc(12px + env(safe-area-inset-top, 0px));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(9, 10, 15, 0.85);
+            backdrop-filter: blur(16px);
+            z-index: 100;
+            border-bottom: 1px solid var(--card-border);
+            flex-shrink: 0;
+        }
         .logo { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; background: var(--primary-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
         .header-actions { display: flex; align-items: center; gap: 8px; }
         .location-badge { background: var(--glass); border: 1px solid var(--card-border); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px; backdrop-filter: blur(8px); max-width: 180px; overflow: hidden; }
         .location-badge span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .header-profile-btn { background: var(--glass); border: 1px solid var(--card-border); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: background 0.2s; flex-shrink: 0; overflow: hidden; padding: 0; }
+        .header-profile-btn {
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            overflow: hidden;
+            padding: 0;
+        }
         .header-profile-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
         .header-profile-btn:active { background: rgba(255,255,255,0.15); }
 
@@ -172,7 +221,7 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(16px); z-index: 5000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: #12141C; border: 1px solid var(--card-border); width: 100%; max-width: 380px; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-height: 90dvh; max-height: 90vh; overflow-y: auto; }
         .modal-box label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 4px; margin-top: 4px; }
         .offer-item-check { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); cursor: pointer; }
         .star-rating { display: flex; justify-content: center; gap: 8px; font-size: 32px; cursor: pointer; margin: 6px 0; }
@@ -191,6 +240,7 @@
             z-index: 100;
             flex-shrink: 0;
             padding: 6px 0;
+            padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
         }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tg-theme-hint-color, var(--text-sub)); font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.2s ease; padding: 4px 12px; user-select: none; position: relative; }
         .nav-item.active { color: var(--tg-theme-button-color, var(--accent-pink)); }
@@ -640,7 +690,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             console.log('🎉 Всё загружено');
         } catch (e) {
             console.error('❌ Init error:', e.message);
-            showToast('⚠️ ' + e.message);
+            showToast('⚠️ Ошибка авторизации: ' + e.message);
             renderCards();
         }
     })();
@@ -736,7 +786,7 @@ function updateChatsBadge() {
 }
 
 /* ============================================================
-   АВТОРИЗАЦИЯ (через Telegram Edge Function)
+   АВТОРИЗАЦИЯ
    ============================================================ */
 async function initUser() {
     let authResult = null;
@@ -750,7 +800,10 @@ async function initUser() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ initData: tg.initData })
             });
-            if (!r.ok) throw new Error('Auth HTTP ' + r.status);
+            if (!r.ok) {
+                const errText = await r.text();
+                throw new Error('Edge Function ' + r.status + ': ' + errText);
+            }
             authResult = await r.json();
         } else {
             let anonId = localStorage.getItem('dm_anon_id');
@@ -764,15 +817,20 @@ async function initUser() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ anonId })
             });
-            if (!r.ok) throw new Error('Auth HTTP ' + r.status);
+            if (!r.ok) {
+                const errText = await r.text();
+                throw new Error('Edge Function ' + r.status + ': ' + errText);
+            }
             authResult = await r.json();
         }
     } catch (e) {
-        console.error('Auth fetch error:', e);
+        console.error('Auth error:', e);
         throw new Error('Не удалось авторизоваться');
     }
 
-    if (!authResult || !authResult.email) throw new Error('Неверный ответ авторизации');
+    if (!authResult || !authResult.email) {
+        throw new Error('Неверный ответ от Edge Function');
+    }
 
     const { error: signInErr } = await sb.auth.signInWithPassword({
         email: authResult.email,
@@ -787,7 +845,9 @@ async function initUser() {
         .select('*')
         .eq('id', authResult.userId)
         .maybeSingle();
-    if (profileData) userProfile = { ...userProfile, ...profileData, reviews: [] };
+    if (profileData) {
+        userProfile = { ...userProfile, ...profileData, reviews: [] };
+    }
 
     const { data: reviewsData } = await sb.from('reviews').select('*')
         .eq('to_user_id', authResult.userId)
@@ -814,6 +874,7 @@ function renderProfileAvatar() {
         if (avatar) headerBtn.innerHTML = `<img src="${escapeHtml(avatar)}" alt="avatar">`;
         else headerBtn.innerHTML = `<span id="header-avatar-icon">👤</span>`;
     }
+
     const bigAvatar = document.getElementById('profile-avatar-big');
     if (bigAvatar) {
         const firstLetter = userProfile.name ? userProfile.name[0].toUpperCase() : '👤';
@@ -838,7 +899,12 @@ async function handleProfilePhoto(evt) {
         cacheControl: '3600', upsert: true, contentType: file.type
     });
 
-    if (error) { console.error(error); showToast('⚠️ Ошибка загрузки'); evt.target.value = ''; return; }
+    if (error) {
+        console.error('Avatar upload error:', error);
+        showToast('⚠️ Ошибка загрузки фото');
+        evt.target.value = '';
+        return;
+    }
 
     const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
     const publicUrl = urlData.publicUrl;
@@ -848,7 +914,7 @@ async function handleProfilePhoto(evt) {
 
     userProfile.avatar = publicUrl;
     renderProfileAvatar();
-    showToast('✅ Фото обновлено');
+    showToast('✅ Фото профиля обновлено');
     evt.target.value = '';
 }
 
@@ -1010,7 +1076,7 @@ function editMyItem(id) {
 async function deleteMyItem(id) {
     if (!confirm('Удалить лот?')) return;
     const { error } = await sb.from('items').delete().eq('id', id);
-    if (error) { console.error(error); showToast('⚠️ Ошибка удаления'); return; }
+    if (error) { console.error('Delete error:', error); showToast('⚠️ Ошибка удаления'); return; }
     await loadItems();
     renderCards();
     renderMyLotsGrid();
@@ -2083,11 +2149,24 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 function showBrowserInstallBtn() {
     const btn = document.getElementById('browser-install-btn');
-    if (!btn) return;
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
+    if (!btn) {
+        console.log('❌ Кнопка browser-install-btn не найдена');
+        return;
+    }
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('ℹ️ Уже установлено');
+        return;
+    }
+
     const inTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
-    if (inTelegram) return;
+    if (inTelegram) {
+        console.log('ℹ️ В Telegram');
+        return;
+    }
+
     btn.style.display = 'block';
+    console.log('✅ Кнопка установки показана');
 }
 
 function handleBrowserInstall() {
@@ -2110,7 +2189,11 @@ function handleBrowserInstall() {
     }
 }
 
-window.addEventListener('load', () => setTimeout(showBrowserInstallBtn, 1000));
+window.addEventListener('load', () => {
+    setTimeout(showBrowserInstallBtn, 500);
+    setTimeout(showBrowserInstallBtn, 2000);
+});
+
 window.addEventListener('appinstalled', () => {
     const btn = document.getElementById('browser-install-btn');
     if (btn) btn.style.display = 'none';

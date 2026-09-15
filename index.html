@@ -404,7 +404,7 @@
         <h3 style="margin-bottom:12px; font-size:16px;">Отзывы:</h3>
         <div id="profile-reviews-list"></div>
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
-        <button class="btn-gps" id="install-app-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="addAppToHomeScreen()">📲 Установить приложение</button>
+        <button class="btn-gps" id="browser-install-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="handleBrowserInstall()">📲 Установить приложение</button>
     </div>
 
     <div id="map-picker-view">
@@ -2108,6 +2108,90 @@ function addAppToHomeScreen() {
 // Проверяем статус через 1.5 секунды после загрузки
 window.addEventListener('load', () => {
     setTimeout(checkHomeScreenStatus, 1500);
+});
+</script>
+    <script>
+// ============================================================
+// Кнопка установки для браузера (PWA)
+// ============================================================
+
+let deferredPrompt = null;
+
+// Перехватываем событие установки (работает только в Chrome/Android)
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    console.log('✅ Браузер готов к установке PWA');
+    checkAndShowBrowserInstallButton();
+});
+
+// Проверка и показ кнопки
+function checkAndShowBrowserInstallButton() {
+    const btn = document.getElementById('browser-install-btn');
+    if (!btn) return;
+
+    // Если уже установлено (открыто в standalone) — не показываем
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         ('standalone' in navigator && navigator.standalone === true);
+    
+    if (isStandalone) {
+        btn.style.display = 'none';
+        return;
+    }
+
+    // Определяем устройство
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(navigator.userAgent);
+
+    // Показываем кнопку только если мы в браузере (не в Telegram)
+    const isInTelegram = window.Telegram?.WebApp?.initData !== undefined;
+    
+    if (!isInTelegram && (isIOS || isAndroid || deferredPrompt)) {
+        btn.style.display = 'block';
+        console.log('✅ Кнопка установки в браузере показана');
+    }
+}
+
+// Обработчик клика
+function handleBrowserInstall() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if (isIOS) {
+        // На iOS показываем инструкцию
+        alert('Чтобы установить приложение:\n\n1. Нажмите кнопку «Поделиться» (квадрат со стрелкой)\n2. Пролистайте вниз и выберите «На экран «Домой»»\n3. Нажмите «Добавить»');
+        return;
+    }
+
+    if (deferredPrompt) {
+        // На Android/Chrome — показываем системное окно
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('✅ Пользователь установил приложение');
+                const btn = document.getElementById('browser-install-btn');
+                if (btn) btn.style.display = 'none';
+            } else {
+                console.log('❌ Пользователь отказался');
+            }
+            deferredPrompt = null;
+        });
+    } else {
+        // Фолбэк — если браузер не поддерживает
+        alert('Чтобы установить приложение, используйте меню браузера:\n\n1. Откройте меню (три точки)\n2. Выберите «Установить приложение» или «Добавить на главный экран»');
+    }
+}
+
+// Проверяем кнопку при загрузке
+window.addEventListener('load', () => {
+    setTimeout(checkAndShowBrowserInstallButton, 1500);
+});
+
+// Отслеживаем установку
+window.addEventListener('appinstalled', () => {
+    console.log('✅ Приложение установлено!');
+    const btn = document.getElementById('browser-install-btn');
+    if (btn) btn.style.display = 'none';
 });
 </script>
 </body>

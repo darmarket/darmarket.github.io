@@ -58,7 +58,8 @@
         .app-container {
             width: 100%;
             max-width: 420px;
-            height: 100%;
+            height: 100vh;
+            height: 100dvh;
             background-color: var(--bg-dark);
             position: relative;
             display: flex;
@@ -69,7 +70,7 @@
         @media (min-width: 421px) {
             .app-container {
                 border-radius: 32px;
-                height: 92%;
+                height: 92vh;
                 max-height: 880px;
                 border: 1px solid var(--card-border);
             }
@@ -84,7 +85,6 @@
 
         .app-header {
             padding: 12px 16px;
-            padding-top: calc(12px + env(safe-area-inset-top, 0px));
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -180,7 +180,7 @@
         .btn-delete-lot { color: #FF2D55; }
         .btn-delete-lot:active { background: rgba(255, 45, 85, 0.2); }
 
-        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--glass); border-radius: 24px; border: 1px solid var(--card-border); margin-bottom: 20px; }
+        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 20px 12px; background: var(--glass); border-radius: 24px; border: 1px solid var(--card-border); margin-bottom: 20px; width: 100%; max-width: 100%; box-sizing: border-box; }
         .profile-avatar-big { width: 84px; height: 84px; border-radius: 50%; background: var(--primary-grad); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 12px; box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4); position: relative; overflow: hidden; cursor: pointer; }
         .profile-avatar-big img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
         .profile-avatar-edit { position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; background: var(--primary-grad); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-dark); font-size: 14px; z-index: 2; }
@@ -240,7 +240,6 @@
             z-index: 100;
             flex-shrink: 0;
             padding: 6px 0;
-            padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
         }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tg-theme-hint-color, var(--text-sub)); font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.2s ease; padding: 4px 12px; user-select: none; position: relative; }
         .nav-item.active { color: var(--tg-theme-button-color, var(--accent-pink)); }
@@ -492,8 +491,8 @@
         </div>
         <h3 style="margin-bottom:12px; font-size:16px;">Отзывы:</h3>
         <div id="profile-reviews-list"></div>
-        <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
-        <button class="btn-gps" id="browser-install-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="handleBrowserInstall()">📲 Установить приложение</button>
+        <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px; box-sizing:border-box; display:block;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
+        <button class="btn-gps" id="browser-install-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600; box-sizing:border-box;" onclick="handleBrowserInstall()">📲 Установить приложение</button>
         <a href="privacy.html" target="_blank" style="display:block; text-align:center; color:var(--text-sub); font-size:12px; margin-top:24px; text-decoration:none;">📄 Политика конфиденциальности</a>
     </div>
 
@@ -2153,18 +2152,15 @@ function showBrowserInstallBtn() {
         console.log('❌ Кнопка browser-install-btn не найдена');
         return;
     }
-
     if (window.matchMedia('(display-mode: standalone)').matches) {
         console.log('ℹ️ Уже установлено');
         return;
     }
-
     const inTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
     if (inTelegram) {
         console.log('ℹ️ В Telegram');
         return;
     }
-
     btn.style.display = 'block';
     console.log('✅ Кнопка установки показана');
 }

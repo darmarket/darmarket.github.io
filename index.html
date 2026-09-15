@@ -29,7 +29,6 @@
             --glass: rgba(255, 255, 255, 0.05);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-
         html { height: 100%; }
         body {
             height: 100%;
@@ -44,7 +43,6 @@
             padding-top: env(safe-area-inset-top, 0);
             padding-bottom: env(safe-area-inset-bottom, 0);
         }
-
         .app-container {
             width: 100%;
             max-width: 420px;
@@ -449,6 +447,7 @@
         <div id="profile-reviews-list"></div>
         <button class="btn-gps" style="width:100%; background:rgba(255,255,255,0.08); border:1px solid var(--card-border); color:white; margin-top:20px; padding:12px;" onclick="openAuthModal()">✏️ Редактировать профиль</button>
         <button class="btn-gps" id="browser-install-btn" style="display:none; width:100%; background:linear-gradient(135deg, #30D158 0%, #7000FF 100%); border:none; color:white; margin-top:12px; padding:12px; font-weight:600;" onclick="handleBrowserInstall()">📲 Установить приложение</button>
+        <a href="privacy.html" target="_blank" style="display:block; text-align:center; color:var(--text-sub); font-size:12px; margin-top:24px; text-decoration:none;">📄 Политика конфиденциальности</a>
     </div>
 
     <div id="map-picker-view">
@@ -625,7 +624,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 new Promise((_, rej) => setTimeout(() => rej(new Error(`${name} timeout`)), ms))
             ]);
 
-            await withTimeout(initUser(), 8000, 'initUser');
+            await withTimeout(initUser(), 10000, 'initUser');
             console.log('✅ Профиль загружен');
 
             await withTimeout(loadItems(), 8000, 'loadItems');
@@ -644,7 +643,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             console.log('🎉 Всё загружено');
         } catch (e) {
             console.error('❌ Init error:', e.message);
-            showToast('⚠️ Данные не загрузились');
+            showToast('⚠️ Ошибка авторизации: ' + e.message);
             renderCards();
         }
     })();
@@ -740,39 +739,73 @@ function updateChatsBadge() {
 }
 
 /* ============================================================
-   АВТОРИЗАЦИЯ
+   АВТОРИЗАЦИЯ (через Telegram Edge Function)
    ============================================================ */
 async function initUser() {
-    const tgUser = TelegramApp.user;
-    let userId = tgUser ? tgUser.id : null;
+    let authResult = null;
+    const tg = window.Telegram?.WebApp;
 
-    if (!userId) {
-        userId = parseInt(localStorage.getItem('dm_uid') || '0') || Math.floor(1e9 + Math.random() * 9e8);
-        localStorage.setItem('dm_uid', String(userId));
+    try {
+        if (tg && tg.initData) {
+            console.log('🔐 Авторизация через Telegram...');
+            const r = await fetch(`${SUPABASE_URL}/functions/v1/auth-telegram`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData })
+            });
+            if (!r.ok) {
+                const errText = await r.text();
+                throw new Error('Edge Function вернула ' + r.status + ': ' + errText);
+            }
+            authResult = await r.json();
+        } else {
+            let anonId = localStorage.getItem('dm_anon_id');
+            if (!anonId) {
+                anonId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+                localStorage.setItem('dm_anon_id', anonId);
+            }
+            console.log('🔐 Авторизация через anon ID:', anonId);
+            const r = await fetch(`${SUPABASE_URL}/functions/v1/auth-telegram`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ anonId })
+            });
+            if (!r.ok) {
+                const errText = await r.text();
+                throw new Error('Edge Function вернула ' + r.status + ': ' + errText);
+            }
+            authResult = await r.json();
+        }
+    } catch (e) {
+        console.error('Auth fetch error:', e);
+        throw new Error('Не удалось авторизоваться — проверьте Edge Function');
     }
 
-    userProfile.id = userId;
-
-    const { data, error } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
-    if (error) console.warn('Profile load:', error);
-
-    if (data) {
-        userProfile = { ...userProfile, ...data, reviews: [] };
-    } else {
-        const newProfile = {
-            id: userId,
-            name: tgUser ? (tgUser.first_name || 'Пользователь') : 'Гость',
-            username: tgUser ? (tgUser.username || null) : null,
-            phone: null,
-            city: 'Санкт-Петербург',
-            lat: userLat, lng: userLng
-        };
-        const { data: created, error: createErr } = await sb.from('profiles').insert(newProfile).select().single();
-        if (createErr) { console.error('Profile create:', createErr); throw createErr; }
-        userProfile = { ...userProfile, ...created, reviews: [] };
+    if (!authResult || !authResult.email) {
+        throw new Error('Неверный ответ от Edge Function');
     }
 
-    const { data: reviewsData } = await sb.from('reviews').select('*').eq('to_user_id', userId).order('created_at', { ascending: false });
+    const { error: signInErr } = await sb.auth.signInWithPassword({
+        email: authResult.email,
+        password: authResult.password
+    });
+    if (signInErr) throw signInErr;
+
+    userProfile.id = authResult.userId;
+    console.log('✅ Авторизован:', userProfile.id);
+
+    const { data: profileData, error: profileErr } = await sb.from('profiles')
+        .select('*')
+        .eq('id', authResult.userId)
+        .maybeSingle();
+    if (profileErr) console.warn('Profile load:', profileErr);
+    if (profileData) {
+        userProfile = { ...userProfile, ...profileData, reviews: [] };
+    }
+
+    const { data: reviewsData } = await sb.from('reviews').select('*')
+        .eq('to_user_id', authResult.userId)
+        .order('created_at', { ascending: false });
     if (reviewsData) userProfile.reviews = reviewsData;
 
     updateProfileUI();
@@ -822,13 +855,7 @@ async function handleProfilePhoto(evt) {
 
     if (error) {
         console.error('❌ Avatar upload error:', error);
-        if (error.message?.includes('not found') || error.message?.includes('Bucket not found')) {
-            showToast('⚠️ Bucket "avatars" не создан');
-        } else if (error.message?.includes('policy') || error.message?.includes('row-level')) {
-            showToast('⚠️ Нет прав. Настройте RLS');
-        } else {
-            showToast('⚠️ Ошибка: ' + (error.message || 'загрузки'));
-        }
+        showToast('⚠️ Ошибка загрузки фото');
         evt.target.value = '';
         return;
     }
@@ -898,7 +925,6 @@ async function saveRegistration() {
 async function loadItems() {
     const { data, error } = await sb.from('items')
         .select('id, owner_id, title, swap_for, description, condition, media, lat, lng, created_at, profiles!items_owner_id_fkey(name, rating, avatar)')
-        .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -2064,7 +2090,7 @@ function escapeHtml(str) {
 }
 
 /* ============================================================
-   PWA — установка приложения (Chrome / Safari / Яндекс)
+   PWA — установка приложения
    ============================================================ */
 let deferredPrompt = null;
 
@@ -2078,30 +2104,18 @@ window.addEventListener('beforeinstallprompt', (e) => {
 function showBrowserInstallBtn() {
     const btn = document.getElementById('browser-install-btn');
     if (!btn) return;
-
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('ℹ️ Уже установлено');
-        return;
-    }
-
+    if (window.matchMedia('(display-mode: standalone)').matches) return;
     const inTelegram = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData;
-    if (inTelegram) {
-        console.log('ℹ️ Мы в Telegram — браузерная кнопка не нужна');
-        return;
-    }
-
+    if (inTelegram) return;
     btn.style.display = 'block';
-    console.log('✅ Кнопка установки показана');
 }
 
 function handleBrowserInstall() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
     if (isIOS) {
         alert('Чтобы установить приложение:\n\n1. Нажмите «Поделиться» (квадрат со стрелкой)\n2. Пролистайте вниз\n3. Выберите «На экран «Домой»»\n4. Нажмите «Добавить»');
         return;
     }
-
     if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((result) => {
@@ -2116,10 +2130,7 @@ function handleBrowserInstall() {
     }
 }
 
-window.addEventListener('load', () => {
-    setTimeout(showBrowserInstallBtn, 1000);
-});
-
+window.addEventListener('load', () => setTimeout(showBrowserInstallBtn, 1000));
 window.addEventListener('appinstalled', () => {
     const btn = document.getElementById('browser-install-btn');
     if (btn) btn.style.display = 'none';

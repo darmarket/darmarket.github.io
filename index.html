@@ -1205,50 +1205,63 @@ function changeMedia(card, direction) {
 }
 
 function initSwipeEvents(card) {
-    let dragging = false, startX = 0, startY = 0, curX = 0, curY = 0;
+    let dragging = false, startX = 0, curX = 0;
     const badgeLike = card.querySelector('.badge-like');
     const badgePass = card.querySelector('.badge-pass');
-
-    const getPoint = (e) => {
-        if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        if (e.changedTouches && e.changedTouches.length) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
-        return { x: e.clientX, y: e.clientY };
-    };
 
     const onStart = (e) => {
         if (e.target.closest('.carousel-controls')) return;
         dragging = true;
-        const p = getPoint(e);
-        startX = p.x; startY = p.y;
+        startX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        curX = 0;
         card.style.transition = 'none';
     };
+
     const onMove = (e) => {
         if (!dragging) return;
-        const p = getPoint(e);
-        curX = p.x - startX; curY = p.y - startY;
-        card.style.transform = `translate3d(${curX}px, ${curY}px, 0) rotate(${curX * 0.08}deg)`;
-        if (curX > 30) { badgeLike.style.opacity = Math.min(curX / 100, 1); badgePass.style.opacity = '0'; }
-        else if (curX < -30) { badgePass.style.opacity = Math.min(Math.abs(curX) / 100, 1); badgeLike.style.opacity = '0'; }
-        else { badgeLike.style.opacity = '0'; badgePass.style.opacity = '0'; }
+        const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        curX = clientX - startX;
+
+        // ⚠️ ТОЛЬКО ГОРИЗОНТАЛЬ — никакого Y
+        const rotate = curX * 0.08;
+        card.style.transform = `translate3d(${curX}px, 0, 0) rotate(${rotate}deg)`;
+
+        // Показываем бейджи
+        if (curX > 30) {
+            badgeLike.style.opacity = Math.min(curX / 100, 1);
+            badgePass.style.opacity = '0';
+        } else if (curX < -30) {
+            badgePass.style.opacity = Math.min(Math.abs(curX) / 100, 1);
+            badgeLike.style.opacity = '0';
+        } else {
+            badgeLike.style.opacity = '0';
+            badgePass.style.opacity = '0';
+        }
     };
+
     const onEnd = () => {
         if (!dragging) return;
         dragging = false;
         card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+
         if (curX > 120) {
+            // Свайп вправо — лайк
             pendingSwipeCard = card;
             TelegramApp.haptic('medium');
             openOfferModal(card._item);
-            card.style.transform = 'translate3d(0,0,0) rotate(0)';
+            card.style.transform = 'translate3d(0, 0, 0) rotate(0)';
             badgeLike.style.opacity = '0';
         } else if (curX < -120) {
+            // Свайп влево — пропуск
             TelegramApp.haptic('light');
             completeSwipe(card, false);
         } else {
-            card.style.transform = 'translate3d(0,0,0) rotate(0)';
-            badgeLike.style.opacity = '0'; badgePass.style.opacity = '0';
+            // Возврат на место
+            card.style.transform = 'translate3d(0, 0, 0) rotate(0)';
+            badgeLike.style.opacity = '0';
+            badgePass.style.opacity = '0';
         }
-        curX = curY = 0;
+        curX = 0;
     };
 
     card.addEventListener('mousedown', onStart);

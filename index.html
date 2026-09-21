@@ -2182,11 +2182,31 @@ window.addEventListener('appinstalled', () => {
    SERVICE WORKER
    ============================================================ */
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js?v=5')
-            .then(reg => console.log('✅ Service Worker зарегистрирован:', reg.scope))
-            .catch(err => console.log('❌ Ошибка SW:', err));
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    // Проверяем обновления каждые 60 секунд
+    setInterval(() => reg.update(), 60 * 1000);
+
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Новая версия готова — активируем сразу
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      }
     });
+  });
+
+  // Когда новый SW активировался — перезагружаем страницу один раз
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
 }
 
 window.addEventListener('DOMContentLoaded', () => {

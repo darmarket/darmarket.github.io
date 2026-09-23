@@ -1664,6 +1664,46 @@ async function openChat(chatId) {
     view.classList.add('active');
 
     TelegramApp.showBackButton(true);
+
+    // ⚡ Авто-синхронизация: каждые 3 секунды перезагружаем сообщения
+    startChatSync(chatId);
+}
+
+let _chatSyncTimer = null;
+function startChatSync(chatId) {
+    stopChatSync();
+    _chatSyncTimer = setInterval(async () => {
+        if (String(activeChatId) !== String(chatId)) {
+            stopChatSync();
+            return;
+        }
+        // Не мешаем, если вкладка невидима
+        if (document.hidden) return;
+
+        const { data, error } = await sb.from('messages')
+            .select('*')
+            .eq('chat_id', chatId)
+            .order('created_at', { ascending: true });
+
+        if (error || !data) return;
+
+        // Сравниваем: если что-то изменилось — обновляем
+        const oldIds = currentMessages.map(m => String(m.id)).join(',');
+        const newIds = data.map(m => String(m.id)).join(',');
+
+        if (oldIds !== newIds) {
+            currentMessages = data;
+            renderMessages();
+            markChatRead(chatId);
+        }
+    }, 3000);
+}
+
+function stopChatSync() {
+    if (_chatSyncTimer) {
+        clearInterval(_chatSyncTimer);
+        _chatSyncTimer = null;
+    }
 }
 
 async function loadMessages(chatId) {

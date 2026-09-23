@@ -904,7 +904,8 @@ async function saveRegistration() {
    ============================================================ */
 async function loadItems() {
     const { data, error } = await sb.from('items')
-        .select('id, owner_id, title, swap_for, description, condition, media, lat, lng, created_at, profiles!items_owner_id_fkey(name, rating, avatar)')
+        .select('id, owner_id, title, swap_for, description, condition, media, lat, lng, created_at, expires_at, profiles!items_owner_id_fkey(name, rating, avatar)')
+        .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -920,6 +921,7 @@ async function loadItems() {
         media: item.media || [],
         lat: parseFloat(item.lat),
         lng: parseFloat(item.lng),
+        expiresAt: item.expires_at,
         isMine: String(item.owner_id) === String(userProfile.id),
         ownerId: item.owner_id,
         ownerName: item.profiles?.name || 'Пользователь',
@@ -944,12 +946,54 @@ async function publishItem() {
     const finalLng = parseFloat(newItemLng);
     if (isNaN(finalLat) || isNaN(finalLng)) { showToast('⚠️ Укажите место'); return; }
 
-    // Проверка: лот должен быть в пределах ЖК
     const distFromCenter = getDistanceKm(START_CITY.lat, START_CITY.lng, finalLat, finalLng);
     if (distFromCenter > START_CITY.maxRadiusKm) {
         showToast(`⚠️ Лот должен быть в пределах ${START_CITY.name}`);
         return;
     }
+
+    const mediaData = realMedia.map(m => ({
+        type: m.type,
+        url: m.publicUrl || m.url,
+        path: m.storagePath || null
+    }));
+
+    const swapFor = condition === 'Бесплатно' ? '🎁 Даром' : swap;
+    const expiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString();
+
+    if (editingItemId) {
+        const { error } = await sb.from('items').update({
+            title, swap_for: swapFor, description: desc || 'Без описания',
+            condition, media: mediaData, lat: finalLat, lng: finalLng
+        }).eq('id', editingItemId);
+        if (error) { console.error(error); showToast('⚠️ Ошибка обновления'); return; }
+        showToast('✅ Лот обновлён!');
+    } else {
+        const newItem = {
+            owner_id: userProfile.id, title, swap_for: swapFor,
+            description: desc || 'Без описания', condition,
+            media: mediaData, lat: finalLat, lng: finalLng,
+            expires_at: expiresAt
+        };
+        const { error } = await sb.from('items').insert(newItem).select().single();
+        if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
+        showToast('🎉 Лот опубликован на 15 дней!');
+    }
+
+    uploadedMedia = [];
+    editingItemId = null;
+    document.getElementById('preview-counter').classList.remove('visible');
+    renderMediaUploadRow();
+    document.getElementById('add-title').value = '';
+    document.getElementById('add-swap').value = '';
+    document.getElementById('add-desc').value = '';
+
+    closeModal('add-lot-modal');
+    await loadItems();
+    renderCards();
+    renderMyLotsGrid();
+    updateMapMarkers();
+}
 
     const mediaData = realMedia.map(m => ({ type: m.type, url: m.publicUrl || m.url }));
 
@@ -1003,8 +1047,12 @@ function editMyItem(id) {
     newItemLng = parseFloat(item.lng);
 
     uploadedMedia = (item.media || []).map(m => ({
-        type: m.type, url: m.url, publicUrl: m.url, file: null
-    }));
+    type: m.type,
+    url: m.url,
+    publicUrl: m.url,
+    storagePath: m.path || null,
+    file: null
+}));
 
     renderMediaUploadRow();
 
@@ -1028,7 +1076,28 @@ async function deleteMyItem(id) {
     updateMapMarkers();
     showToast('🗑️ Лот удалён');
 }
+async function extendItem(itemId) {
+    const newExpiry = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString();
+    const { error } = await sb.from('items')
+        .update({ expires_at: newExpiry })
+        .eq('id', itemId);
+    if (error) {
+        showToast('⚠️ Не удалось продлить: ' + error.message);
+        return;
+    }
+    showToast('🔄 Лот продлён ещё на 15 дней');
+    await loadItems();
+    renderMyLotsGrid();
+    renderCards();
+    updateMapMarkers();
+}
 
+function daysLeft(expiresAt) {
+    if (!expiresAt) return 15;
+    const diff = new Date(expiresAt) - new Date();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+    
 function renderMyLotsGrid() {
     const container = document.getElementById('my-lots-grid-container');
     const myItems = allItems.filter(i => i.isMine);
@@ -1039,7 +1108,13 @@ function renderMyLotsGrid() {
         return;
     }
 
-    container.innerHTML = myItems.map(item => `
+    container.innerHTML = myItems.map(item => {
+        const left = daysLeft(item.expiresAt);
+        const expiryBadge = left <= 3
+            ? `<span style="color:#FF453A; font-size:10px;">⏳ ${left} дн.</span>`
+            : `<span style="color:var(--text-sub); font-size:10px;">⏳ ${left} дн.</span>`;
+
+        return `
         <div class="my-lot-card">
             <div class="my-lot-img-wrapper">
                 <img src="${escapeHtml(item.media[0]?.url || '')}" class="my-lot-img" loading="lazy" onerror="this.style.display='none'">
@@ -1047,17 +1122,26 @@ function renderMyLotsGrid() {
             </div>
             <div class="my-lot-title">${escapeHtml(item.title)}</div>
             <div class="my-lot-swap">${item.isFree ? '🎁 Отдаю даром' : 'Ищу: ' + escapeHtml(item.swapFor)}</div>
+            <div style="margin-bottom:8px;">${expiryBadge}</div>
             <div class="my-lot-actions">
-                <button class="btn-edit-lot" data-edit-id="${escapeHtml(String(item.id))}">✏️ Изменить</button>
+                <button class="btn-edit-lot" data-edit-id="${escapeHtml(String(item.id))}">✏️</button>
+                <button class="btn-edit-lot" data-extend-id="${escapeHtml(String(item.id))}" style="color:var(--accent-green);">🔄</button>
                 <button class="btn-delete-lot" data-delete-id="${escapeHtml(String(item.id))}">🗑️</button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 
     container.querySelectorAll('[data-edit-id]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault(); e.stopPropagation();
             editMyItem(btn.getAttribute('data-edit-id'));
+        });
+    });
+    container.querySelectorAll('[data-extend-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            extendItem(btn.getAttribute('data-extend-id'));
         });
     });
     container.querySelectorAll('[data-delete-id]').forEach(btn => {
@@ -1067,7 +1151,6 @@ function renderMyLotsGrid() {
         });
     });
 }
-
 /* ============================================================
    КАРТОЧКИ СВАЙПА
    ============================================================ */
@@ -2027,7 +2110,7 @@ async function handleFileSelect(evt) {
         }
 
         const localUrl = URL.createObjectURL(processedFile);
-        const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: processedFile, publicUrl: null };
+        const mediaObj = { type: isVideo ? 'video' : 'image', url: localUrl, file: processedFile, publicUrl: null, storagePath: null };
         uploadedMedia.push(mediaObj);
         renderMediaUploadRow();
 
@@ -2048,6 +2131,7 @@ async function handleFileSelect(evt) {
         const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
         mediaObj.publicUrl = urlData.publicUrl;
         mediaObj.url = urlData.publicUrl;
+        mediaObj.storagePath = fileName;
         URL.revokeObjectURL(localUrl);
         renderMediaUploadRow();
     }

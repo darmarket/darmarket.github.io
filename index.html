@@ -995,43 +995,6 @@ async function publishItem() {
     updateMapMarkers();
 }
 
-    const mediaData = realMedia.map(m => ({ type: m.type, url: m.publicUrl || m.url }));
-
-    const swapFor = condition === 'Бесплатно' ? '🎁 Даром' : swap;
-
-    if (editingItemId) {
-        const { error } = await sb.from('items').update({
-            title, swap_for: swapFor, description: desc || 'Без описания',
-            condition, media: mediaData, lat: finalLat, lng: finalLng
-        }).eq('id', editingItemId);
-        if (error) { console.error(error); showToast('⚠️ Ошибка обновления'); return; }
-        showToast('✅ Лот обновлён!');
-    } else {
-        const newItem = {
-            owner_id: userProfile.id, title, swap_for: swapFor,
-            description: desc || 'Без описания', condition,
-            media: mediaData, lat: finalLat, lng: finalLng
-        };
-        const { error } = await sb.from('items').insert(newItem).select().single();
-        if (error) { console.error(error); showToast('⚠️ Ошибка публикации'); return; }
-        showToast('🎉 Лот опубликован!');
-    }
-
-    uploadedMedia = [];
-    editingItemId = null;
-    document.getElementById('preview-counter').classList.remove('visible');
-    renderMediaUploadRow();
-    document.getElementById('add-title').value = '';
-    document.getElementById('add-swap').value = '';
-    document.getElementById('add-desc').value = '';
-
-    closeModal('add-lot-modal');
-    await loadItems();
-    renderCards();
-    renderMyLotsGrid();
-    updateMapMarkers();
-}
-
 function editMyItem(id) {
     const item = allItems.find(i => String(i.id) === String(id));
     if (!item) { showToast('⚠️ Лот не найден'); return; }

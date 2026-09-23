@@ -665,21 +665,29 @@ window.addEventListener('DOMContentLoaded', async () => {
     })();
 
     sb.channel('messages-realtime')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
-            const msg = payload.new;
-            if (String(msg.chat_id) === String(activeChatId)) {
-                currentMessages.push(msg);
-                renderMessages();
-                markChatRead(msg.chat_id);
-            } else if (String(msg.sender_id) !== String(userProfile.id)) {
-                showToast('💬 Новое сообщение');
-                TelegramApp.haptic('light');
-            }
-            await loadChats();
-            if (!activeChatId) renderChatsList();
-            updateChatsBadge();
-        })
-        .subscribe((status) => console.log('📡 Messages:', status));
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
+        const msg = payload.new;
+        if (String(msg.chat_id) === String(activeChatId)) {
+            currentMessages.push(msg);
+            renderMessages();
+            markChatRead(msg.chat_id);
+        } else if (String(msg.sender_id) !== String(userProfile.id)) {
+            showToast('💬 Новое сообщение');
+            TelegramApp.haptic('light');
+        }
+        await loadChats();
+        if (!activeChatId) renderChatsList();
+        updateChatsBadge();
+    })
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, (payload) => {
+        const deletedId = payload.old?.id;
+        if (!deletedId) return;
+        currentMessages = currentMessages.filter(m => String(m.id) !== String(deletedId));
+        if (String(activeChatId) === String(payload.old.chat_id)) {
+            renderMessages();
+        }
+    })
+    .subscribe((status) => console.log('📡 Messages:', status));
 
     sb.channel('items-realtime')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'items' }, async (payload) => {

@@ -397,9 +397,12 @@
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-bar">
-            <input type="text" id="chat-input" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendChatMessage()">
-            <button class="send-btn" onclick="sendChatMessage()">➔</button>
-        </div>
+    <button class="attach-btn" onclick="document.getElementById('chat-file-input').click()">📎</button>
+    <input type="text" id="chat-input" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+    <button class="send-btn" onclick="sendChatMessage()">➔</button>
+</div>
+
+<input type="file" id="chat-file-input" accept="image/*,video/*" multiple style="display:none;" onchange="handleChatFileSelect(event)">
     </div>
 
     <div id="view-my-lots" class="view-content" style="padding: 20px; overflow-y:auto;">
@@ -1625,7 +1628,29 @@ function renderMessages() {
     currentMessages.forEach(msg => {
         const div = document.createElement('div');
         div.className = `msg-bubble ${String(msg.sender_id) === String(userProfile.id) ? 'msg-sent' : 'msg-received'}`;
-        div.innerHTML = `<div style="white-space: pre-line;">${escapeHtml(msg.text || '')}</div>`;
+
+        let content = '';
+
+        // Медиа
+        const mediaArr = Array.isArray(msg.media) ? msg.media : [];
+        if (mediaArr.length > 0) {
+            content += `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:${msg.text ? '6px' : '0'};">`;
+            mediaArr.forEach(m => {
+                if (m.type === 'video') {
+                    content += `<video src="${escapeHtml(m.url)}" style="max-width:180px; max-height:180px; border-radius:12px; display:block;" controls playsinline preload="metadata"></video>`;
+                } else {
+                    content += `<img src="${escapeHtml(m.url)}" style="max-width:180px; max-height:180px; border-radius:12px; display:block; cursor:pointer;" onclick="openLightbox('image','${escapeHtml(m.url)}')">`;
+                }
+            });
+            content += `</div>`;
+        }
+
+        // Текст
+        if (msg.text) {
+            content += `<div style="white-space: pre-line;">${escapeHtml(msg.text)}</div>`;
+        }
+
+        div.innerHTML = content;
         container.appendChild(div);
     });
     container.scrollTop = container.scrollHeight;
@@ -1636,10 +1661,95 @@ async function sendChatMessage() {
     const text = input.value.trim();
     if (!text || !activeChatId) return;
     const { error } = await sb.from('messages').insert({ chat_id: activeChatId, sender_id: userProfile.id, text });
-    if (error) { showToast('⚠️ Ошибка отправки'); return; }
+    if (error) { showToast('⚠️ Ошибка отправки,больше 15 мб'); return; }
     input.value = '';
 }
 
+ async function handleChatFileSelect(evt) {
+    const files = evt.target.files;
+    if (!files.length || !activeChatId) return;
+
+    const preview = [];
+    const uploaded = [];
+
+    showToast('📤 Загрузка ' + files.length + ' файлов...');
+
+    for (const file of files) {
+        if (file.size > 15 * 1024 * 1024) {
+            showToast('⚠️ ' + file.name + ' больше 15 МБ');
+            continue;
+        }
+
+        const isVideo = file.type.startsWith('video');
+        let processedFile = file;
+
+        // Сжимаем фото
+        if (!isVideo) {
+            try {
+                const options = {
+                    maxSizeMB: 0.5,
+                    maxWidthOrHeight: 1280,
+                    useWebWorker: true,
+                    fileType: 'image/jpeg',
+                    initialQuality: 0.8
+                };
+                const compressedBlob = await imageCompression(file, options);
+                processedFile = new File(
+                    [compressedBlob],
+                    file.name.replace(/\.[^.]+$/, '') + '.jpg',
+                    { type: 'image/jpeg', lastModified: Date.now() }
+                );
+            } catch (err) {
+                console.error('Ошибка сжатия:', err);
+                processedFile = file;
+            }
+        }
+
+        const ext = isVideo ? 'mp4' : 'jpg';
+        const fileName = 'chat/' + activeChatId + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+
+        const { error } = await sb.storage.from('item-media').upload(fileName, processedFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: processedFile.type
+        });
+
+        if (error) {
+            console.error('Chat upload error:', error);
+            showToast('⚠️ Ошибка загрузки');
+            continue;
+        }
+
+        const { data: urlData } = sb.storage.from('item-media').getPublicUrl(fileName);
+
+        uploaded.push({
+            type: isVideo ? 'video' : 'image',
+            url: urlData.publicUrl,
+            path: fileName
+        });
+    }
+
+    evt.target.value = '';
+
+    if (uploaded.length === 0) return;
+
+    // Отправляем сообщение с медиа
+    const { error: sendErr } = await sb.from('messages').insert({
+        chat_id: activeChatId,
+        sender_id: userProfile.id,
+        text: '',
+        media: uploaded
+    });
+
+    if (sendErr) {
+        console.error('Send media error:', sendErr);
+        showToast('⚠️ Не удалось отправить');
+        return;
+    }
+
+    showToast('📤 Отправлено: ' + uploaded.length);
+    TelegramApp.haptic('success');
+}   
 function closeChat() {
     document.getElementById('view-single-chat').style.display = 'none';
     TelegramApp.showBackButton(false);

@@ -1944,6 +1944,7 @@ async function sendChatMessage() {
     TelegramApp.haptic('success');
 }   
 function closeChat() {
+    stopChatSync();
     document.getElementById('view-single-chat').style.display = 'none';
     TelegramApp.showBackButton(false);
     switchTab('chats');
